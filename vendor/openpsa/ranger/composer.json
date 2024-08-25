@@ -1,0 +1,26 @@
+{
+    "name": "openpsa/ranger",
+    "description": "Formatter for date and time ranges with i18n support",
+    "keywords": ["date range", "time range"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andreas Flack",
+            "email": "flack@contentcontrol-berlin.de",
+            "homepage": "http://www.contentcontrol-berlin.de/"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "symfony/intl": "~2.6|~3.4|~4.0|~5.0|~6.0|~7.0"
+    },
+    "suggest": {
+        "ext-intl": "Needed for usage with other locales than 'en'"
+    },
+    "autoload": {
+        "psr-4": { "OpenPsa\\Ranger\\": "src/" }
+    },
+    "require-dev": {
+        "phpunit/phpunit": ">=6.5"
+    }
+}
