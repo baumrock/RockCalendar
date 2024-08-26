@@ -25,17 +25,45 @@ var RockDaterange;
       this.endDate = this.getDate(this.$end.value);
       this.hasTime = false;
       this.hasRange = false;
-      this.changeSettings();
+      this.changed();
       this.initPicker();
-      this.$hasTime.addEventListener("change", this.changeSettings.bind(this));
-      this.$hasRange.addEventListener("change", this.changeSettings.bind(this));
+      this.$hasTime.addEventListener("change", this.changed.bind(this));
+      this.$hasRange.addEventListener("change", this.changed.bind(this));
     }
+
+    // public API to manipulate the field
+
+    setEndDate(date) {
+      let parsedDate = this.getDate(date);
+      let formattedDate = parsedDate.format("DD/MM/YYYY HH:mm:ss");
+      this.picker.setEndDate(formattedDate);
+      this.setDates();
+    }
+
+    setHasRange(bool) {
+      this.$hasRange.checked = bool;
+      this.changed();
+    }
+
+    setHasTime(bool) {
+      this.$hasTime.checked = bool;
+      this.changed();
+    }
+
+    setStartDate(date) {
+      let parsedDate = this.getDate(date);
+      let formattedDate = parsedDate.format("DD/MM/YYYY HH:mm:ss");
+      this.picker.setStartDate(formattedDate);
+      this.setDates();
+    }
+
+    // internal
 
     callback(start, end) {
       this.setDates(start, end);
     }
 
-    changeSettings() {
+    changed() {
       this.hasTime = this.$hasTime.checked;
       this.hasRange = this.$hasRange.checked;
       if (!this.picker) return;
@@ -72,6 +100,7 @@ var RockDaterange;
         buttonClasses: "uk-button uk-button-small",
         applyButtonClasses: "uk-button-primary",
         locale: {
+          // TODO: make format configurable
           format: this.hasTime ? "DD.MM.YYYY HH:mm" : "DD.MM.YYYY",
           firstDay: 1, // monday
         },
