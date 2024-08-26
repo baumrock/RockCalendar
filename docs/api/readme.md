@@ -6,6 +6,18 @@ It is important to understand that every daterange is behind the scenes represen
 
 <img src=hidden-fields.png class=blur>
 
+## Match Query (Selectors)
+
+The `getMatchQuery` method allows you to create database queries to match date ranges based on different subfields. The supported subfields are:
+
+- `start`: Matches the start date of the date range.
+- `end`: Matches the end date of the date range.
+- `year`: Matches the year of the date range.
+- `month`: Matches the month of the date range.
+- `day`: Matches the day of the date range.
+
+Example usage:
+
 ## Upcoming Events
 
 To show all upcoming events we only select events that have an "end" timestamp in the future. This is because all events that have an end date in the past are already over.

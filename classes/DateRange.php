@@ -8,10 +8,11 @@ use ProcessWire\WireData;
 
 class DateRange extends WireData
 {
-  public $start;
+  public $allDay;
   public $end;
   public $hasTime;
   public $hasRange;
+  public $start;
 
   public function __construct($arr = [])
   {
@@ -19,12 +20,19 @@ class DateRange extends WireData
     $this->start = $this->getTS($data->start) ?: time();
     $this->end = $this->getTS($data->end) ?: time();
     $this->hasTime = $data->hasTime ?: false;
+    $this->allDay = !$this->hasTime;
     $this->hasRange = $data->hasRange ?: false;
   }
 
-  public function end($format = 'Y-m-d H:i:s'): string
+  /**
+   * FullCalendar needs the endDate to be the first second that is not part
+   * of the event. In that case you can request the end date as
+   * $date->end('Y-m-d\TH:i:s', 1)
+   * which will add one second to the end timestamp before formatting.
+   */
+  public function end($format = 'Y-m-d H:i:s', $offset = 0): string
   {
-    return date($format, $this->end);
+    return date($format, $this->end + $offset);
   }
 
   public function ___getRanger(): Ranger
@@ -60,9 +68,12 @@ class DateRange extends WireData
     return $this->getRanger()->format($this->start, $this->end);
   }
 
-  public function start($format = 'Y-m-d H:i:s'): string
+  /**
+   * See notes about offset on end() method
+   */
+  public function start($format = 'Y-m-d H:i:s', $offset = 0): string
   {
-    return date($format, $this->start);
+    return date($format, $this->start + $offset);
   }
 
   public function __toString()
@@ -74,7 +85,10 @@ class DateRange extends WireData
   {
     return [
       'start' => $this->start,
+      'start("Y-m-d H:i:s")' => $this->start("Y-m-d H:i:s"),
       'end' => $this->end,
+      'end("Y-m-d H:i:s")' => $this->end("Y-m-d H:i:s"),
+      'allDay' => $this->allDay,
       'hasTime' => $this->hasTime,
       'hasRange' => $this->hasRange,
     ];
