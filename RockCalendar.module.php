@@ -15,7 +15,46 @@ function rockcalendar(): RockCalendar|null
 class RockCalendar extends WireData implements Module, ConfigurableModule
 {
 
-  public function init() {}
+  public function init()
+  {
+    wire()->addHookAfter('/rockcalendar/events/', $this, 'eventsJSON');
+  }
+
+  public function eventsJSON()
+  {
+    return json_encode($this->___getEvents(
+      wire()->input->get('pid', 'int'),
+      wire()->input->get('field', 'string')
+    ));
+  }
+
+  public function ___getEvents($pid, $field): array
+  {
+    $events = wire()->pages->get($pid)->children();
+    $result = [];
+    foreach ($events as $event) {
+      $result[] = $this->getItemArray($event) ?? [];
+    }
+    return $result;
+  }
+
+  public function ___getItemArray(Page $p)
+  {
+    // find datepicker field and get value
+    foreach ($p->fields as $f) {
+      if ($f->type instanceof FieldtypeRockDaterangePicker) {
+        $date = $p->getFormatted($f->name);
+      }
+    }
+    if (!$date) return;
+    return [
+      'id' => $p->id,
+      'title' => $p->title,
+      'start' => $date->start(),
+      'end' => $date->end(),
+      'allDay' => $date->hasTime ? 0 : 1,
+    ];
+  }
 
   public function getLocales(): array
   {

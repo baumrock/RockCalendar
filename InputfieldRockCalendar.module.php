@@ -45,7 +45,6 @@ class InputfieldRockCalendar extends InputfieldTextarea
    */
   public function ___render()
   {
-    $id = "calendar-{$this->name}";
     $p = wire()->pages->get(wire()->input->get('id', 'int'));
     $locale = rockcalendar()->getUserLocale();
     return "
@@ -54,8 +53,8 @@ class InputfieldRockCalendar extends InputfieldTextarea
         class='pw-modal add-item uk-hidden'
         data-buttons='button.ui-button[type=submit]'
       >Add Event</a>
-      <div id='$id' class='rock-calendar'></div>
-      <script>RockCalendar.add('$id', '$locale');</script>";
+      <div id='calendar-{$this->name}' class='rock-calendar'></div>
+      <script>RockCalendar.add('{$this->name}', '$locale');</script>";
   }
 
   /**

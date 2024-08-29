@@ -1,3 +1,13 @@
+# RockCalendar
+
+## Quickstart
+
+1. Install the module
+2. Go to Modules > RockCalendar > Configure
+4. Add a `RockCalendar` Inputfield to your page
+5. Define which pages should be shown in the calendar
+3. For translating the calendar, you can add language mappings in the module settings
+
 # RockDaterangePicker
 
 <img src=demo.gif>

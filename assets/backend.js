@@ -6,7 +6,7 @@ var RockCalendar;
     constructor(id, lang) {
       this.id = id;
       this.lang = lang;
-      this.calendarEl = document.getElementById(id);
+      this.calendarEl = document.getElementById("calendar-" + id);
       this.li = this.calendarEl.closest("li.Inputfield");
       this.addLink = this.li.querySelector("a.pw-modal.add-item");
       this.calendar = null;
@@ -20,10 +20,10 @@ var RockCalendar;
           selectable: true,
           weekNumbers: true,
           locale: this.lang,
+          events: "/rockcalendar/events/?pid=1119&field=" + this.id,
         },
         this.id
       );
-      console.log(config);
       var calendar = new FullCalendar.Calendar(this.calendarEl, config);
       this.calendar = calendar;
       calendar.render();
