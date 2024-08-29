@@ -27,8 +27,13 @@ class InputfieldRockCalendar extends InputfieldTextarea
     parent::renderReady();
     $dir = $this->wire->config->urls('InputfieldRockCalendar');
     $this->wire->config->scripts->add($dir . 'lib/fullcalendar.min.js');
-    foreach ($this->wire->modules->get('RockCalendar')->locales as $locale) {
-      $this->wire->config->scripts->add($dir . "lib/FullCalendar/core/locales/$locale.global.js");
+
+    // load locale based on user language
+    $locale = rockcalendar()->getUserLocale();
+    if ($locale) {
+      $this->wire->config->scripts->add(
+        $dir . "lib/FullCalendar/core/locales/$locale.global.min.js"
+      );
     }
     $this->wire->config->scripts->add($dir . 'assets/backend.js');
     $this->wire->config->styles->add($dir . 'assets/backend.css');
@@ -42,6 +47,7 @@ class InputfieldRockCalendar extends InputfieldTextarea
   {
     $id = "calendar-{$this->name}";
     $p = wire()->pages->get(wire()->input->get('id', 'int'));
+    $locale = rockcalendar()->getUserLocale();
     return "
       <a
         href='/cms/page/add/?parent_id=$p'
@@ -49,7 +55,7 @@ class InputfieldRockCalendar extends InputfieldTextarea
         data-buttons='button.ui-button[type=submit]'
       >Add Event</a>
       <div id='$id' class='rock-calendar'></div>
-      <script>RockCalendar.add('$id');</script>";
+      <script>RockCalendar.add('$id', '$locale');</script>";
   }
 
   /**

@@ -3,8 +3,9 @@ var RockCalendar;
   let loaded = false;
 
   class Calendar {
-    constructor(id) {
+    constructor(id, lang) {
       this.id = id;
+      this.lang = lang;
       this.calendarEl = document.getElementById(id);
       this.li = this.calendarEl.closest("li.Inputfield");
       this.addLink = this.li.querySelector("a.pw-modal.add-item");
@@ -17,11 +18,12 @@ var RockCalendar;
         {
           initialView: "dayGridMonth",
           selectable: true,
-          locale: "de-at",
           weekNumbers: true,
+          locale: this.lang,
         },
         this.id
       );
+      console.log(config);
       var calendar = new FullCalendar.Calendar(this.calendarEl, config);
       this.calendar = calendar;
       calendar.render();
@@ -56,8 +58,8 @@ var RockCalendar;
       this.calendars = {};
     }
 
-    add(id) {
-      let cal = new Calendar(id);
+    add(id, lang) {
+      let cal = new Calendar(id, lang);
       this.calendars[id] = cal;
       if (loaded) cal.init();
     }
