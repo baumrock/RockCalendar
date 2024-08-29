@@ -112,4 +112,38 @@ var RockDaterange;
   }
 
   RockDaterange = new Pickers();
+
+  // auto-populate date in calendar modals
+  $(document).ready(() => {
+    if (!document.body.classList.contains("modal")) return;
+
+    // we only do this on new pages
+    let title = document.querySelector("input[name=title]");
+    if (title && title.value) return;
+
+    if (typeof RockDaterange == "undefined") return;
+
+    // get fieldname from inputfield
+    let inputfield = document.querySelector("li.InputfieldRockDaterangePicker");
+    if (!inputfield) return;
+    // remove 'wrap_Inputfield_'
+    let name = inputfield.id.substring(16);
+    let picker = RockDaterange.pickers[name];
+    if (!picker) return;
+
+    // get start and end date from localStorage
+    let start = localStorage.getItem("eventStartDate");
+    if (!start) return;
+    let end = localStorage.getItem("eventEndDate");
+    if (!end) return;
+
+    // set dates in picker
+    picker.setHasTime(false);
+    picker.setHasRange(start !== end);
+    picker.setStartDate(start);
+    picker.setEndDate(end);
+    localStorage.removeItem("eventStartDate");
+    localStorage.removeItem("eventEndDate");
+    if (title) title.focus();
+  });
 })();
