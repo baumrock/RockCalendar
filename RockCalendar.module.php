@@ -194,7 +194,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
   public function languageMappings(): WireData
   {
     $mappings = new WireData();
-    foreach (explode("\n", $this->locales) as $line) {
+    foreach (explode("\n", (string)$this->locales) as $line) {
       $line = trim($line);
       if (!$line) continue;
       // split on colon and trim whitespace
