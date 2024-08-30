@@ -19,8 +19,9 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
 
   public function init()
   {
-    wire()->addHookAfter('/rockcalendar/events/',    $this, 'eventsJSON');
-    wire()->addHookAfter('/rockcalendar/eventDrop/', $this, 'eventDrop');
+    wire()->addHookAfter('/rockcalendar/events/',      $this, 'eventsJSON');
+    wire()->addHookAfter('/rockcalendar/eventDrop/',   $this, 'eventDrop');
+    wire()->addHookAfter('/rockcalendar/eventResize/', $this, 'eventResize');
   }
 
   private function err(string $msg): string
@@ -43,6 +44,22 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $date->end = $newEnd;
     $p->setAndSave($date->fieldName, $date);
     return $this->succ("Event $p moved");
+  }
+
+  protected function eventResize(HookEvent $event)
+  {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $input = new WireInputData($input);
+    $p = wire()->pages->get((int)$input->id);
+    if (!$p->id) return $this->err("Event $p not found");
+    if (!$p->editable()) return $this->err("Event $p not editable");
+    $date = $this->getDateRange($p);
+    $newStart = strtotime($input->start);
+    $newEnd = strtotime($input->end);
+    $date->start = $newStart;
+    $date->end = $newEnd;
+    $p->setAndSave($date->fieldName, $date);
+    return $this->succ("Event $p resized");
   }
 
   protected function eventsJSON(HookEvent $event)

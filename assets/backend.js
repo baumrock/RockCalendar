@@ -35,22 +35,17 @@ var RockCalendar;
     addEditCallbacks() {
       let calendar = this.calendar;
       calendar.on("eventDrop", (info) => {
-        let data = {
+        this.fetch("/rockcalendar/eventDrop/", {
           id: info.event.id,
           start: info.event.startStr,
-        };
-        console.log(data);
-        fetch("/rockcalendar/eventDrop/", {
-          method: "POST",
-          headers: {
-            "X-Requested-With": "XMLHttpRequest",
-          },
-          body: JSON.stringify(data),
         });
       });
       calendar.on("eventResize", (info) => {
-        console.log(info.event.startStr);
-        console.log(info.event.endStr);
+        this.fetch("/rockcalendar/eventResize/", {
+          id: info.event.id,
+          start: info.event.startStr,
+          end: info.event.endStr,
+        });
       });
     }
 
@@ -74,6 +69,32 @@ var RockCalendar;
         // trigger resize event to fix calendar display glitch
         window.dispatchEvent(new Event("resize"));
       });
+    }
+
+    fetch(endpoint, data) {
+      fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: JSON.stringify(data),
+      })
+        .then((response) => response.json())
+        .then((json) => {
+          if (json.success) {
+            UIkit.notification({
+              message: '<span uk-icon="icon: check"></span> ' + json.success,
+              status: "success",
+              timeout: 2000,
+            });
+          } else if (json.error) {
+            UIkit.notification({
+              message: '<span uk-icon="icon: warning"></span> ' + json.error,
+              status: "danger",
+              timeout: 2000,
+            });
+          }
+        });
     }
   }
 
