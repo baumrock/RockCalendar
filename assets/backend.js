@@ -18,6 +18,7 @@ var RockCalendar;
         {
           initialView: "dayGridMonth",
           selectable: true,
+          editable: true,
           weekNumbers: true,
           locale: this.lang,
           events: "/rockcalendar/events/?pid=1119&field=" + this.id,
@@ -28,6 +29,29 @@ var RockCalendar;
       this.calendar = calendar;
       calendar.render();
       this.addModal();
+      this.addEditCallbacks();
+    }
+
+    addEditCallbacks() {
+      let calendar = this.calendar;
+      calendar.on("eventDrop", (info) => {
+        let data = {
+          id: info.event.id,
+          start: info.event.startStr,
+        };
+        console.log(data);
+        fetch("/rockcalendar/eventDrop/", {
+          method: "POST",
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: JSON.stringify(data),
+        });
+      });
+      calendar.on("eventResize", (info) => {
+        console.log(info.event.startStr);
+        console.log(info.event.endStr);
+      });
     }
 
     addModal() {

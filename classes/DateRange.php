@@ -10,6 +10,7 @@ class DateRange extends WireData
 {
   public $allDay;
   public $end;
+  public $fieldName;
   public $hasTime;
   public $hasRange;
   public $start;
@@ -25,13 +26,22 @@ class DateRange extends WireData
   }
 
   /**
+   * Time difference in seconds
+   */
+  public function diff(): int
+  {
+    return $this->end - $this->start;
+  }
+
+  /**
    * FullCalendar needs the endDate to be the first second that is not part
    * of the event. In that case you can request the end date as
    * $date->end('Y-m-d\TH:i:s', 1)
    * which will add one second to the end timestamp before formatting.
    */
-  public function end($format = 'Y-m-d H:i:s', $offset = 0): string
+  public function end($format = null, $offset = 0): string
   {
+    if (!$format) $format = 'Y-m-d H:i:s';
     return date($format, $this->end + $offset);
   }
 
@@ -71,8 +81,9 @@ class DateRange extends WireData
   /**
    * See notes about offset on end() method
    */
-  public function start($format = 'Y-m-d H:i:s', $offset = 0): string
+  public function start($format = null, $offset = 0): string
   {
+    if (!$format) $format = 'Y-m-d H:i:s';
     return date($format, $this->start + $offset);
   }
 

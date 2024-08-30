@@ -2,6 +2,8 @@
 
 namespace ProcessWire;
 
+use RockDaterangePicker\DateRange;
+
 /**
  * @author Bernhard Baumrock, 29.08.2024
  * @license COMMERCIAL DO NOT DISTRIBUTE
@@ -17,15 +19,56 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
 
   public function init()
   {
-    wire()->addHookAfter('/rockcalendar/events/', $this, 'eventsJSON');
+    wire()->addHookAfter('/rockcalendar/events/',    $this, 'eventsJSON');
+    wire()->addHookAfter('/rockcalendar/eventDrop/', $this, 'eventDrop');
   }
 
-  public function eventsJSON()
+  private function err(string $msg): string
   {
-    return json_encode($this->___getEvents(
-      wire()->input->get('pid', 'int'),
+    return json_encode(['error' => $msg]);
+  }
+
+  protected function eventDrop(HookEvent $event)
+  {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $input = new WireInputData($input);
+    $p = wire()->pages->get((int)$input->id);
+    if (!$p->id) return $this->err("Event $p not found");
+    if (!$p->editable()) return $this->err("Event $p not editable");
+    $date = $this->getDateRange($p);
+    $diff = $date->diff();
+    $newStart = strtotime($input->start);
+    $newEnd = $newStart + $diff;
+    $date->start = $newStart;
+    $date->end = $newEnd;
+    $p->setAndSave($date->fieldName, $date);
+    return $this->succ("Event $p moved");
+  }
+
+  protected function eventsJSON(HookEvent $event)
+  {
+    $pid = wire()->input->get('pid', 'int');
+    $p = wire()->pages->get($pid);
+    if (!$p->editable()) $data = [
+      'msg' => "Parent page $p must be editable to get events.",
+    ];
+    else $data = $this->getEvents(
+      $pid,
       wire()->input->get('field', 'string')
-    ));
+    );
+    return json_encode($data);
+  }
+
+  protected function getDateRange(Page $p): DateRange|false
+  {
+    foreach ($p->fields as $f) {
+      if ($f->type instanceof FieldtypeRockDaterangePicker) {
+        $date = $p->getFormatted($f->name);
+        $date->fieldName = $f->name;
+        return $date;
+      }
+    }
+    return false;
   }
 
   public function ___getEvents($pid, $field): array
@@ -41,17 +84,13 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
   public function ___getItemArray(Page $p)
   {
     // find datepicker field and get value
-    foreach ($p->fields as $f) {
-      if ($f->type instanceof FieldtypeRockDaterangePicker) {
-        $date = $p->getFormatted($f->name);
-      }
-    }
+    $date = $this->getDateRange($p);
     if (!$date) return;
     return [
       'id' => $p->id,
       'title' => $p->title,
       'start' => $date->start(),
-      'end' => $date->end(),
+      'end' => $date->end(offset: 1),
       'allDay' => $date->hasTime ? 0 : 1,
     ];
   }
@@ -133,5 +172,10 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       $mappings->$lang = $locale;
     }
     return $mappings;
+  }
+
+  private function succ(string $msg): string
+  {
+    return json_encode(['success' => $msg]);
   }
 }
