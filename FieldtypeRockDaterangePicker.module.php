@@ -67,6 +67,11 @@ class FieldtypeRockDaterangePicker extends Fieldtype
     $schema['hasRange'] = "int(1) NOT NULL";
     $schema['hasTime'] = "int(1) NOT NULL";
     $schema['isRecurring'] = "int(1) NOT NULL";
+    $schema['every'] = "int(3)";
+    $schema['everytype'] = "int(1)";
+    $schema['recurend'] = "int(1)";
+    $schema['recurenddate'] = "timestamp";
+    $schema['recurendcount'] = "int(3)";
 
     // see FieldtypeComments how this works
     $schemaVersion = (int) $field->get('schemaVersion');
@@ -78,6 +83,21 @@ class FieldtypeRockDaterangePicker extends Fieldtype
       try {
         if (!$database->columnExists($table, 'isRecurring')) {
           $database->query("ALTER TABLE `$table` ADD isRecurring " . $schema['isRecurring']);
+        }
+        if (!$database->columnExists($table, 'every')) {
+          $database->query("ALTER TABLE `$table` ADD every " . $schema['every']);
+        }
+        if (!$database->columnExists($table, 'everytype')) {
+          $database->query("ALTER TABLE `$table` ADD everytype " . $schema['everytype']);
+        }
+        if (!$database->columnExists($table, 'recurend')) {
+          $database->query("ALTER TABLE `$table` ADD recurend " . $schema['recurend']);
+        }
+        if (!$database->columnExists($table, 'recurenddate')) {
+          $database->query("ALTER TABLE `$table` ADD recurenddate " . $schema['recurenddate']);
+        }
+        if (!$database->columnExists($table, 'recurendcount')) {
+          $database->query("ALTER TABLE `$table` ADD recurendcount " . $schema['recurendcount']);
         }
         $field->set('schemaVersion', 1);
         $field->save();
@@ -182,12 +202,18 @@ class FieldtypeRockDaterangePicker extends Fieldtype
 
   public function sleepValue($page, $field, $value)
   {
+    bd($value, 'sleep');
     return [
       'data' => date('Y-m-d H:i:s', $value->start),
       'end' => date('Y-m-d H:i:s', $value->end),
       'hasTime' => $value->hasTime,
       'hasRange' => $value->hasRange,
       'isRecurring' => $value->isRecurring,
+      'every' => $value->every,
+      'everytype' => $value->everytype,
+      'recurend' => $value->recurend,
+      'recurenddate' => $value->recurenddate,
+      'recurendcount' => $value->recurendcount,
     ];
   }
 
@@ -199,6 +225,7 @@ class FieldtypeRockDaterangePicker extends Fieldtype
   {
     $value['start'] = $value['data'];
     unset($value['data']);
-    return new DateRange($value);
+    $range = new DateRange($value);
+    return $range;
   }
 }

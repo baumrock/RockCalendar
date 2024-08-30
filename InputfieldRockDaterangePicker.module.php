@@ -33,12 +33,17 @@ class InputfieldRockDaterangePicker extends Inputfield
     return wire()->files->render(__DIR__ . '/markup.php', [
       'hasTime' => $this->value->hasTime,
       'hasRange' => $this->value->hasRange,
-      'isRecurring' => $this->value->isRecurring,
       'start' => $this->value->start(),
       'end' => $this->value->end(),
       'hasTimeLabel' => $this->_('Enter time'),
       'hasRangeLabel' => $this->_('Enter range'),
       'isRecurringLabel' => $this->_('Recurring'),
+      'isRecurring' => $this->value->isRecurring,
+      'every' => $this->value->every,
+      'everytype' => $this->value->everytype,
+      'recurend' => $this->value->recurend,
+      'recurenddate' => $this->value->recurenddate,
+      'recurendcount' => $this->value->recurendcount ?: 1,
       'input' => $input,
       'name' => $this->name,
     ]);
@@ -61,12 +66,20 @@ class InputfieldRockDaterangePicker extends Inputfield
   {
     $name = $this->name;
     $old = $this->value;
+    $end = (int)$input->get($name . '_recurend');
     $new = new DateRange([
       'start' => $input->get($name . '_start'),
       'end' => $input->get($name . '_end'),
       'hasTime' => !!$input->get($name . '_hasTime'),
       'hasRange' => !!$input->get($name . '_hasRange'),
       'isRecurring' => !!$input->get($name . '_isRecurring'),
+      'every' => (int)$input->get($name . '_every'),
+      'everytype' => (int)$input->get($name . '_everytype'),
+      'recurend' => $end,
+      'recurenddate' => $end === 1
+        ? ($input->get($name . '_recurenddate') ?: date('Y-m-d'))
+        : '',
+      'recurendcount' => $end === 2 ? $input->get($name . '_recurendcount') : 1,
     ]);
     if ($old->hash() === $new->hash()) return;
     $this->trackChange('value');

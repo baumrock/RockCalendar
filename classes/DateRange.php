@@ -10,11 +10,16 @@ class DateRange extends WireData
 {
   public $allDay;
   public $end;
-  public $fieldName;
-  public $hasTime;
-  public $hasRange;
-  public $isRecurring;
-  public $start;
+  public string $fieldName;
+  public bool $hasTime;
+  public bool $hasRange;
+  public bool $isRecurring;
+  public int $start;
+  public int $every;
+  public int $everytype;
+  public int $recurend;
+  public string|null $recurenddate;
+  public int $recurendcount;
 
   public function __construct($arr = [])
   {
@@ -25,6 +30,11 @@ class DateRange extends WireData
     $this->allDay = !$this->hasTime;
     $this->hasRange = $data->hasRange ?: false;
     $this->isRecurring = $data->isRecurring ?: false;
+    $this->every = $data->every ?: 1;
+    $this->everytype = $data->everytype ?: 0;
+    $this->recurend = $data->recurend ?: 0;
+    $this->recurenddate = $data->recurenddate ? date('Y-m-d', strtotime($data->recurenddate)) : null;
+    $this->recurendcount = $data->recurendcount ?: 0;
   }
 
   /**
@@ -72,7 +82,9 @@ class DateRange extends WireData
    */
   public function hash(): string
   {
-    return "{$this->start}-{$this->end}-{$this->hasTime}-{$this->hasRange}-{$this->isRecurring}";
+    $enddate = $this->recurenddate;
+    if (!$enddate || str_starts_with($enddate, '0000-')) $enddate = '';
+    return "{$this->start}-{$this->end}-{$this->hasTime}-{$this->hasRange}-{$this->isRecurring}-{$this->every}-{$this->everytype}-{$this->recurend}-{$enddate}-{$this->recurendcount}";
   }
 
   public function ranger(): string
@@ -104,6 +116,12 @@ class DateRange extends WireData
       'allDay' => $this->allDay,
       'hasTime' => $this->hasTime,
       'hasRange' => $this->hasRange,
+      'isRecurring' => $this->isRecurring,
+      'every' => $this->every,
+      'everytype' => $this->everytype,
+      'recurend' => $this->recurend,
+      'recurenddate' => $this->recurenddate,
+      'recurendcount' => $this->recurendcount,
     ];
   }
 }

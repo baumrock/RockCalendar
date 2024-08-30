@@ -34,12 +34,12 @@
   <div class='uk-background-muted uk-padding-small uk-margin-small-top'>
     <div>
       Wiederholen alle
-      <input type='text' class='uk-input uk-text-center' style='width:50px;margin-left:10px;' value=1>
-      <select class='uk-select'>
-        <option value='day'>Tag</option>
-        <option value='week'>Woche</option>
-        <option value='month'>Monat</option>
-        <option value='year'>Jahr</option>
+      <input type='number' name='<?= $name ?>_every' class='uk-input uk-text-center' style='width:80px;margin-left:10px;' value='<?= $every ?>'>
+      <select class='uk-select' name='<?= $name ?>_everytype'>
+        <option value='0' <?= $everytype == 0 ? 'selected' : '' ?>>Tag</option>
+        <option value='1' <?= $everytype == 1 ? 'selected' : '' ?>>Woche</option>
+        <option value='2' <?= $everytype == 2 ? 'selected' : '' ?>>Monat</option>
+        <option value='3' <?= $everytype == 3 ? 'selected' : '' ?>>Jahr</option>
       </select>
     </div>
     <div class='uk-flex uk-flex-middle uk-margin-small-top' style='gap: 30px;'>
@@ -47,23 +47,23 @@
       <div class='uk-flex' style='gap:20px'>
         <div class='uk-flex uk-flex-middle rc-button'>
           <label class='uk-flex'>
-            <input type='radio' name='<?= $name ?>_recurrence_end' value='never' class='uk-radio' checked>
+            <input type='radio' name='<?= $name ?>_recurend' value='0' class='uk-radio' <?= $recurend == 0 ? 'checked' : '' ?>>
             Nie
           </label>
         </div>
         <div class='uk-flex uk-flex-middle rc-button'>
           <label class='uk-flex'>
-            <input type='radio' name='<?= $name ?>_recurrence_end' value='on' class='uk-radio'>
+            <input type='radio' name='<?= $name ?>_recurend' value='1' class='uk-radio' <?= $recurend == 1 ? 'checked' : '' ?>>
             Am
           </label>
-          <input type='date' class='uk-input'>
+          <input type='date' name='<?= $name ?>_recurenddate' class='uk-input' value='<?= $recurenddate ?>'>
         </div>
         <div class='uk-flex uk-flex-middle rc-button'>
           <label class='uk-flex'>
-            <input type='radio' name='<?= $name ?>_recurrence_end' value='after' class='uk-radio'>
+            <input type='radio' name='<?= $name ?>_recurend' value='2' class='uk-radio' <?= $recurend == 2 ? 'checked' : '' ?>>
             Nach
           </label>
-          <input type='number' class='uk-input' name='<?= $name ?>_recurrence_end_count' style='width: 80px;' min=1> Terminen
+          <input type='number' class='uk-input' name='<?= $name ?>_recurendcount' style='width: 80px;' min=1 value='<?= $recurendcount ?>'> Terminen
         </div>
       </div>
     </div>
