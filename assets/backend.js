@@ -30,6 +30,7 @@ var RockCalendar;
       calendar.render();
       this.addModal();
       this.addEditCallbacks();
+      $(document).on("pw-modal-closed", this.refresh.bind(this));
     }
 
     addEditCallbacks() {
@@ -59,7 +60,6 @@ var RockCalendar;
         $link.attr("data-autoclose", "");
         $link.attr("data-buttons", "button.ui-button[type=submit]");
         $link.on("click", pwModalOpenEvent);
-        $(document).on("pw-modal-closed", this.refresh.bind(this));
         $link.click();
         $link.remove();
       });

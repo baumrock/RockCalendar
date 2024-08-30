@@ -52,6 +52,7 @@ class InputfieldRockCalendar extends InputfieldTextarea
         href='/cms/page/add/?parent_id=$p'
         class='pw-modal add-item uk-hidden'
         data-buttons='button.ui-button[type=submit]'
+        data-autoclose
       >Add Event</a>
       <div id='calendar-{$this->name}' class='rock-calendar'></div>
       <script>RockCalendar.add('{$this->name}', '$locale');</script>";
