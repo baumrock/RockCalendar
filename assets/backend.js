@@ -102,12 +102,14 @@ var RockCalendar;
               message: '<span uk-icon="icon: check"></span> ' + json.success,
               status: "success",
               timeout: 2000,
+              pos: "top-right",
             });
           } else if (json.error) {
             UIkit.notification({
               message: '<span uk-icon="icon: warning"></span> ' + json.error,
               status: "danger",
               timeout: 2000,
+              pos: "top-right",
             });
           }
         });
