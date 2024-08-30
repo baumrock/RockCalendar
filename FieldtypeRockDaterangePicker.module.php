@@ -116,6 +116,25 @@ class FieldtypeRockDaterangePicker extends Fieldtype
         $startDate = $date->format('Y-m-d 00:00:00');
         $endDate = $date->format('Y-m-d 23:59:59');
         break;
+      case 'inRange':
+        /**
+         * Usage:
+         * ->find('yourfield.inRange' => '2024-01-01 - 2024-01-31')
+         * Or using timestamps:
+         * ->find('yourfield.inRange' => '1704067200 - 1706659200')
+         */
+        $parts = explode(' - ', $value);
+        $startTS = $parts[0];
+        $endTS = $parts[1];
+        // if startts and endts are not a unix timestamp use strtotime
+        if (!is_numeric($startTS)) $startTS = strtotime($startTS);
+        if (!is_numeric($endTS)) $endTS = strtotime($endTS);
+        $startDate = new DateTime();
+        $startDate->setTimestamp($startTS);
+        $endDate = new DateTime();
+        $endDate->setTimestamp($endTS);
+        $startDate = $startDate->format('Y-m-d H:i:s');
+        $endDate = $endDate->format('Y-m-d H:i:s');
     }
 
     $query->where("$table.data <= '$endDate' AND $table.end >= '$startDate'");

@@ -65,13 +65,20 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
   protected function eventsJSON(HookEvent $event)
   {
     $pid = wire()->input->get('pid', 'int');
+    $start = wire()->input->get('start', 'string');
+    $end = wire()->input->get('end', 'string');
+    $startTS = strtotime($start);
+    $endTS = strtotime($end);
     $p = wire()->pages->get($pid);
+    $field = wire()->fields->get('type=FieldtypeRockDaterangePicker');
     if (!$p->editable()) $data = [
-      'msg' => "Parent page $p must be editable to get events.",
+      'msg' => "Page $p must be editable to get events.",
     ];
     else $data = $this->getEvents(
       $pid,
-      wire()->input->get('field', 'string')
+      $startTS,
+      $endTS,
+      $field,
     );
     return json_encode($data);
   }
@@ -88,9 +95,17 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     return false;
   }
 
-  public function ___getEvents($pid, $field): array
-  {
-    $events = wire()->pages->get($pid)->children();
+  public function ___getEvents(
+    int $pid,
+    int $start,
+    int $end,
+    Field $field,
+  ): array {
+    // find events in given date range
+    $events = wire()->pages->find([
+      'parent' => $pid,
+      $field->name . '.inRange' => "$start - $end",
+    ]);
     $result = [];
     foreach ($events as $event) {
       $result[] = $this->getItemArray($event) ?? [];
