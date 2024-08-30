@@ -15,5 +15,7 @@ $info = [
   'installs' => [
     'FieldtypeRockCalendar',
     'InputfieldRockCalendar',
+    'FieldtypeRockDaterangePicker',
+    'InputfieldRockDaterangePicker',
   ],
 ];

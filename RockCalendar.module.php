@@ -2,6 +2,7 @@
 
 namespace ProcessWire;
 
+use DateTime;
 use RockDaterangePicker\DateRange;
 
 /**
@@ -16,7 +17,6 @@ function rockcalendar(): RockCalendar|null
 
 class RockCalendar extends WireData implements Module, ConfigurableModule
 {
-
   public function init()
   {
     wire()->addHookAfter('/rockcalendar/events/',      $this, 'eventsJSON');
@@ -83,6 +83,12 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     return json_encode($data);
   }
 
+  public function getConfig(string $prop): mixed
+  {
+    $config = wire()->modules->getConfig($this);
+    return array_key_exists($prop, $config) ? $config[$prop] : null;
+  }
+
   protected function getDateRange(Page $p): DateRange|false
   {
     foreach ($p->fields as $f) {
@@ -124,6 +130,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       'start' => $date->start(),
       'end' => $date->end(offset: 1),
       'allDay' => $date->hasTime ? 0 : 1,
+      'url' => $p->editUrl(),
     ];
   }
 
@@ -143,6 +150,18 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
    */
   public function getModuleConfigInputfields($inputfields)
   {
+    // hard limit for recurring events option ends "never"
+    $inputfields->add([
+      'type' => 'text',
+      'name' => 'recurringEventsLimit',
+      'label' => 'Recurring Events Hard Limit',
+      'description' => 'PHP date string like "+ 5 years" to set the hard limit for recurring events if "ends never" is selected.',
+      'value' => $this->recurringEventsLimit,
+      'notes' => 'Calculated end date (save to refresh): **' . $this->recurringEndDate() . '**'
+        . "\nThe end date will always be calculated from the current time.",
+      'placeholder' => '+ 1 year',
+    ]);
+
     $langs = wire()->languages;
     if ($langs) {
       $langsStr = '';
@@ -158,7 +177,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
         'type' => 'textarea',
         'name' => 'locales',
         'label' => 'Locale Language Mappings',
-        'description' => 'Assign a locale to each installed language by clicking on the listed items below. Example: default:de-at.',
+        'description' => 'Assign a locale to each installed language by clicking on the listed items below. Enter one mapping per line. Example: default:de-at',
         'notes' => "Installed languages: $langsStr
       Available locales: $locales",
         'entityEncodeText' => false,
@@ -204,6 +223,21 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       $mappings->$lang = $locale;
     }
     return $mappings;
+  }
+
+  private function recurringEndDate(): string
+  {
+    $date = new DateTime();
+    $date->modify($this->recurringEventsLimit ?: '+ 1 year');
+    $date->setTime(0, 0, 0);
+    return $date->format('Y-m-d H:i:s');
+  }
+
+  public function setConfig(string $name, mixed $value): void
+  {
+    $config = wire()->modules->getConfig($this);
+    $config[$name] = $value;
+    wire()->modules->saveConfig($this, $config);
   }
 
   private function succ(string $msg): string

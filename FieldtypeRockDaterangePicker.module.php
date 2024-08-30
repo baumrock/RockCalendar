@@ -66,6 +66,26 @@ class FieldtypeRockDaterangePicker extends Fieldtype
     $schema['end'] = 'timestamp NOT NULL';
     $schema['hasRange'] = "int(1) NOT NULL";
     $schema['hasTime'] = "int(1) NOT NULL";
+    $schema['isRecurring'] = "int(1) NOT NULL";
+
+    // see FieldtypeComments how this works
+    $schemaVersion = (int) $field->get('schemaVersion');
+    $updateSchema = true;
+    $table = $field->getTable();
+    $database = wire()->database;
+
+    if ($schemaVersion < 1 && $updateSchema) {
+      try {
+        if (!$database->columnExists($table, 'isRecurring')) {
+          $database->query("ALTER TABLE `$table` ADD isRecurring " . $schema['isRecurring']);
+        }
+        $field->set('schemaVersion', 1);
+        $field->save();
+      } catch (\Throwable $th) {
+        $this->error($th->getMessage());
+        $updateSchema = false;
+      }
+    }
 
     return $schema;
   }
@@ -167,6 +187,7 @@ class FieldtypeRockDaterangePicker extends Fieldtype
       'end' => date('Y-m-d H:i:s', $value->end),
       'hasTime' => $value->hasTime,
       'hasRange' => $value->hasRange,
+      'isRecurring' => $value->isRecurring,
     ];
   }
 

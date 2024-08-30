@@ -13,6 +13,7 @@ class DateRange extends WireData
   public $fieldName;
   public $hasTime;
   public $hasRange;
+  public $isRecurring;
   public $start;
 
   public function __construct($arr = [])
@@ -23,6 +24,7 @@ class DateRange extends WireData
     $this->hasTime = $data->hasTime ?: false;
     $this->allDay = !$this->hasTime;
     $this->hasRange = $data->hasRange ?: false;
+    $this->isRecurring = $data->isRecurring ?: false;
   }
 
   /**
@@ -70,7 +72,7 @@ class DateRange extends WireData
    */
   public function hash(): string
   {
-    return "{$this->start}-{$this->end}-{$this->hasTime}-{$this->hasRange}";
+    return "{$this->start}-{$this->end}-{$this->hasTime}-{$this->hasRange}-{$this->isRecurring}";
   }
 
   public function ranger(): string

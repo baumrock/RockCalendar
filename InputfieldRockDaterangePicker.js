@@ -21,14 +21,20 @@ var RockDaterange;
       this.$end = this.$li.querySelector("input[name=" + name + "_end]");
       this.$hasTime = this.$li.querySelector("input.hasTime");
       this.$hasRange = this.$li.querySelector("input.hasRange");
+      this.$isRecurring = this.$li.querySelector("input.isRecurring");
       this.startDate = this.getDate(this.$start.value);
       this.endDate = this.getDate(this.$end.value);
       this.hasTime = false;
       this.hasRange = false;
+      this.isRecurring = false;
       this.changed();
       this.initPicker();
       this.$hasTime.addEventListener("change", this.changed.bind(this));
       this.$hasRange.addEventListener("change", this.changed.bind(this));
+      this.$isRecurring.addEventListener(
+        "change",
+        this.recurringChanged.bind(this)
+      );
     }
 
     // public API to manipulate the field
@@ -83,6 +89,16 @@ var RockDaterange;
       );
       this.picker = $(this.$picker).data("daterangepicker");
       this.setDates();
+    }
+
+    recurringChanged() {
+      this.isRecurring = this.$isRecurring.checked;
+      let container = this.$li.querySelector(".rc-recurring-container");
+      if (this.isRecurring) {
+        container.classList.remove("uk-hidden");
+      } else {
+        container.classList.add("uk-hidden");
+      }
     }
 
     setDates() {

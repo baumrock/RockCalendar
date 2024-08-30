@@ -33,10 +33,12 @@ class InputfieldRockDaterangePicker extends Inputfield
     return wire()->files->render(__DIR__ . '/markup.php', [
       'hasTime' => $this->value->hasTime,
       'hasRange' => $this->value->hasRange,
+      'isRecurring' => $this->value->isRecurring,
       'start' => $this->value->start(),
       'end' => $this->value->end(),
       'hasTimeLabel' => $this->_('Enter time'),
       'hasRangeLabel' => $this->_('Enter range'),
+      'isRecurringLabel' => $this->_('Recurring'),
       'input' => $input,
       'name' => $this->name,
     ]);
@@ -64,6 +66,7 @@ class InputfieldRockDaterangePicker extends Inputfield
       'end' => $input->get($name . '_end'),
       'hasTime' => !!$input->get($name . '_hasTime'),
       'hasRange' => !!$input->get($name . '_hasRange'),
+      'isRecurring' => !!$input->get($name . '_isRecurring'),
     ]);
     if ($old->hash() === $new->hash()) return;
     $this->trackChange('value');

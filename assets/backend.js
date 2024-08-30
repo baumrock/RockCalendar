@@ -49,13 +49,19 @@ var RockCalendar;
         });
       });
       calendar.on("eventClick", (info) => {
+        // do not follow link on regular clicks (no cmd key pressed)
+        if (!info.jsEvent.metaKey) {
+          info.jsEvent.preventDefault();
+        } else return;
+
+        // on shift-click open event in a new tab
+        let href =
+          ProcessWire.config.urls.admin + "page/edit/?id=" + info.event.id;
+
         // create a fake link element in body
         let link = document.createElement("a");
         let $link = $(link);
-        $link.attr(
-          "href",
-          ProcessWire.config.urls.admin + "page/edit/?id=" + info.event.id
-        );
+        $link.attr("href", href);
         $link.addClass("pw-modal");
         $link.attr("data-autoclose", "");
         $link.attr("data-buttons", "button.ui-button[type=submit]");
