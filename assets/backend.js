@@ -47,6 +47,22 @@ var RockCalendar;
           end: info.event.endStr,
         });
       });
+      calendar.on("eventClick", (info) => {
+        // create a fake link element in body
+        let link = document.createElement("a");
+        let $link = $(link);
+        $link.attr(
+          "href",
+          ProcessWire.config.urls.admin + "page/edit/?id=" + info.event.id
+        );
+        $link.addClass("pw-modal");
+        $link.attr("data-autoclose", "");
+        $link.attr("data-buttons", "button.ui-button[type=submit]");
+        $link.on("click", pwModalOpenEvent);
+        $(document).on("pw-modal-closed", this.refresh.bind(this));
+        $link.click();
+        $link.remove();
+      });
     }
 
     addModal() {
@@ -95,6 +111,12 @@ var RockCalendar;
             });
           }
         });
+    }
+
+    refresh() {
+      this.calendar.refetchEvents();
+      // trigger resize event to fix calendar display glitch
+      window.dispatchEvent(new Event("resize"));
     }
   }
 

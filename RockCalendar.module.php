@@ -55,7 +55,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     if (!$p->editable()) return $this->err("Event $p not editable");
     $date = $this->getDateRange($p);
     $newStart = strtotime($input->start);
-    $newEnd = strtotime($input->end);
+    $newEnd = strtotime($input->end) - 1; // account for FullCalendar date handling
     $date->start = $newStart;
     $date->end = $newEnd;
     $p->setAndSave($date->fieldName, $date);
