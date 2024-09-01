@@ -20,11 +20,7 @@
         <td>Ends on</td>
         <td>
           <input type='date' name='until' class='uk-input'>
-        </td>
-      </tr>
-      <tr>
-        <td>Ends after</td>
-        <td>
+          or after
           <input type='number' name='count' class='uk-input' style='width: 80px;' min=1 value=10>
           Events
         </td>
@@ -32,6 +28,7 @@
       <tr>
         <td>On weekdays</td>
         <td class='uk-flex uk-flex-wrap' style='gap: 10px;'>
+          <input type='number' name='n-th' class='uk-input' style='width: 80px;' min=1 max=5>
           <label><input type='checkbox' class='uk-checkbox' name='byweekday' value='MO'> Monday</label>
           <label><input type='checkbox' class='uk-checkbox' name='byweekday' value='TU'> Tuesday</label>
           <label><input type='checkbox' class='uk-checkbox' name='byweekday' value='WE'> Wednesday</label>
@@ -56,6 +53,11 @@
           <label><input type='checkbox' class='uk-checkbox' name='bymonth' value='10'> Oct</label>
           <label><input type='checkbox' class='uk-checkbox' name='bymonth' value='11'> Nov</label>
           <label><input type='checkbox' class='uk-checkbox' name='bymonth' value='12'> Dec</label>
+        </td>
+      </tr>
+      <tr>
+        <td>Result</td>
+        <td class='human-readable uk-text-bold'>
         </td>
       </tr>
     </tbody>

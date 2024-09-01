@@ -39,6 +39,11 @@ class InputfieldRockDaterangePicker extends Inputfield
       'icon' => 'plus',
       // 'collapsed' => Inputfield::collapsedYes,
       'prependMarkup' => wire()->files->render(__DIR__ . '/markup-rrule.php'),
+      'appendMarkup' => '
+      <button class="uk-button uk-button-primary uk-margin-small-top">
+        Create Events
+      </button>
+      ',
     ]);
     $fs->add([
       'type' => 'RockGrid',

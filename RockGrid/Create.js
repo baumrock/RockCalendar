@@ -6,6 +6,11 @@ document.addEventListener("RockGrid:init", (e) => {
 
   let events = [];
 
+  function ucfirst(str) {
+    if (typeof str !== "string" || str.length === 0) return str;
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
   // build the tabulator table
   setTimeout(() => {
     let table = grid.tabulator({
@@ -47,6 +52,25 @@ document.addEventListener("RockGrid:init", (e) => {
       let interval = container.querySelector("input[name='interval']").value;
       let until = container.querySelector("input[name='until']").value;
       let count = container.querySelector("input[name='count']").value;
+      let nth = container.querySelector("input[name='n-th']").value;
+
+      // Convert NodeList to Array before using filter and map
+      let weekdays = Array.from(
+        container.querySelectorAll("input[name='byweekday']")
+      )
+        .filter((input) => input.checked)
+        .map((input) => {
+          if (nth > 0) {
+            return rrule.RRule[input.value].nth(nth);
+          }
+          return rrule.RRule[input.value];
+        });
+      // Convert NodeList to Array before using filter and map
+      let months = Array.from(
+        container.querySelectorAll("input[name='bymonth']")
+      )
+        .filter((input) => input.checked)
+        .map((input) => parseInt(input.value));
       let start = container
         .closest(".InputfieldRockDaterangePicker")
         .querySelector("input[name=rockcalendar_date_start]").value;
@@ -57,7 +81,16 @@ document.addEventListener("RockGrid:init", (e) => {
         dtstart: new Date(start),
       };
       if (until) config.until = new Date(until);
-      return new rrule.RRule(config);
+      if (weekdays.length) config.byweekday = weekdays;
+      if (months.length) config.bymonth = months;
+      let rule = new rrule.RRule(config);
+
+      // show rrule result in human readable string
+      container.querySelector(".human-readable").textContent = ucfirst(
+        rule.toText() + "."
+      );
+
+      return rule;
     };
 
     let setData = () => {
