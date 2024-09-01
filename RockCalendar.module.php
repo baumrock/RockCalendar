@@ -17,11 +17,17 @@ function rockcalendar(): RockCalendar|null
 
 class RockCalendar extends WireData implements Module, ConfigurableModule
 {
+  const prefix = 'rockcalendar_';
+  const field_date = self::prefix . "date";
+
   public function init()
   {
     wire()->addHookAfter('/rockcalendar/events/',      $this, 'eventsJSON');
     wire()->addHookAfter('/rockcalendar/eventDrop/',   $this, 'eventDrop');
     wire()->addHookAfter('/rockcalendar/eventResize/', $this, 'eventResize');
+
+    $f = wire()->fields->get(self::field_date);
+    if (!$f) $this->___install();
   }
 
   private function err(string $msg): string
@@ -208,6 +214,15 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
   {
     $lang = wire()->user->language->name;
     return (string)$this->languageMappings()->$lang;
+  }
+
+  public function ___install(): void
+  {
+    $field = $this->wire(new Field());
+    $field->type = 'FieldtypeRockDaterangePicker';
+    $field->name = self::field_date;
+    $field->label = 'Date';
+    $field->save();
   }
 
   public function languageMappings(): WireData
