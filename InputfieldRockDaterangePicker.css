@@ -13,6 +13,26 @@
 .InputfieldRockDaterangePicker .rc-button .uk-checkbox:not(:checked) {
   background-color: white;
 }
+.InputfieldRockDaterangePicker .rc-rrule table td {
+  white-space: nowrap;
+}
+.InputfieldRockDaterangePicker .rc-rrule table td:first-child {
+  width: 1%;
+  white-space: nowrap;
+  padding-right: 20px;
+}
+.InputfieldRockDaterangePicker .rc-rrule [name="freq"]:not(.fake-important):not(.fake-important) {
+  width: 150px;
+}
+.InputfieldRockDaterangePicker .rc-rrule [name="interval"] {
+  width: 80px;
+}
+.InputfieldRockDaterangePicker .rc-rrule [name="until"] {
+  width: 150px;
+}
+.InputfieldRockDaterangePicker .tabulator-paginator > label:first-child {
+  display: none;
+}
 .AdminStyleRock .daterangepicker td.in-range {
   background-color: var(--rock-gray-100);
 }

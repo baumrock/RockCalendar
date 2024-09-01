@@ -31,7 +31,7 @@
 <input hidden name='<?= $name ?>_start' value='<?= $start ?>'>
 <input hidden name='<?= $name ?>_end' value='<?= $end ?>'>
 <div class='uk-margin-small-top rc-recurring-container <?= $isRecurring ?: 'uk-hidden' ?>'>
-  TBD
+  <?= $grid ?>
 </div>
 <script>
   RockDaterange.init('<?= $name ?>');

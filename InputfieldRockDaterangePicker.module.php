@@ -30,6 +30,25 @@ class InputfieldRockDaterangePicker extends Inputfield
     ]);
     $input = "<input $attrStr />";
 
+    $fs = new InputfieldFieldset();
+    $fs->add([
+      'type' => 'RockGrid',
+      'name' => $this->name . '_create',
+      'grid' => 'RockCalendar\\Create',
+      'label' => 'Create Events',
+      'icon' => 'plus',
+      // 'collapsed' => Inputfield::collapsedYes,
+      'prependMarkup' => wire()->files->render(__DIR__ . '/markup-rrule.php'),
+    ]);
+    $fs->add([
+      'type' => 'RockGrid',
+      'name' => $this->name . '_recur2',
+      'grid' => 'RockCalendar\\Existing',
+      'label' => 'Existing Events',
+      'icon' => 'calendar',
+    ]);
+    $grid = $fs->render();
+
     return wire()->files->render(__DIR__ . '/markup.php', [
       'hasTime' => $this->value->hasTime,
       'hasRange' => $this->value->hasRange,
@@ -46,6 +65,7 @@ class InputfieldRockDaterangePicker extends Inputfield
       'recurendcount' => $this->value->recurendcount ?: 1,
       'input' => $input,
       'name' => $this->name,
+      'grid' => $grid,
     ]);
   }
 
@@ -54,6 +74,7 @@ class InputfieldRockDaterangePicker extends Inputfield
     $url = wire()->config->urls($this) . 'lib/';
     wire()->config->scripts->add($url . 'moment.min.js');
     wire()->config->scripts->add($url . 'daterangepicker.js');
+    wire()->config->scripts->add($url . 'rrule.min.js');
     wire()->config->styles->add($url . 'daterangepicker.css');
     parent::renderReady($parent, $renderValueMode);
   }
