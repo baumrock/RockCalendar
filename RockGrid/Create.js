@@ -31,7 +31,9 @@ document.addEventListener("RockGrid:init", (e) => {
           },
           hozAlign: "center",
         },
-        { title: "Date", field: "date", headerFilter: "input" },
+        { title: "Day", field: "day", headerFilter: "input" },
+        { title: "Date", field: "date", headerFilter: "input", width: 100 },
+        { title: "Time", field: "time", headerFilter: "input" },
       ],
       selectableRows: false,
       pagination: true,
@@ -46,6 +48,7 @@ document.addEventListener("RockGrid:init", (e) => {
       return;
     }
 
+    // get dates from rrule
     const getDates = () => {
       let container = document.querySelector(".rc-rrule");
       let freq = container.querySelector("select[name='freq']").value;
@@ -83,6 +86,13 @@ document.addEventListener("RockGrid:init", (e) => {
       if (until) config.until = new Date(until);
       if (weekdays.length) config.byweekday = weekdays;
       if (months.length) config.bymonth = months;
+
+      // set limit of 100 events if no count or until is set
+      if (!count && !until) config.count = 100;
+
+      // set hard limit of 10.000 events
+      if (config.count > 10000) config.count = 10000;
+
       let rule = new rrule.RRule(config);
 
       // show rrule result in human readable string
@@ -93,28 +103,49 @@ document.addEventListener("RockGrid:init", (e) => {
       return rule;
     };
 
+    // set data in table
     let setData = () => {
+      let locale = ProcessWire.config.RcLocale || "en-US";
       let events = getDates()
         .all()
         .map((date, index) => {
           return {
             id: index + 1,
-            date: date.toLocaleString("de-AT", {
+            // day as short string
+            day: date.toLocaleString(locale, {
+              weekday: "short",
+            }),
+            // date
+            date: date.toLocaleString(locale, {
               year: "numeric",
               month: "2-digit",
               day: "2-digit",
-              weekday: "short",
+            }),
+            // time
+            time: date.toLocaleString(locale, {
               hour: "2-digit",
               minute: "2-digit",
               second: "2-digit",
             }),
+            // datetime as format that php can understand
+            iso: date.toISOString(),
           };
         });
       table.setData(events);
+
+      // no events, no create events button
+      if (events.length === 0) {
+        $(document).find("[data-create-events]").hide();
+      } else {
+        $(document).find("[data-create-events]").show();
+      }
     };
 
     // monitor all inputs in .rc-rrule
     $(document).on("input", ".rc-rrule", () => {
+      setData();
+    });
+    $(document).on("change", "input[name=rockcalendar_date]", () => {
       setData();
     });
 
@@ -123,11 +154,20 @@ document.addEventListener("RockGrid:init", (e) => {
       setData();
     });
 
-    // handle delete button
+    // handle clicks on delete button
     $(document).on("click", "a[data-remove-row]", (e) => {
       e.preventDefault();
       let rowId = $(e.target).closest("a").data("remove-row");
       table.deleteRow(rowId);
+    });
+
+    // handle clicks on "create events" button
+    $(document).on("click", "[data-create-events]", (e) => {
+      e.preventDefault();
+      RockGrid.sse("/rockcalendar/create-recurring-events/", {
+        pid: parseInt($("#Inputfield_id").val()),
+        dates: table.getData().map((row) => row.iso),
+      });
     });
   }, 0);
 });

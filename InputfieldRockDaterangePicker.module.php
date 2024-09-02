@@ -40,9 +40,13 @@ class InputfieldRockDaterangePicker extends Inputfield
       // 'collapsed' => Inputfield::collapsedYes,
       'prependMarkup' => wire()->files->render(__DIR__ . '/markup-rrule.php'),
       'appendMarkup' => '
-      <button class="uk-button uk-button-primary uk-margin-small-top">
-        Create Events
-      </button>
+        <div class="uk-flex uk-flex-middle uk-margin-small-top" style="gap: 10px;">
+          <button data-create-events class="uk-button uk-button-primary uk-text-nowrap">
+            Create Events
+          </button>
+          <span>0/10</span>
+          <progress class="uk-progress uk-margin-remove" max="100" value="0"></progress>
+        </div>
       ',
     ]);
     $fs->add([

@@ -22,12 +22,48 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
 
   public function init()
   {
-    wire()->addHookAfter('/rockcalendar/events/',      $this, 'eventsJSON');
-    wire()->addHookAfter('/rockcalendar/eventDrop/',   $this, 'eventDrop');
-    wire()->addHookAfter('/rockcalendar/eventResize/', $this, 'eventResize');
+    wire()->addHookAfter('/rockcalendar/events/',                  $this, 'eventsJSON');
+    wire()->addHookAfter('/rockcalendar/eventDrop/',               $this, 'eventDrop');
+    wire()->addHookAfter('/rockcalendar/eventResize/',             $this, 'eventResize');
+    wire()->addHookAfter('/rockcalendar/create-recurring-events/', $this, 'createRecurringEvents');
 
     $f = wire()->fields->get(self::field_date);
     if (!$f) $this->___install();
+  }
+
+  public function ready(): void
+  {
+    $locale = $this->getUserLocale();
+    if ($locale) {
+      wire()->config->js('RcLocale', $locale);
+    }
+  }
+
+  protected function createRecurringEvents(HookEvent $event)
+  {
+    $requestMethod = $_SERVER['REQUEST_METHOD'];
+    if ($requestMethod === 'POST') {
+      $input = json_decode(file_get_contents('php://input'), true);
+      $input = new WireInputData($input);
+      bd($input);
+      wire()->session->set('rockgrid-sse-input', $input);
+
+      header('Content-Type: application/json; charset=utf-8');
+      return json_encode($input->getArray());
+    }
+
+    // if (!$p->id) return $this->err("Page $p not found");
+    // if (!$p->editable()) return $this->err("Page $p not editable");
+
+    header("Cache-Control: no-cache");
+    header("Content-Type: text/event-stream");
+
+    $input = wire()->session->get('rockgrid-sse-input');
+    foreach ($input->dates as $date) {
+      rockgrid()->sse($date);
+    }
+
+    rockgrid()->sse('rockgrid-sse-done');
   }
 
   private function err(string $msg): string
@@ -156,18 +192,6 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
    */
   public function getModuleConfigInputfields($inputfields)
   {
-    // hard limit for recurring events option ends "never"
-    $inputfields->add([
-      'type' => 'text',
-      'name' => 'recurringEventsLimit',
-      'label' => 'Recurring Events Hard Limit',
-      'description' => 'PHP date string like "+ 5 years" to set the hard limit for recurring events if "ends never" is selected.',
-      'value' => $this->recurringEventsLimit,
-      'notes' => 'Calculated end date (save to refresh): **' . $this->recurringEndDate() . '**'
-        . "\nThe end date will always be calculated from the current time.",
-      'placeholder' => '+ 1 year',
-    ]);
-
     $langs = wire()->languages;
     if ($langs) {
       $langsStr = '';
@@ -238,14 +262,6 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       $mappings->$lang = $locale;
     }
     return $mappings;
-  }
-
-  private function recurringEndDate(): string
-  {
-    $date = new DateTime();
-    $date->modify($this->recurringEventsLimit ?: '+ 1 year');
-    $date->setTime(0, 0, 0);
-    return $date->format('Y-m-d H:i:s');
   }
 
   public function setConfig(string $name, mixed $value): void
