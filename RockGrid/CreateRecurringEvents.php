@@ -4,7 +4,7 @@ namespace RockCalendar;
 
 use RockGrid\Grid;
 
-class Create extends Grid
+class CreateRecurringEvents extends Grid
 {
   public function getData()
   {

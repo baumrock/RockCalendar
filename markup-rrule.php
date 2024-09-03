@@ -21,7 +21,7 @@
         <td>
           <input type='date' name='until' class='uk-input'>
           or after
-          <input type='number' name='count' class='uk-input' style='width: 80px;' min=1 value=10>
+          <input type='number' name='count' class='uk-input' style='width: 80px;' min=1 value=4>
           Events
         </td>
       </tr>

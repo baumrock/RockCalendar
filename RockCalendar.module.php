@@ -61,19 +61,23 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $date = $event->getFormatted(RockCalendar::field_date);
     $all = count($input->rows);
     foreach ($input->rows as $i => $row) {
+      // ini_set('max_execution_time', 10);
+
       $range = $date->setStart($row->date);
-      wire()->log->save('tmp', $row->date);
+      // wire()->log->save('tmp', $row->date);
       $p = wire()->pages->new([
         'template' => EventPage::tpl,
         'parent' => $event->parent,
         RockCalendar::field_date => $range,
         'title' => $event->title,
       ]);
-      rockgrid()->sse(json_encode([
-        'progress' => round(($i + 1) / $all, 2),
-        'id' => $row->id,
-        'created' => $p->id,
-      ]));
+      if ($i % 50 === 0) {
+        rockgrid()->sse(json_encode([
+          'progress' => round(($i + 1) / $all, 2),
+          'id' => $row->id,
+          'created' => $p->id,
+        ]));
+      }
       wire()->pages->uncacheAll();
     }
 
