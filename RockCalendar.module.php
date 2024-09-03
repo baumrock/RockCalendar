@@ -54,7 +54,6 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     if (!function_exists('\ProcessWire\rockgrid')) return;
 
     // add sse endpoint for creating recurring events
-    rockgrid()->debug = true;
     rockgrid()->addSseEndpoint(
       // url
       '/rockcalendar/create-recurring-events/',
