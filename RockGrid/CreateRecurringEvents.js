@@ -154,18 +154,14 @@ document.addEventListener("RockGrid:init", (e) => {
         // console.log(date);
         let ymd = dashDate(date);
         let time = hasTime
-          ? date.toLocaleString(locale, {
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-            })
+          ? date.toISOString().slice(11, 19) // Extract HH:MM:SS from ISO string
           : "";
         return {
           id: index + 1,
           // day as short string
-          day: date.toLocaleString(locale, {
-            weekday: "short",
-          }),
+          day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
+            date.getUTCDay()
+          ],
           // date as YYYY-MM-DD
           date: ymd,
           // time as HH:MM:SS
@@ -220,16 +216,15 @@ document.addEventListener("RockGrid:init", (e) => {
         },
         (msg) => {
           let data = JSON.parse(msg);
-          table.deleteRow(data.id);
           $progress.val(data.progress * 100);
           li.querySelector("span.current").textContent = data.current;
         },
         () => {
           li.querySelector(".spinner").classList.add("uk-hidden");
-          // enable all inputs in the .rc-rrule div
           inputs.forEach((input) => input.removeAttribute("disabled"));
+          table.clearData();
         }
       );
     });
-  }, 0);
+  }, 10);
 });
