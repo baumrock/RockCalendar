@@ -43,13 +43,11 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
   {
     $requestMethod = $_SERVER['REQUEST_METHOD'];
     if ($requestMethod === 'POST') {
-      $input = json_decode(file_get_contents('php://input'), true);
-      $input = new WireInputData($input);
-      bd($input);
-      wire()->session->set('rockgrid-sse-input', $input);
-
+      $rawInput = file_get_contents('php://input');
+      wire()->session->set('rockgrid-sse-input', $rawInput);
       header('Content-Type: application/json; charset=utf-8');
-      return json_encode($input->getArray());
+      // bd(json_decode($rawInput));
+      return $rawInput;
     }
 
     // if (!$p->id) return $this->err("Page $p not found");
@@ -58,9 +56,25 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     header("Cache-Control: no-cache");
     header("Content-Type: text/event-stream");
 
-    $input = wire()->session->get('rockgrid-sse-input');
-    foreach ($input->dates as $date) {
-      rockgrid()->sse($date);
+    $input = json_decode(wire()->session->get('rockgrid-sse-input'));
+    $event = wire()->pages->get($input->pid);
+    $date = $event->getFormatted(RockCalendar::field_date);
+    $all = count($input->rows);
+    foreach ($input->rows as $i => $row) {
+      $range = $date->setStart($row->date);
+      wire()->log->save('tmp', $row->date);
+      $p = wire()->pages->new([
+        'template' => EventPage::tpl,
+        'parent' => $event->parent,
+        RockCalendar::field_date => $range,
+        'title' => $event->title,
+      ]);
+      rockgrid()->sse(json_encode([
+        'progress' => round(($i + 1) / $all, 2),
+        'id' => $row->id,
+        'created' => $p->id,
+      ]));
+      wire()->pages->uncacheAll();
     }
 
     rockgrid()->sse('rockgrid-sse-done');

@@ -1,10 +1,20 @@
 document.addEventListener("RockGrid:init", (e) => {
-  let grid = e.detail;
+  const grid = e.detail;
 
   // do everything below only for this specific grid
   if (grid.name !== "RockCalendar-Create") return;
+  if (typeof rrule === "undefined") {
+    console.error("RRule library is not loaded.");
+    return;
+  }
 
+  let li = grid.li.closest(".InputfieldRockDaterangePicker");
+  let removeLast = false;
   let events = [];
+
+  function eventStartDate() {
+    return li.querySelector("input[name=rockcalendar_date_start]").value;
+  }
 
   function ucfirst(str) {
     if (typeof str !== "string" || str.length === 0) return str;
@@ -13,7 +23,7 @@ document.addEventListener("RockGrid:init", (e) => {
 
   // build the tabulator table
   setTimeout(() => {
-    let table = grid.tabulator({
+    const table = grid.tabulator({
       layout: "fitDataStretch",
       data: events,
       columns: [
@@ -41,12 +51,6 @@ document.addEventListener("RockGrid:init", (e) => {
       paginationSizeSelector: [10, 20, 50, 100],
       paginationCounter: "rows",
     });
-
-    // Check if rrule is available
-    if (typeof rrule === "undefined") {
-      console.error("RRule library is not loaded.");
-      return;
-    }
 
     // get dates from rrule
     const getDates = () => {
@@ -93,6 +97,12 @@ document.addEventListener("RockGrid:init", (e) => {
       // set hard limit of 10.000 events
       if (config.count > 10000) config.count = 10000;
 
+      // we add 1 event because we will remove the first one later
+      // if (config.count > 0) {
+      //   config.count += 1;
+      //   removeLast = true;
+      // }
+
       let rule = new rrule.RRule(config);
 
       // show rrule result in human readable string
@@ -104,7 +114,7 @@ document.addEventListener("RockGrid:init", (e) => {
     };
 
     // set data in table
-    let setData = () => {
+    const setData = () => {
       let locale = ProcessWire.config.RcLocale || "en-US";
       let events = getDates()
         .all()
@@ -115,12 +125,8 @@ document.addEventListener("RockGrid:init", (e) => {
             day: date.toLocaleString(locale, {
               weekday: "short",
             }),
-            // date
-            date: date.toLocaleString(locale, {
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-            }),
+            // date as YYYY-MM-DD
+            date: date.toISOString().split("T")[0],
             // time
             time: date.toLocaleString(locale, {
               hour: "2-digit",
@@ -131,12 +137,21 @@ document.addEventListener("RockGrid:init", (e) => {
             iso: date.toISOString(),
           };
         });
-      table.setData(events);
 
       // no events, no create events button
       if (events.length === 0) {
         $(document).find("[data-create-events]").hide();
       } else {
+        // // check events
+        // // if the first event has the same date as the current event, remove it
+        // let firstEventDate = new Date(events[0].iso);
+        // let currentEventDate = new Date(eventStartDate());
+        // if (firstEventDate.toDateString() === currentEventDate.toDateString()) {
+        //   events.shift();
+        // } else if (removeLast) {
+        //   events.pop();
+        // }
+        table.setData(events);
         $(document).find("[data-create-events]").show();
       }
     };
@@ -164,10 +179,45 @@ document.addEventListener("RockGrid:init", (e) => {
     // handle clicks on "create events" button
     $(document).on("click", "[data-create-events]", (e) => {
       e.preventDefault();
-      RockGrid.sse("/rockcalendar/create-recurring-events/", {
-        pid: parseInt($("#Inputfield_id").val()),
-        dates: table.getData().map((row) => row.iso),
-      });
+      let $progress = $(grid.li).find("progress");
+      $progress.val(0);
+
+      let container = document.querySelector(".rc-rrule");
+      let start = container
+        .closest(".InputfieldRockDaterangePicker")
+        .querySelector("input[name=rockcalendar_date_start]").value;
+      let end = container
+        .closest(".InputfieldRockDaterangePicker")
+        .querySelector("input[name=rockcalendar_date_end]").value;
+      let diff = new Date(end) - new Date(start);
+      RockGrid.sse(
+        "/rockcalendar/create-recurring-events/",
+        {
+          pid: $("#Inputfield_id").val(),
+          diff: diff,
+          rows: table.getData().map((row) => ({
+            id: row.id,
+            date: row.iso,
+          })),
+        },
+        (msg) => {
+          requestAnimationFrame(() => {
+            try {
+              let data = JSON.parse(msg);
+              let progress = parseInt(data.progress * 100);
+              console.log("data", progress);
+
+              // remove row with id data.id from table
+              table.deleteRow(data.id);
+
+              // update progress bar
+              $progress.val(data.progress * 100);
+            } catch (error) {
+              console.error("Error parsing message:", error);
+            }
+          });
+        }
+      );
     });
   }, 0);
 });

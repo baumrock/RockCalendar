@@ -9,7 +9,7 @@
             <option value='YEARLY'>Years</option>
             <option value='MONTHLY'>Months</option>
             <option value='WEEKLY'>Weeks</option>
-            <option value='DAILY'>Days</option>
+            <option value='DAILY' selected>Days</option>
             <option value='HOURLY'>Hours</option>
             <option value='MINUTELY'>Minutes</option>
             <option value='SECONDLY'>Seconds</option>

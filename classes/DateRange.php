@@ -2,6 +2,7 @@
 
 namespace RockDaterangePicker;
 
+use DateTime;
 use IntlDateFormatter;
 use OpenPsa\Ranger\Ranger;
 use ProcessWire\WireData;
@@ -73,6 +74,7 @@ class DateRange extends WireData
   public function getTS($str): int
   {
     if (is_int($str)) return $str;
+    if ($str instanceof DateTime) return $str->getTimestamp();
     return strtotime((string)$str);
   }
 
@@ -90,6 +92,14 @@ class DateRange extends WireData
   public function ranger(): string
   {
     return $this->getRanger()->format($this->start, $this->end);
+  }
+
+  public function setStart(mixed $start): self
+  {
+    $diff = $this->diff();
+    $this->start = $this->getTS($start);
+    $this->end = $this->start + $diff;
+    return $this;
   }
 
   /**
