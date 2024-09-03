@@ -2,7 +2,6 @@
 
 namespace ProcessWire;
 
-use DateTime;
 use RockDaterangePicker\DateRange;
 
 /**
@@ -31,15 +30,16 @@ class InputfieldRockDaterangePicker extends Inputfield
     $input = "<input $attrStr />";
 
     $fs = new InputfieldFieldset();
-    $fs->add([
-      'type' => 'RockGrid',
-      'name' => $this->name . '_create',
-      'grid' => 'RockCalendar\\CreateRecurringEvents',
-      'label' => 'Create Additional Events',
-      'icon' => 'plus',
-      // 'collapsed' => Inputfield::collapsedYes,
-      'prependMarkup' => wire()->files->render(__DIR__ . '/markup-rrule.php'),
-      'appendMarkup' => '
+    if (!$this->value->mainPage->id) {
+      $fs->add([
+        'type' => 'RockGrid',
+        'name' => $this->name . '_create',
+        'grid' => 'RockCalendar\\CreateRecurringEvents',
+        'label' => 'Create Additional Events',
+        'icon' => 'plus',
+        // 'collapsed' => Inputfield::collapsedYes,
+        'prependMarkup' => wire()->files->render(__DIR__ . '/markup-rrule.php'),
+        'appendMarkup' => '
         <div class="uk-flex uk-flex-middle uk-margin-small-top" style="gap: 10px;">
           <button data-create-events class="uk-button uk-button-primary uk-text-nowrap">
             Create Events
@@ -48,7 +48,14 @@ class InputfieldRockDaterangePicker extends Inputfield
           <progress class="uk-progress uk-margin-remove" max="100" value="0"></progress>
         </div>
       ',
-    ]);
+      ]);
+    } else {
+      $p = $this->value->mainPage;
+      $fs->add([
+        'type' => 'markup',
+        'value' => "This event is part of a recurring series. You can edit the main event <a href='{$p->editUrl()}&modal={$this->wire->input->modal}'>here</a>.",
+      ]);
+    }
     $grid = $fs->render();
 
     return wire()->files->render(__DIR__ . '/markup.php', [
@@ -89,20 +96,14 @@ class InputfieldRockDaterangePicker extends Inputfield
   {
     $name = $this->name;
     $old = $this->value;
-    $end = (int)$input->get($name . '_recurend');
+    $isRecurring = !!$input->get($name . '_isRecurring');
     $new = new DateRange([
       'start' => $input->get($name . '_start'),
       'end' => $input->get($name . '_end'),
       'hasTime' => !!$input->get($name . '_hasTime'),
       'hasRange' => !!$input->get($name . '_hasRange'),
-      'isRecurring' => !!$input->get($name . '_isRecurring'),
-      'every' => (int)$input->get($name . '_every'),
-      'everytype' => (int)$input->get($name . '_everytype'),
-      'recurend' => $end,
-      'recurenddate' => $end === 1
-        ? ($input->get($name . '_recurenddate') ?: date('Y-m-d'))
-        : '',
-      'recurendcount' => $end === 2 ? $input->get($name . '_recurendcount') : 1,
+      'isRecurring' => $isRecurring,
+      'mainPage' => $isRecurring ? $old->mainPage : null,
     ]);
     if ($old->hash() === $new->hash()) return;
     $this->trackChange('value');

@@ -2,7 +2,6 @@
 
 namespace ProcessWire;
 
-use DateTime;
 use RockDaterangePicker\DateRange;
 
 /**
@@ -22,19 +21,12 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
 
   public function init()
   {
-    wire()->addHookAfter('/rockcalendar/events/',      $this, 'eventsJSON');
-    wire()->addHookAfter('/rockcalendar/eventDrop/',   $this, 'eventDrop');
-    wire()->addHookAfter('/rockcalendar/eventResize/', $this, 'eventResize');
-
-    // TODO: refactor this to a dedicated method
-    wire()->addHookAfter('Page::loaded', function (HookEvent $event) {
-      $p = $event->object;
-      if (!str_starts_with((string)$p->title, 'recurr-')) return;
-      $parts = explode('-', $p->title);
-      $event = wire()->pages->get($parts[1]);
-      $p->title = $event->title;
-    });
-    wire()->addHookAfter('ProcessPageEdit::buildForm', $this, 'hookRecurringEventEdit');
+    wire()->addHookAfter('/rockcalendar/events/',             $this, 'eventsJSON');
+    wire()->addHookAfter('/rockcalendar/eventDrop/',          $this, 'eventDrop');
+    wire()->addHookAfter('/rockcalendar/eventResize/',        $this, 'eventResize');
+    wire()->addHookAfter('Page::loaded',                      $this, 'inheritFieldValues');
+    wire()->addHookAfter('ProcessPageEdit::buildFormContent', $this, 'hookRecurringEventEdit');
+    wire()->addHookProperty('Page::isRecurringEvent',         $this, 'isRecurringEvent');
 
     $this->createRecurringEvents();
 
@@ -79,6 +71,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
 
         $event = $getEvent($rawInput); // check access
         $date = $this->getDateRange($event);
+        $date->setMainPage($event);
         $range = $date->setStart($rawItem->date);
         $p = wire()->pages->new([
           'template' => EventPage::tpl,
@@ -300,9 +293,36 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
   {
     /** @var InputfieldWrapper $form */
     $form = $event->return;
+
+    /** @var Page $page */
     $page = $event->object->getPage();
-    foreach ($form->fields() as $field) {
-      bd($field);
+    if (!$page->hasField(self::field_date)) return;
+    $date = $page->getFormatted(self::field_date);
+    if (!$date->isRecurring) return;
+    $mainPage = $date->mainPage;
+    if (!$mainPage->id) return;
+
+    $keep = [self::field_date];
+    foreach ($form->getAll() as $field) {
+      if (in_array($field->name, $keep)) continue;
+      $form->remove($field);
+    }
+
+    $event->return = $form;
+  }
+
+  protected function inheritFieldValues(HookEvent $event): void
+  {
+    /** @var Page $page */
+    $page = $event->object;
+    if (!$page->hasField(self::field_date)) return;
+    $date = $page->getFormatted(self::field_date);
+    if (!$date->isRecurring) return;
+    $mainPage = $date->mainPage;
+    if (!$mainPage->id) return;
+    foreach ($mainPage->fields as $f) {
+      if ($f->name == self::field_date) continue;
+      $page->set($f->name, $mainPage->get($f->name));
     }
   }
 
@@ -313,6 +333,16 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $field->name = self::field_date;
     $field->label = 'Date';
     $field->save();
+  }
+
+  protected function isRecurringEvent(HookEvent $event): void
+  {
+    /** @var Page $page */
+    $page = $event->object;
+    if (!$page->hasField(self::field_date)) return;
+    $date = $page->getFormatted(self::field_date);
+    if (!$date->isRecurring) return;
+    $event->return = true;
   }
 
   public function languageMappings(): WireData

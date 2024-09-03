@@ -67,6 +67,7 @@ class FieldtypeRockDaterangePicker extends Fieldtype
     $schema['hasRange'] = "int(1) NOT NULL";
     $schema['hasTime'] = "int(1) NOT NULL";
     $schema['isRecurring'] = "int(1) NOT NULL";
+    $schema['mainPage'] = 'int';
 
     // see FieldtypeComments how this works
     $schemaVersion = (int) $field->get('schemaVersion');
@@ -74,27 +75,16 @@ class FieldtypeRockDaterangePicker extends Fieldtype
     $table = $field->getTable();
     $database = wire()->database;
 
-    if ($schemaVersion < 1 && $updateSchema) {
+    // version 1 + 2 removed before release
+    if ($schemaVersion < 3 && $updateSchema) {
       try {
         if (!$database->columnExists($table, 'isRecurring')) {
-          $database->query("ALTER TABLE `$table` ADD isRecurring " . $schema['isRecurring']);
+          $database->query("ALTER TABLE `$table` ADD `isRecurring` " . $schema['isRecurring']);
         }
-        if (!$database->columnExists($table, 'every')) {
-          $database->query("ALTER TABLE `$table` ADD every " . $schema['every']);
+        if (!$database->columnExists($table, 'mainPage')) {
+          $database->query("ALTER TABLE `$table` ADD `mainPage` " . $schema['mainPage']);
         }
-        if (!$database->columnExists($table, 'everytype')) {
-          $database->query("ALTER TABLE `$table` ADD everytype " . $schema['everytype']);
-        }
-        if (!$database->columnExists($table, 'recurend')) {
-          $database->query("ALTER TABLE `$table` ADD recurend " . $schema['recurend']);
-        }
-        if (!$database->columnExists($table, 'recurenddate')) {
-          $database->query("ALTER TABLE `$table` ADD recurenddate " . $schema['recurenddate']);
-        }
-        if (!$database->columnExists($table, 'recurendcount')) {
-          $database->query("ALTER TABLE `$table` ADD recurendcount " . $schema['recurendcount']);
-        }
-        $field->set('schemaVersion', 1);
+        $field->set('schemaVersion', 3);
         $field->save();
       } catch (\Throwable $th) {
         $this->error($th->getMessage());
@@ -102,30 +92,6 @@ class FieldtypeRockDaterangePicker extends Fieldtype
       }
     }
 
-    if ($schemaVersion < 2 && $updateSchema) {
-      try {
-        if ($database->columnExists($table, 'every')) {
-          $database->query("ALTER TABLE `$table` DROP COLUMN every");
-        }
-        if ($database->columnExists($table, 'everytype')) {
-          $database->query("ALTER TABLE `$table` DROP COLUMN everytype");
-        }
-        if ($database->columnExists($table, 'recurend')) {
-          $database->query("ALTER TABLE `$table` DROP COLUMN recurend");
-        }
-        if ($database->columnExists($table, 'recurenddate')) {
-          $database->query("ALTER TABLE `$table` DROP COLUMN recurenddate");
-        }
-        if ($database->columnExists($table, 'recurendcount')) {
-          $database->query("ALTER TABLE `$table` DROP COLUMN recurendcount");
-        }
-        $field->set('schemaVersion', 2);
-        $field->save();
-      } catch (\Throwable $th) {
-        $this->error($th->getMessage());
-        $updateSchema = false;
-      }
-    }
     return $schema;
   }
 
@@ -228,6 +194,7 @@ class FieldtypeRockDaterangePicker extends Fieldtype
       'hasTime' => $value->hasTime,
       'hasRange' => $value->hasRange,
       'isRecurring' => $value->isRecurring,
+      'mainPage' => $value->mainPage->id,
     ];
   }
 

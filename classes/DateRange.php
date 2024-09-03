@@ -5,7 +5,10 @@ namespace RockDaterangePicker;
 use DateTime;
 use IntlDateFormatter;
 use OpenPsa\Ranger\Ranger;
+use ProcessWire\Page;
 use ProcessWire\WireData;
+
+use function ProcessWire\wire;
 
 class DateRange extends WireData
 {
@@ -16,11 +19,7 @@ class DateRange extends WireData
   public bool $hasRange;
   public bool $isRecurring;
   public int $start;
-  public int $every;
-  public int $everytype;
-  public int $recurend;
-  public string|null $recurenddate;
-  public int $recurendcount;
+  public $mainPage;
 
   public function __construct($arr = [])
   {
@@ -31,11 +30,7 @@ class DateRange extends WireData
     $this->allDay = !$this->hasTime;
     $this->hasRange = $data->hasRange ?: false;
     $this->isRecurring = $data->isRecurring ?: false;
-    $this->every = $data->every ?: 1;
-    $this->everytype = $data->everytype ?: 0;
-    $this->recurend = $data->recurend ?: 0;
-    $this->recurenddate = $data->recurenddate ? date('Y-m-d', strtotime($data->recurenddate)) : null;
-    $this->recurendcount = $data->recurendcount ?: 0;
+    $this->mainPage = wire()->pages->get((int)(string)$data->mainPage);
   }
 
   /**
@@ -84,9 +79,19 @@ class DateRange extends WireData
    */
   public function hash(): string
   {
-    $enddate = $this->recurenddate;
-    if (!$enddate || str_starts_with($enddate, '0000-')) $enddate = '';
-    return "{$this->start}-{$this->end}-{$this->hasTime}-{$this->hasRange}-{$this->isRecurring}-{$this->every}-{$this->everytype}-{$this->recurend}-{$enddate}-{$this->recurendcount}";
+    $props = [
+      'start',
+      'end',
+      'hasTime',
+      'hasRange',
+      'isRecurring',
+      'mainPage',
+    ];
+    $hash = '';
+    foreach ($props as $prop) {
+      $hash .= $this->$prop . ';';
+    }
+    return $hash;
   }
 
   public function ranger(): string
@@ -94,7 +99,12 @@ class DateRange extends WireData
     return $this->getRanger()->format($this->start, $this->end);
   }
 
-  public function setSeries(Page $page): self {}
+  public function setMainPage(Page $page): self
+  {
+    $this->isRecurring = true;
+    $this->mainPage = $page;
+    return $this;
+  }
 
   public function setStart(mixed $start): self
   {
@@ -129,11 +139,7 @@ class DateRange extends WireData
       'hasTime' => $this->hasTime,
       'hasRange' => $this->hasRange,
       'isRecurring' => $this->isRecurring,
-      'every' => $this->every,
-      'everytype' => $this->everytype,
-      'recurend' => $this->recurend,
-      'recurenddate' => $this->recurenddate,
-      'recurendcount' => $this->recurendcount,
+      'mainPage' => $this->mainPage,
     ];
   }
 }
