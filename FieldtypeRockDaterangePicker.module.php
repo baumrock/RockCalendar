@@ -67,11 +67,6 @@ class FieldtypeRockDaterangePicker extends Fieldtype
     $schema['hasRange'] = "int(1) NOT NULL";
     $schema['hasTime'] = "int(1) NOT NULL";
     $schema['isRecurring'] = "int(1) NOT NULL";
-    $schema['every'] = "int(3)";
-    $schema['everytype'] = "int(1)";
-    $schema['recurend'] = "int(1)";
-    $schema['recurenddate'] = "timestamp";
-    $schema['recurendcount'] = "int(3)";
 
     // see FieldtypeComments how this works
     $schemaVersion = (int) $field->get('schemaVersion');
@@ -107,6 +102,30 @@ class FieldtypeRockDaterangePicker extends Fieldtype
       }
     }
 
+    if ($schemaVersion < 2 && $updateSchema) {
+      try {
+        if ($database->columnExists($table, 'every')) {
+          $database->query("ALTER TABLE `$table` DROP COLUMN every");
+        }
+        if ($database->columnExists($table, 'everytype')) {
+          $database->query("ALTER TABLE `$table` DROP COLUMN everytype");
+        }
+        if ($database->columnExists($table, 'recurend')) {
+          $database->query("ALTER TABLE `$table` DROP COLUMN recurend");
+        }
+        if ($database->columnExists($table, 'recurenddate')) {
+          $database->query("ALTER TABLE `$table` DROP COLUMN recurenddate");
+        }
+        if ($database->columnExists($table, 'recurendcount')) {
+          $database->query("ALTER TABLE `$table` DROP COLUMN recurendcount");
+        }
+        $field->set('schemaVersion', 2);
+        $field->save();
+      } catch (\Throwable $th) {
+        $this->error($th->getMessage());
+        $updateSchema = false;
+      }
+    }
     return $schema;
   }
 
@@ -202,18 +221,13 @@ class FieldtypeRockDaterangePicker extends Fieldtype
 
   public function sleepValue($page, $field, $value)
   {
-    bd($value, 'sleep');
+    // bd($value, 'sleep');
     return [
       'data' => date('Y-m-d H:i:s', $value->start),
       'end' => date('Y-m-d H:i:s', $value->end),
       'hasTime' => $value->hasTime,
       'hasRange' => $value->hasRange,
       'isRecurring' => $value->isRecurring,
-      'every' => $value->every,
-      'everytype' => $value->everytype,
-      'recurend' => $value->recurend,
-      'recurenddate' => $value->recurenddate,
-      'recurendcount' => $value->recurendcount,
     ];
   }
 
