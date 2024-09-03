@@ -44,7 +44,12 @@ class InputfieldRockDaterangePicker extends Inputfield
           <button data-create-events class="uk-button uk-button-primary uk-text-nowrap">
             Create Events
           </button>
-          <span>0/10</span>
+          <span class="uk-flex uk-flex-middle">
+            <div uk-spinner class="spinner uk-hidden uk-margin-small-right"></div>
+            <span class="current">0</span>
+            /
+            <span class="total">0</span>
+          </span>
           <progress class="uk-progress uk-margin-remove" max="100" value="0"></progress>
         </div>
       ',

@@ -139,6 +139,7 @@ document.addEventListener("RockGrid:init", (e) => {
     // set data in table
     function setData() {
       let rule = getRule();
+      $progress.val(0);
 
       // show rrule result in human readable string
       li.querySelector(".human-readable").textContent = ucfirst(
@@ -174,6 +175,8 @@ document.addEventListener("RockGrid:init", (e) => {
         };
       });
       table.setData(rows);
+      li.querySelector("span.current").textContent = 0;
+      li.querySelector("span.total").textContent = rows.length;
     }
 
     // update table data on various events
@@ -196,7 +199,11 @@ document.addEventListener("RockGrid:init", (e) => {
     // handle clicks on "create events" button
     $(document).on("click", "[data-create-events]", (e) => {
       e.preventDefault();
-      $progress.val(0);
+      li.querySelector(".spinner").classList.remove("uk-hidden");
+
+      // disable all inputs in the .rc-rrule div
+      let inputs = li.querySelectorAll(".rc-rrule *");
+      inputs.forEach((input) => input.setAttribute("disabled", "disabled"));
 
       RockGrid.sse(
         "/rockcalendar/create-recurring-events/",
@@ -212,19 +219,15 @@ document.addEventListener("RockGrid:init", (e) => {
           })),
         },
         (msg) => {
-          try {
-            let data = JSON.parse(msg);
-            let progress = parseInt(data.progress * 100);
-            console.log("data", progress);
-
-            // remove row with id data.id from table
-            table.deleteRow(data.id);
-
-            // update progress bar
-            $progress.val(data.progress * 100);
-          } catch (error) {
-            console.error("Error parsing message:", error);
-          }
+          let data = JSON.parse(msg);
+          table.deleteRow(data.id);
+          $progress.val(data.progress * 100);
+          li.querySelector("span.current").textContent = data.current;
+        },
+        () => {
+          li.querySelector(".spinner").classList.add("uk-hidden");
+          // enable all inputs in the .rc-rrule div
+          inputs.forEach((input) => input.removeAttribute("disabled"));
         }
       );
     });
