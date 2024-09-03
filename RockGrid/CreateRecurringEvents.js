@@ -143,6 +143,12 @@ document.addEventListener("RockGrid:init", (e) => {
 
       // prepare rows for table
       let rows = rule.all().map((date, index) => {
+        let ymd = dashDate(date);
+        let time = date.toLocaleString(locale, {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
         return {
           id: index + 1,
           // day as short string
@@ -150,15 +156,11 @@ document.addEventListener("RockGrid:init", (e) => {
             weekday: "short",
           }),
           // date as YYYY-MM-DD
-          date: dashDate(date),
+          date: ymd,
           // time as HH:MM:SS
-          time: date.toLocaleString(locale, {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          }),
+          time: time,
           // datetime formatted for php
-          iso: date.toISOString(),
+          php: ymd + " " + time,
         };
       });
       table.setData(rows);
@@ -167,6 +169,11 @@ document.addEventListener("RockGrid:init", (e) => {
     // update table data on various events
     $(document).on("input", ".rc-rrule", setData);
     $(document).on("change", "input[name=rockcalendar_date]", setData);
+    $(document).on(
+      "change",
+      "input[name=rockcalendar_date_isRecurring]",
+      setData
+    );
     table.on("tableBuilt", setData);
 
     // handle clicks on delete button
@@ -184,11 +191,14 @@ document.addEventListener("RockGrid:init", (e) => {
       RockGrid.sse(
         "/rockcalendar/create-recurring-events/",
         {
-          pid: $("#Inputfield_id").val(),
+          pid: parseInt($("#Inputfield_id").val()),
           diff: new Date(eventDate("end")) - new Date(eventDate("start")),
+          title: li
+            .closest(".InputfieldForm")
+            .querySelector("input[name='title']").value,
           rows: table.getData().map((row) => ({
             id: row.id,
-            date: row.iso,
+            date: row.php,
           })),
         },
         (msg) => {

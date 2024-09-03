@@ -94,6 +94,8 @@ class DateRange extends WireData
     return $this->getRanger()->format($this->start, $this->end);
   }
 
+  public function setSeries(Page $page): self {}
+
   public function setStart(mixed $start): self
   {
     $diff = $this->diff();

@@ -22,10 +22,21 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
 
   public function init()
   {
-    wire()->addHookAfter('/rockcalendar/events/',                  $this, 'eventsJSON');
-    wire()->addHookAfter('/rockcalendar/eventDrop/',               $this, 'eventDrop');
-    wire()->addHookAfter('/rockcalendar/eventResize/',             $this, 'eventResize');
-    wire()->addHookAfter('/rockcalendar/create-recurring-events/', $this, 'createRecurringEvents');
+    wire()->addHookAfter('/rockcalendar/events/',      $this, 'eventsJSON');
+    wire()->addHookAfter('/rockcalendar/eventDrop/',   $this, 'eventDrop');
+    wire()->addHookAfter('/rockcalendar/eventResize/', $this, 'eventResize');
+
+    // TODO: refactor this to a dedicated method
+    wire()->addHookAfter('Page::loaded', function (HookEvent $event) {
+      $p = $event->object;
+      if (!str_starts_with((string)$p->title, 'recurr-')) return;
+      $parts = explode('-', $p->title);
+      $event = wire()->pages->get($parts[1]);
+      $p->title = $event->title;
+    });
+    wire()->addHookAfter('ProcessPageEdit::buildForm', $this, 'hookRecurringEventEdit');
+
+    $this->createRecurringEvents();
 
     $f = wire()->fields->get(self::field_date);
     if (!$f) $this->___install();
@@ -39,49 +50,76 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     }
   }
 
-  protected function createRecurringEvents(HookEvent $event)
+  private function createRecurringEvents()
   {
-    $requestMethod = $_SERVER['REQUEST_METHOD'];
-    if ($requestMethod === 'POST') {
-      $rawInput = file_get_contents('php://input');
-      wire()->session->set('rockgrid-sse-input', $rawInput);
-      header('Content-Type: application/json; charset=utf-8');
-      // bd(json_decode($rawInput));
-      return $rawInput;
-    }
+    $getEvent = function ($rawInput) {
+      $event = wire()->pages->get((int)$rawInput->pid);
+      if (!$event instanceof EventPage) throw new WireException('not an event');
+      if (!$event->editable()) throw new WireException('no access');
+      return $event;
+    };
+    // early exit if rockgrid is not installed
+    if (!function_exists('\ProcessWire\rockgrid')) return;
+
+    // add sse endpoint for creating recurring events
+    rockgrid()->debug = true;
+    rockgrid()->addSseEndpoint(
+      // url
+      '/rockcalendar/create-recurring-events/',
+      // getItems() callback
+      function ($rawInput) use ($getEvent) {
+        // bd($rawInput);
+        $getEvent($rawInput); // check access
+        return (array)$rawInput->rows;
+      },
+      // item callback
+      function ($rawItem, $rawInput) use ($getEvent) {
+        // reset max execution time to 10 seconds for every item
+        ini_set('max_execution_time', 10);
+
+        $event = $getEvent($rawInput); // check access
+        $date = $this->getDateRange($event);
+        $range = $date->setStart($rawItem->date);
+        $p = wire()->pages->new([
+          'template' => EventPage::tpl,
+          'parent' => $event->parent,
+          RockCalendar::field_date => $range,
+          'title' => 'recurr',
+          'name' => 'recurr',
+        ]);
+      }
+    );
 
     // if (!$p->id) return $this->err("Page $p not found");
     // if (!$p->editable()) return $this->err("Page $p not editable");
 
-    header("Cache-Control: no-cache");
-    header("Content-Type: text/event-stream");
+    // header("Cache-Control: no-cache");
+    // header("Content-Type: text/event-stream");
 
-    $input = json_decode(wire()->session->get('rockgrid-sse-input'));
-    $event = wire()->pages->get($input->pid);
-    $date = $event->getFormatted(RockCalendar::field_date);
-    $all = count($input->rows);
-    foreach ($input->rows as $i => $row) {
-      // ini_set('max_execution_time', 10);
+    // $input = json_decode(wire()->session->get('rockgrid-sse-input'));
 
-      $range = $date->setStart($row->date);
-      // wire()->log->save('tmp', $row->date);
-      $p = wire()->pages->new([
-        'template' => EventPage::tpl,
-        'parent' => $event->parent,
-        RockCalendar::field_date => $range,
-        'title' => $event->title,
-      ]);
-      if ($i % 50 === 0) {
-        rockgrid()->sse(json_encode([
-          'progress' => round(($i + 1) / $all, 2),
-          'id' => $row->id,
-          'created' => $p->id,
-        ]));
-      }
-      wire()->pages->uncacheAll();
-    }
+    // $all = count($input->rows);
+    // foreach ($input->rows as $i => $row) {
+    //   // ini_set('max_execution_time', 10);
 
-    rockgrid()->sse('rockgrid-sse-done');
+    //   $range = $date->setStart($row->date);
+    //   $p = wire()->pages->new([
+    //     'template' => EventPage::tpl,
+    //     'parent' => $event->parent,
+    //     RockCalendar::field_date => $range,
+    //     'title' => $event->title,
+    //   ]);
+    //   if ($i % 50 === 0) {
+    //     rockgrid()->sse(json_encode([
+    //       'progress' => round(($i + 1) / $all, 2),
+    //       'id' => $row->id,
+    //       'created' => $p->id,
+    //     ]));
+    //   }
+    //   wire()->pages->uncacheAll();
+    // }
+
+    // rockgrid()->sse('rockgrid-sse-done');
   }
 
   private function err(string $msg): string
@@ -256,6 +294,16 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
   {
     $lang = wire()->user->language->name;
     return (string)$this->languageMappings()->$lang;
+  }
+
+  protected function hookRecurringEventEdit(HookEvent $event): void
+  {
+    /** @var InputfieldWrapper $form */
+    $form = $event->return;
+    $page = $event->object->getPage();
+    foreach ($form->fields() as $field) {
+      bd($field);
+    }
   }
 
   public function ___install(): void
