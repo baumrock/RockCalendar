@@ -1,5 +1,9 @@
 # RockCalendar
 
+## Notes
+
+- Recurring events input in repeater fields is not supported.
+
 ## Quickstart
 
 1. Install the module

@@ -36,7 +36,11 @@ document.addEventListener("RockGrid:init", (e) => {
       let time = li.querySelector(
         "input[name=rockcalendar_date_" + (type || "start") + "]"
       ).value;
-      return new Date(time).toISOString();
+      // treat the event start date as UTC
+      // this prevents long recurrence series from having a time offset
+      // when passing a daylight saving time date
+      const date = new Date(time + " Z").toISOString();
+      return date;
     }
 
     function ucfirst(str) {
@@ -142,13 +146,19 @@ document.addEventListener("RockGrid:init", (e) => {
       );
 
       // prepare rows for table
+      let hasTime = li.querySelector(
+        "input[name='rockcalendar_date_hasTime']"
+      ).checked;
       let rows = rule.all().map((date, index) => {
+        // console.log(date);
         let ymd = dashDate(date);
-        let time = date.toLocaleString(locale, {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        });
+        let time = hasTime
+          ? date.toLocaleString(locale, {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })
+          : "";
         return {
           id: index + 1,
           // day as short string
