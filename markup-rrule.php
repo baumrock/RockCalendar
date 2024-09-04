@@ -2,6 +2,27 @@
   <table class='uk-table uk-table-small uk-table-striped uk-table-middle'>
     <tbody>
       <tr>
+        <td>Mode</td>
+        <td>
+          <div class='uk-flex uk-flex-middle' style='gap: 20px;'>
+            <label><input type='radio' name='mode' value='simple' class='uk-radio' checked> Simple</label>
+            <label><input type='radio' name='mode' value='advanced' class='uk-radio'> Advanced</label>
+          </div>
+        </td>
+      </tr>
+      <tr class='advanced uk-hidden'>
+        <td>Start</td>
+        <td class='uk-flex uk-flex-middle' style='gap: 20px;'>
+          <div>
+            <label><input type='radio' name='start_type' value='main' class='uk-radio' checked> Main event</label>
+          </div>
+          <div class='uk-flex'>
+            <label><input type='radio' name='start_type' value='custom' class='uk-radio'> or at</label>
+            <input type='datetime-local' name='custom_startdate' class='uk-input' style='margin-left: 10px;'>
+          </div>
+        </td>
+      </tr>
+      <tr>
         <td>Repeat every</td>
         <td>
           <input type='number' name='interval' class='uk-input uk-text-center' value=1>
@@ -21,11 +42,11 @@
         <td>
           <input type='date' name='until' class='uk-input'>
           or after
-          <input type='number' name='count' class='uk-input' style='width: 80px;' min=1 value=4>
+          <input type='number' name='count' class='uk-input' style='width: 80px;' min=0 value=4>
           Events
         </td>
       </tr>
-      <tr>
+      <tr class='advanced uk-hidden'>
         <td>On weekdays</td>
         <td class='uk-flex uk-flex-wrap' style='gap: 10px;'>
           <input type='number' name='n-th' class='uk-input' style='width: 80px;' min=1 max=5>
@@ -38,7 +59,7 @@
           <label><input type='checkbox' class='uk-checkbox' name='byweekday' value='SU'> Sunday</label>
         </td>
       </tr>
-      <tr>
+      <tr class='advanced uk-hidden'>
         <td>On months</td>
         <td class='uk-flex uk-flex-wrap' style='gap: 10px;'>
           <label><input type='checkbox' class='uk-checkbox' name='bymonth' value='1'> Jan</label>

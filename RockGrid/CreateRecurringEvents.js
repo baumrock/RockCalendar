@@ -8,10 +8,14 @@ document.addEventListener("RockGrid:init", (e) => {
     return;
   }
 
+  let includeStart = false;
+
   // build the tabulator table
   setTimeout(() => {
     let events = [];
     let li = grid.li.closest(".InputfieldRockDaterangePicker");
+    let li_selector = "#" + li.id;
+    console.log(li_selector);
     let $progress = $(grid.li).find("progress");
     let locale = ProcessWire.config.RcLocale || "en-US";
 
@@ -41,6 +45,21 @@ document.addEventListener("RockGrid:init", (e) => {
       // when passing a daylight saving time date
       const date = new Date(time + " Z").toISOString();
       return date;
+    }
+
+    function startDate() {
+      includeStart = false;
+      let start = eventDate("start");
+      try {
+        const val = li.querySelector("input[name=start_type]:checked").value;
+        if (val === "main") return start;
+        const local = li.querySelector("input[name=custom_startdate]").value;
+        if (!local) return start;
+        includeStart = true;
+        return new Date(local + "Z").toISOString();
+      } catch (error) {
+        return start;
+      }
     }
 
     function ucfirst(str) {
@@ -95,7 +114,7 @@ document.addEventListener("RockGrid:init", (e) => {
       let months = Array.from(li.querySelectorAll("input[name='bymonth']"))
         .filter((input) => input.checked)
         .map((input) => parseInt(input.value));
-      let start = eventDate();
+      let start = startDate();
       let config = {
         freq: rrule.RRule[freq],
         interval: parseInt(interval),
@@ -118,18 +137,21 @@ document.addEventListener("RockGrid:init", (e) => {
       // then we use the second date as start date for the rrule
       // this is to exclude the actual start date from the results
       let config = getRruleConfig();
-      const old = [config.until, config.count];
-      config.until = null;
-      config.count = 2;
-      let rule = new rrule.RRule(config);
 
-      // get the second date from the rule
-      let start = rule.all()[1];
+      if (!includeStart) {
+        const old = [config.until, config.count];
+        config.until = null;
+        config.count = 2;
+        let rule = new rrule.RRule(config);
 
-      // set the start date in the config
-      config.dtstart = start;
-      config.until = old[0];
-      config.count = old[1];
+        // get the second date from the rule
+        let start = rule.all()[1];
+
+        // set the start date in the config
+        config.dtstart = start;
+        config.until = old[0];
+        config.count = old[1];
+      }
 
       // create the rule with the correct start date
       rule = new rrule.RRule(config);
@@ -176,24 +198,72 @@ document.addEventListener("RockGrid:init", (e) => {
     }
 
     // update table data on various events
-    $(document).on("input", ".rc-rrule", setData);
-    $(document).on("change", "input[name=rockcalendar_date]", setData);
+    $(document).on("input", li_selector + " .rc-rrule", setData);
     $(document).on(
       "change",
-      "input[name=rockcalendar_date_isRecurring]",
+      li_selector + " input[name=rockcalendar_date]",
+      setData
+    );
+    $(document).on(
+      "change",
+      li_selector + " input[name=rockcalendar_date_isRecurring]",
       setData
     );
     table.on("tableBuilt", setData);
 
+    // keep hasTime in sync with the date picker
+    const setCustomStartdateType = () => {
+      if (li.querySelector("input[name=rockcalendar_date_hasTime]").checked) {
+        li.querySelector("input[name=custom_startdate]").type =
+          "datetime-local";
+      } else {
+        li.querySelector("input[name=custom_startdate]").type = "date";
+      }
+    };
+    $(document).on(
+      "change",
+      li_selector + " input[name=rockcalendar_date_hasTime]",
+      setCustomStartdateType
+    );
+    setCustomStartdateType();
+
+    // monitor mode change
+    const modeChange = () => {
+      let table = li.querySelector(".rc-rrule > table");
+      let mode = li.querySelector("input[name=mode]:checked").value;
+      if (mode === "advanced") {
+        // remove row with class remove
+        let row = table.querySelector("tr.remove");
+        if (row) row.remove();
+        li.querySelectorAll(".advanced").forEach((el) =>
+          el.classList.remove("uk-hidden")
+        );
+      } else {
+        li.querySelectorAll(".advanced").forEach((el) =>
+          el.classList.add("uk-hidden")
+        );
+        // clone first .uk-hidden row and add class remove
+        // insert this row directly before the cloned row
+        let row = table.querySelector("tr.uk-hidden");
+        if (row) {
+          let clone = row.cloneNode(true);
+          clone.classList.add("remove");
+          row.insertAdjacentElement("beforebegin", clone);
+        }
+      }
+    };
+    $(document).on("change", li_selector + " input[name=mode]", modeChange);
+    modeChange();
+
     // handle clicks on delete button
-    $(document).on("click", "a[data-remove-row]", (e) => {
+    $(document).on("click", li_selector + " a[data-remove-row]", (e) => {
       e.preventDefault();
       let rowId = $(e.target).closest("a").data("remove-row");
       table.deleteRow(rowId);
     });
 
     // handle clicks on "create events" button
-    $(document).on("click", "[data-create-events]", (e) => {
+    $(document).on("click", li_selector + " [data-create-events]", (e) => {
       e.preventDefault();
       li.querySelector(".spinner").classList.remove("uk-hidden");
 

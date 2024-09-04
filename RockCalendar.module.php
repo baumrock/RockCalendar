@@ -69,7 +69,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
           'parent' => $event->parent,
           RockCalendar::field_date => $range,
           'title' => 'recurr',
-          'name' => 'recurr',
+          'name' => uniqid(),
         ]);
         return [
           'id' => $rawItem->id,

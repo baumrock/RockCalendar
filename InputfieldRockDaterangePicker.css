@@ -30,6 +30,10 @@
 .InputfieldRockDaterangePicker .rc-rrule [name="until"] {
   width: 150px;
 }
+.InputfieldRockDaterangePicker .rc-rrule .uk-checkbox,
+.InputfieldRockDaterangePicker .rc-rrule .uk-radio {
+  margin-top: 1px;
+}
 .InputfieldRockDaterangePicker .tabulator-paginator > label:first-child {
   display: none;
 }
