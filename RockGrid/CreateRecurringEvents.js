@@ -10,14 +10,18 @@ document.addEventListener("RockGrid:init", (e) => {
 
   class RecurringGUI {
     constructor() {
+      this.deleteRows = [];
       this.li = grid.li.closest(".InputfieldRockDaterangePicker");
       this.configTable = this.li.querySelector(".rc-rrule > table");
-      this.$progress = this.li.querySelector("progress");
+      this.progressBar = this.li.querySelector("progress");
       this.eventDateInput = this.li.querySelector(
         "input[name='rockcalendar_date']"
       );
       this.eventDateHiddenStart = this.li.querySelector(
         "input[name='rockcalendar_date_start']"
+      );
+      this.eventDateHiddenEnd = this.li.querySelector(
+        "input[name='rockcalendar_date_end']"
       );
       this.createEventsButton = this.li.querySelector(
         "button[data-create-events]"
@@ -73,18 +77,16 @@ document.addEventListener("RockGrid:init", (e) => {
         paginationCounter: "rows",
       });
       this.table = table;
-
-      // update progress count when table data changes
-      table.on("renderComplete", (data) => {
-        this.updateProgressCount();
-      });
     }
 
     createCancel(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
+      this.isRunning = false;
+      this.enableInputs();
       this.progressContainer.classList.remove("running");
       this.progressCancelButton.setAttribute("disabled", "disabled");
       this.createEventsButton.removeAttribute("disabled");
+      this.table.deleteRow(this.deleteRows);
     }
 
     /**
@@ -92,31 +94,31 @@ document.addEventListener("RockGrid:init", (e) => {
      */
     createStart(e) {
       e.preventDefault();
+      this.isRunning = true;
+      this.disableInputs();
       this.progressContainer.classList.add("running");
       this.createEventsButton.setAttribute("disabled", "disabled");
       this.progressCancelButton.removeAttribute("disabled");
       RockGrid.sse(
         "/rockcalendar/create-recurring-events/",
         {
-          pid: parseInt($("#Inputfield_id").val()),
-          diff: new Date(eventDate("end")) - new Date(eventDate("start")),
-          title: li
-            .closest(".InputfieldForm")
-            .querySelector("input[name='title']").value,
-          rows: table.getData().map((row) => ({
+          pid: this.getPageID(),
+          diff: this.getDiff(),
+          title: this.getTitle(),
+          rows: this.table.getData().map((row) => ({
             id: row.id,
             date: row.php,
           })),
         },
         (msg) => {
           let data = JSON.parse(msg);
-          $progress.val(data.progress * 100);
-          li.querySelector("span.current").textContent = data.current;
+          this.progressBar.value = data.progress * 100;
+          this.li.querySelector("span.current").textContent = data.current;
+          this.deleteRow(data.id);
         },
         () => {
-          li.querySelector(".spinner").classList.add("uk-hidden");
-          inputs.forEach((input) => input.removeAttribute("disabled"));
-          table.clearData();
+          console.log("done");
+          this.createCancel();
         }
       );
     }
@@ -128,6 +130,13 @@ document.addEventListener("RockGrid:init", (e) => {
      */
     dashDate(date) {
       return this.toISO(date).split("T")[0];
+    }
+
+    /**
+     * Collect all ids and delete rows from the table every xx ms
+     */
+    deleteRow(id) {
+      this.deleteRows.push(id);
     }
 
     disableInputs() {
@@ -154,8 +163,12 @@ document.addEventListener("RockGrid:init", (e) => {
      * Get value of date input of event formatted as UTC ISO string
      * @returns {string}
      */
-    eventDate() {
-      return this.toISO(this.eventDateHiddenStart.value);
+    eventDate(type = "start") {
+      if (type === "start") {
+        return this.toISO(this.eventDateHiddenStart.value);
+      } else {
+        return this.toISO(this.eventDateHiddenEnd.value);
+      }
     }
 
     eventTime() {
@@ -168,9 +181,19 @@ document.addEventListener("RockGrid:init", (e) => {
       return "";
     }
 
+    getDiff() {
+      let start = new Date(this.eventDate("start"));
+      let end = new Date(this.eventDate("end"));
+      return end - start;
+    }
+
     getHasTimeState() {
       return this.li.querySelector("input[name='rockcalendar_date_hasTime']")
         .checked;
+    }
+
+    getPageID() {
+      return parseInt($("#Inputfield_id").val());
     }
 
     getRRule() {
@@ -222,6 +245,12 @@ document.addEventListener("RockGrid:init", (e) => {
       if (!this.count && !this.until) config.count = 10;
 
       return config;
+    }
+
+    getTitle() {
+      return this.li
+        .closest(".InputfieldForm")
+        .querySelector("input[name='title']").value;
     }
 
     monitorChanges() {
@@ -437,12 +466,6 @@ document.addEventListener("RockGrid:init", (e) => {
       if (typeof str !== "string" || str.length === 0) return str;
       return str.charAt(0).toUpperCase() + str.slice(1);
     }
-
-    // Add this method to your RecurringGUI class
-    updateProgressCount() {
-      const rowCount = this.table.getDataCount();
-      this.li.querySelector(".total").textContent = rowCount;
-    }
   }
 
   /**
@@ -457,5 +480,8 @@ document.addEventListener("RockGrid:init", (e) => {
     // console.log(gui.dashDate(gui.eventDate()), "dashDate(eventDate())");
     // console.log(gui.getRRule(), "getRRule()");
     // console.log(gui.getRRule().all(), "getRRule().all()");
+    // console.log(gui.getDiff(), "getDiff()");
+    // console.log(gui.getPageID(), "getPageID()");
+    // gui.progressBar.value = 50;
   }, 50);
 });
