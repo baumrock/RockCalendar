@@ -19,6 +19,13 @@ document.addEventListener("RockGrid:init", (e) => {
       this.eventDateHiddenStart = this.li.querySelector(
         "input[name='rockcalendar_date_start']"
       );
+      this.createEventsButton = this.li.querySelector(
+        "button[data-create-events]"
+      );
+      this.progressContainer = this.li.querySelector(".progress-container");
+      this.progressCancelButton = this.li.querySelector(
+        "button[data-progress-cancel]"
+      );
       this.bymonth = [];
       this.byweekday = [];
       this.set("locale", ProcessWire.config.RcLocale || "en-US");
@@ -26,10 +33,18 @@ document.addEventListener("RockGrid:init", (e) => {
       this.resetInputs();
       this.buildTable();
       this.monitorChanges();
+      this.createEventsButton.addEventListener(
+        "click",
+        this.createStart.bind(this)
+      );
+      this.progressCancelButton.addEventListener(
+        "click",
+        this.createCancel.bind(this)
+      );
     }
 
     buildTable() {
-      this.table = grid.tabulator({
+      const table = grid.tabulator({
         layout: "fitDataStretch",
         data: [],
         columns: [
@@ -53,10 +68,57 @@ document.addEventListener("RockGrid:init", (e) => {
         ],
         selectableRows: false,
         pagination: true,
-        paginationSize: 20,
+        paginationSize: 10,
         paginationSizeSelector: [10, 20, 50, 100],
         paginationCounter: "rows",
       });
+      this.table = table;
+
+      // update progress count when table data changes
+      table.on("renderComplete", (data) => {
+        this.updateProgressCount();
+      });
+    }
+
+    createCancel(e) {
+      e.preventDefault();
+      this.progressContainer.classList.remove("running");
+      this.progressCancelButton.setAttribute("disabled", "disabled");
+      this.createEventsButton.removeAttribute("disabled");
+    }
+
+    /**
+     * Start creating events
+     */
+    createStart(e) {
+      e.preventDefault();
+      this.progressContainer.classList.add("running");
+      this.createEventsButton.setAttribute("disabled", "disabled");
+      this.progressCancelButton.removeAttribute("disabled");
+      RockGrid.sse(
+        "/rockcalendar/create-recurring-events/",
+        {
+          pid: parseInt($("#Inputfield_id").val()),
+          diff: new Date(eventDate("end")) - new Date(eventDate("start")),
+          title: li
+            .closest(".InputfieldForm")
+            .querySelector("input[name='title']").value,
+          rows: table.getData().map((row) => ({
+            id: row.id,
+            date: row.php,
+          })),
+        },
+        (msg) => {
+          let data = JSON.parse(msg);
+          $progress.val(data.progress * 100);
+          li.querySelector("span.current").textContent = data.current;
+        },
+        () => {
+          li.querySelector(".spinner").classList.add("uk-hidden");
+          inputs.forEach((input) => input.removeAttribute("disabled"));
+          table.clearData();
+        }
+      );
     }
 
     /**
@@ -68,12 +130,24 @@ document.addEventListener("RockGrid:init", (e) => {
       return this.toISO(date).split("T")[0];
     }
 
+    disableInputs() {
+      this.configTable.querySelectorAll("input, select").forEach((input) => {
+        input.setAttribute("disabled", "disabled");
+      });
+    }
+
     /**
      * return time as HH:MM:SS
      */
     dotTime(date) {
       if (!this.hasTime) return;
       return this.toISO(date).split("T")[1].substring(0, 8);
+    }
+
+    enableInputs() {
+      this.configTable.querySelectorAll("input, select").forEach((input) => {
+        input.removeAttribute("disabled");
+      });
     }
 
     /**
@@ -363,6 +437,12 @@ document.addEventListener("RockGrid:init", (e) => {
       if (typeof str !== "string" || str.length === 0) return str;
       return str.charAt(0).toUpperCase() + str.slice(1);
     }
+
+    // Add this method to your RecurringGUI class
+    updateProgressCount() {
+      const rowCount = this.table.getDataCount();
+      this.li.querySelector(".total").textContent = rowCount;
+    }
   }
 
   /**
@@ -378,44 +458,4 @@ document.addEventListener("RockGrid:init", (e) => {
     // console.log(gui.getRRule(), "getRRule()");
     // console.log(gui.getRRule().all(), "getRRule().all()");
   }, 50);
-
-  return;
-
-  // build the tabulator table
-  setTimeout(() => {
-    // handle clicks on "create events" button
-    $(document).on("click", li_selector + " [data-create-events]", (e) => {
-      e.preventDefault();
-      li.querySelector(".spinner").classList.remove("uk-hidden");
-
-      // disable all inputs in the .rc-rrule div
-      let inputs = li.querySelectorAll(".rc-rrule *");
-      inputs.forEach((input) => input.setAttribute("disabled", "disabled"));
-
-      RockGrid.sse(
-        "/rockcalendar/create-recurring-events/",
-        {
-          pid: parseInt($("#Inputfield_id").val()),
-          diff: new Date(eventDate("end")) - new Date(eventDate("start")),
-          title: li
-            .closest(".InputfieldForm")
-            .querySelector("input[name='title']").value,
-          rows: table.getData().map((row) => ({
-            id: row.id,
-            date: row.php,
-          })),
-        },
-        (msg) => {
-          let data = JSON.parse(msg);
-          $progress.val(data.progress * 100);
-          li.querySelector("span.current").textContent = data.current;
-        },
-        () => {
-          li.querySelector(".spinner").classList.add("uk-hidden");
-          inputs.forEach((input) => input.removeAttribute("disabled"));
-          table.clearData();
-        }
-      );
-    });
-  }, 10);
 });

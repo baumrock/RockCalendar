@@ -39,20 +39,7 @@ class InputfieldRockDaterangePicker extends Inputfield
         'icon' => 'plus',
         // 'collapsed' => Inputfield::collapsedYes,
         'prependMarkup' => wire()->files->render(__DIR__ . '/markup-rrule.php'),
-        'appendMarkup' => '
-        <div class="uk-flex uk-flex-middle uk-margin-small-top" style="gap: 10px;">
-          <button data-create-events class="uk-button uk-button-primary uk-text-nowrap">
-            Create Events
-          </button>
-          <span class="uk-flex uk-flex-middle">
-            <div uk-spinner class="spinner uk-hidden uk-margin-small-right"></div>
-            <span class="current">0</span>
-            /
-            <span class="total">0</span>
-          </span>
-          <progress class="uk-progress uk-margin-remove" max="100" value="0"></progress>
-        </div>
-      ',
+        'appendMarkup' => wire()->files->render(__DIR__ . '/markup-progress.php'),
       ]);
     } else {
       $p = $this->value->mainPage;

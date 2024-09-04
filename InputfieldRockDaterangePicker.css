@@ -37,6 +37,12 @@
 .InputfieldRockDaterangePicker .tabulator-paginator > label:first-child {
   display: none;
 }
+.InputfieldRockDaterangePicker .progress-container.running .spinner {
+  display: block !important;
+}
+.InputfieldRockDaterangePicker .progress-container.running .start {
+  display: none !important;
+}
 .AdminStyleRock .daterangepicker td.in-range {
   background-color: var(--rock-gray-100);
 }
