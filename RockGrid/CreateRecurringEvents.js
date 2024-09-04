@@ -8,176 +8,311 @@ document.addEventListener("RockGrid:init", (e) => {
     return;
   }
 
-  let includeStart = false;
-
-  // build the tabulator table
-  setTimeout(() => {
-    let events = [];
-    let li = grid.li.closest(".InputfieldRockDaterangePicker");
-    let li_selector = "#" + li.id;
-    console.log(li_selector);
-    let $progress = $(grid.li).find("progress");
-    let locale = ProcessWire.config.RcLocale || "en-US";
-
-    // return date as YYYY-MM-DD
-    function dashDate(date) {
-      return (
-        date.toLocaleString(locale, {
-          year: "numeric",
-        }) +
-        "-" +
-        date.toLocaleString(locale, {
-          month: "2-digit",
-        }) +
-        "-" +
-        date.toLocaleString(locale, {
-          day: "2-digit",
-        })
+  class RecurringGUI {
+    constructor() {
+      this.li = grid.li.closest(".InputfieldRockDaterangePicker");
+      this.configTable = this.li.querySelector(".rc-rrule > table");
+      this.$progress = this.li.querySelector("progress");
+      this.eventDateInput = this.li.querySelector(
+        "input[name='rockcalendar_date']"
       );
+      this.eventDateHiddenStart = this.li.querySelector(
+        "input[name='rockcalendar_date_start']"
+      );
+      this.bymonth = [];
+      this.byweekday = [];
+      this.set("locale", ProcessWire.config.RcLocale || "en-US");
+      this.set("mode", "advanced");
+      this.resetInputs();
+      this.buildTable();
+      this.monitorChanges();
     }
 
-    function eventDate(type) {
-      let time = li.querySelector(
-        "input[name=rockcalendar_date_" + (type || "start") + "]"
-      ).value;
-      // treat the event start date as UTC
-      // this prevents long recurrence series from having a time offset
-      // when passing a daylight saving time date
-      const date = new Date(time + " Z").toISOString();
-      return date;
-    }
-
-    function startDate() {
-      includeStart = false;
-      let start = eventDate("start");
-      try {
-        const val = li.querySelector("input[name=start_type]:checked").value;
-        if (val === "main") return start;
-        const local = li.querySelector("input[name=custom_startdate]").value;
-        if (!local) return start;
-        includeStart = true;
-        return new Date(local + "Z").toISOString();
-      } catch (error) {
-        return start;
-      }
-    }
-
-    function ucfirst(str) {
-      if (typeof str !== "string" || str.length === 0) return str;
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
-    const table = grid.tabulator({
-      layout: "fitDataStretch",
-      data: events,
-      columns: [
-        { title: "#", field: "id" },
-        {
-          title: "del",
-          field: "del",
-          formatter: (cell) => {
-            let rowID = cell.getData().id;
-            return (
-              '<a href data-remove-row="' +
-              rowID +
-              '"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg></a>'
-            );
+    buildTable() {
+      this.table = grid.tabulator({
+        layout: "fitDataStretch",
+        data: [],
+        columns: [
+          { title: "#", field: "id" },
+          {
+            title: "del",
+            field: "del",
+            formatter: (cell) => {
+              let rowID = cell.getData().id;
+              return (
+                '<a href data-remove-row="' +
+                rowID +
+                '"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg></a>'
+              );
+            },
+            hozAlign: "center",
           },
-          hozAlign: "center",
-        },
-        { title: "Day", field: "day", headerFilter: "input" },
-        { title: "Date", field: "date", headerFilter: "input", width: 100 },
-        { title: "Time", field: "time", headerFilter: "input" },
-      ],
-      selectableRows: false,
-      pagination: true,
-      paginationSize: 20,
-      paginationSizeSelector: [10, 20, 50, 100],
-      paginationCounter: "rows",
-    });
-
-    // get rrule config from UI
-    function getRruleConfig() {
-      let nth = li.querySelector("input[name='n-th']").value;
-      let freq = li.querySelector("select[name='freq']").value;
-      let until = li.querySelector("input[name='until']").value;
-      let count = li.querySelector("input[name='count']").value;
-      let interval = li.querySelector("input[name='interval']").value;
-      let weekdays = Array.from(li.querySelectorAll("input[name='byweekday']"))
-        .filter((input) => input.checked)
-        .map((input) => {
-          if (nth > 0) {
-            return rrule.RRule[input.value].nth(nth);
-          }
-          return rrule.RRule[input.value];
-        });
-      let months = Array.from(li.querySelectorAll("input[name='bymonth']"))
-        .filter((input) => input.checked)
-        .map((input) => parseInt(input.value));
-      let start = startDate();
-      let config = {
-        freq: rrule.RRule[freq],
-        interval: parseInt(interval),
-        count: parseInt(count),
-        dtstart: new Date(start),
-      };
-      if (until) config.until = new Date(until);
-      if (weekdays.length) config.byweekday = weekdays;
-      if (months.length) config.bymonth = months;
-
-      // set limit of 100 events if no count or until is set
-      if (!count && !until) config.count = 100;
-
-      return config;
+          { title: "Day", field: "day", headerFilter: "input" },
+          { title: "Date", field: "date", headerFilter: "input", width: 100 },
+          { title: "Time", field: "time", headerFilter: "input" },
+        ],
+        selectableRows: false,
+        pagination: true,
+        paginationSize: 20,
+        paginationSizeSelector: [10, 20, 50, 100],
+        paginationCounter: "rows",
+      });
     }
 
-    // get dates from rrule
-    function getRule() {
+    /**
+     * return date as YYYY-MM-DD
+     * @param {Date} date
+     * @returns {string}
+     */
+    dashDate(date) {
+      return this.toISO(date).split("T")[0];
+    }
+
+    /**
+     * return time as HH:MM:SS
+     */
+    dotTime(date) {
+      if (!this.hasTime) return;
+      return this.toISO(date).split("T")[1].substring(0, 8);
+    }
+
+    /**
+     * Get value of date input of event formatted as UTC ISO string
+     * @returns {string}
+     */
+    eventDate() {
+      return this.toISO(this.eventDateHiddenStart.value);
+    }
+
+    eventTime() {
+      const hasTime = this.li.querySelector(
+        "input[name='rockcalendar_date_hasTime']"
+      );
+      if (hasTime.checked) {
+        return this.eventDate().split("T")[1].substring(0, 8);
+      }
+      return "";
+    }
+
+    getHasTimeState() {
+      return this.li.querySelector("input[name='rockcalendar_date_hasTime']")
+        .checked;
+    }
+
+    getRRule() {
       // first we get the rrule with a limit of 2
       // then we use the second date as start date for the rrule
       // this is to exclude the actual start date from the results
-      let config = getRruleConfig();
+      let config = this.getRRuleConfig();
+      // console.log(config, "config");
 
-      if (!includeStart) {
-        const old = [config.until, config.count];
-        config.until = null;
-        config.count = 2;
-        let rule = new rrule.RRule(config);
+      // if start is the main event we remove the first start date
+      // if it is the same as the main event
+      const old = [config.until, config.count];
+      config.until = null;
+      config.count = 2;
+      let rule = new rrule.RRule(config);
 
+      let firstDate = rule.all()[0];
+      if (this.toISO(firstDate) === this.eventDate()) {
         // get the second date from the rule
         let start = rule.all()[1];
 
         // set the start date in the config
         config.dtstart = start;
-        config.until = old[0];
-        config.count = old[1];
       }
+      config.until = old[0];
+      config.count = old[1];
 
       // create the rule with the correct start date
-      rule = new rrule.RRule(config);
-      return rule;
+      return new rrule.RRule(config);
     }
 
-    // set data in table
-    function setData() {
-      let rule = getRule();
-      $progress.val(0);
+    getRRuleConfig() {
+      let config = {
+        freq: rrule.RRule[this.freq],
+        interval: parseInt(this.interval),
+        count: parseInt(this.count),
+        dtstart: new Date(this.startDate()),
+      };
+      if (this.until) config.until = new Date(this.until);
+      if (this.byweekday.length)
+        config.byweekday = this.byweekday.map((d) => {
+          if (!this.nth) return rrule.RRule[d];
+          return rrule.RRule[d].nth(parseInt(this.nth));
+        });
+      if (this.bymonth.length)
+        config.bymonth = this.bymonth.map((m) => parseInt(m));
 
-      // show rrule result in human readable string
-      li.querySelector(".human-readable").textContent = ucfirst(
-        rule.toText() + "."
-      );
+      // set limit of 10 events if no count or until is set
+      if (!this.count && !this.until) config.count = 10;
 
-      // prepare rows for table
-      let hasTime = li.querySelector(
-        "input[name='rockcalendar_date_hasTime']"
-      ).checked;
+      return config;
+    }
+
+    monitorChanges() {
+      // add event listeners to all inputs inside the configTable
+      // if any input happens trigger this.set() with the name of the input as property
+      this.configTable.querySelectorAll("input, select").forEach((input) => {
+        input.addEventListener("input", (e) => {
+          // if input is a checkbox get an array of all checked checkboxes
+          if (e.target.type === "checkbox") {
+            let checkboxes = this.configTable.querySelectorAll(
+              `input[name="${e.target.name}"]`
+            );
+            let values = Array.from(checkboxes)
+              .filter((checkbox) => checkbox.checked)
+              .map((checkbox) => checkbox.value);
+            this.set(e.target.name, values);
+          } else {
+            this.set(e.target.name, e.target.value);
+          }
+        });
+      });
+
+      // time checkbox changed
+      this.li
+        .querySelector('input[name="rockcalendar_date_hasTime"]')
+        .addEventListener("change", (e) => {
+          this.set("hasTime", e.target.checked);
+        });
+
+      // event time changed
+      $(document).on("change", "input[name=rockcalendar_date]", () => {
+        this.onChange();
+        this.li.querySelector(".warning").classList.remove("uk-hidden");
+      });
+
+      // clicks on delete icon
+      $(document).on("click", "a[data-remove-row]", (e) => {
+        e.preventDefault();
+        let rowId = $(e.target).closest("a").data("remove-row");
+        this.table.deleteRow(rowId);
+      });
+    }
+
+    /**
+     * Triggers on every change of any input throttled by xx ms
+     */
+    onChange(delay = 50) {
+      clearTimeout(this.onChangeTimeout);
+      this.onChangeTimeout = setTimeout(() => {
+        // console.log("onChange");
+        let rule = this.getRRule();
+        // console.log(rule.all());
+        this.li.querySelector(".human-readable").textContent = this.ucfirst(
+          rule.toText()
+        );
+        this.setTableData(rule);
+      }, delay);
+    }
+
+    onChangeHasTime() {
+      let input = this.li.querySelector("input[name='customstartdate']");
+      if (this.hasTime) {
+        input.type = "datetime-local";
+      } else {
+        input.type = "date";
+      }
+    }
+
+    onChangeMode() {
+      // if mode is simple, hide all tr.advanced
+      if (this.mode === "simple") {
+        this.resetInputs();
+        // add fake row after 2nd tr
+        let fakeRow = document.createElement("tr");
+        fakeRow.classList.add("fake-row");
+        let secondRow = this.configTable.querySelectorAll("tr")[1];
+        secondRow.insertAdjacentElement("afterend", fakeRow);
+        this.configTable.querySelectorAll("tr.advanced").forEach((tr) => {
+          tr.classList.add("uk-hidden");
+        });
+      } else {
+        // remove fake row
+        let fakeRow = this.configTable.querySelector(".fake-row");
+        if (fakeRow) fakeRow.remove();
+        this.configTable.querySelectorAll("tr.advanced").forEach((tr) => {
+          tr.classList.remove("uk-hidden");
+        });
+      }
+    }
+
+    onChangeCustomstartdate() {
+      if (!this.customstartdate) return;
+      // make sure that custom start date is never before event date
+      if (new Date(this.customstartdate) < new Date(this.eventDate())) {
+        // show uikit warning notification
+        UIkit.notification({
+          message: "Custom start date must not be before event date.",
+          status: "warning",
+          pos: "top-right",
+        });
+        this.set("customstartdate", this.eventDate());
+      }
+      this.set("starttype", "custom", true);
+    }
+
+    resetInputs() {
+      this.set("starttype", "main");
+      this.set("customstartdate", "");
+      this.set("interval", this.interval || 1);
+      this.set("freq", this.freq || "DAILY");
+      this.set("hasTime", this.getHasTimeState());
+    }
+
+    /**
+     * Set property of this class and trigger onPropChange if it exists
+     */
+    set(prop, value, updateEL = true) {
+      console.log("set", prop, value);
+      const changed = this[prop] !== value;
+      if (!changed) return;
+
+      // set new property value
+      this[prop] = value;
+
+      // if updateEL is true, update the element with the new value
+      let el = this.configTable.querySelector(`[name='${prop}']`);
+      if (updateEL && el) {
+        // depending on the type of the input, set the value
+        switch (el.tagName.toLowerCase()) {
+          case "select":
+            Array.from(el.options).forEach((option) => {
+              option.selected = option.value === value;
+            });
+            break;
+          case "input":
+            switch (el.type) {
+              case "radio":
+                let elements = this.configTable.querySelectorAll(
+                  `input[name="${el.name}"]`
+                );
+                elements.forEach((element) => {
+                  element.checked = element.value === value;
+                });
+                break;
+              default:
+                el.value = value;
+            }
+            break;
+          default:
+            el.value = value;
+        }
+      }
+
+      const changeMethod = "onChange" + this.ucfirst(prop);
+      if (changed && typeof this[changeMethod] === "function") {
+        this[changeMethod]();
+      }
+
+      this.onChange();
+    }
+
+    setTableData(rule) {
       let rows = rule.all().map((date, index) => {
-        // console.log(date);
-        let ymd = dashDate(date);
-        let time = hasTime
-          ? date.toISOString().slice(11, 19) // Extract HH:MM:SS from ISO string
-          : "";
+        let ymd = this.dashDate(date);
+        let time = this.dotTime(date);
         return {
           id: index + 1,
           // day as short string
@@ -192,76 +327,62 @@ document.addEventListener("RockGrid:init", (e) => {
           php: ymd + " " + time,
         };
       });
-      table.setData(rows);
-      li.querySelector("span.current").textContent = 0;
-      li.querySelector("span.total").textContent = rows.length;
+      // console.log(rows, "rows");
+      this.table.setData(rows);
     }
 
-    // update table data on various events
-    $(document).on("input", li_selector + " .rc-rrule", setData);
-    $(document).on(
-      "change",
-      li_selector + " input[name=rockcalendar_date]",
-      setData
-    );
-    $(document).on(
-      "change",
-      li_selector + " input[name=rockcalendar_date_isRecurring]",
-      setData
-    );
-    table.on("tableBuilt", setData);
-
-    // keep hasTime in sync with the date picker
-    const setCustomStartdateType = () => {
-      if (li.querySelector("input[name=rockcalendar_date_hasTime]").checked) {
-        li.querySelector("input[name=custom_startdate]").type =
-          "datetime-local";
+    /**
+     * Get the start date for the rrule config
+     */
+    startDate() {
+      let start = this.eventDate();
+      if (this.starttype === "main") {
+        return start;
       } else {
-        li.querySelector("input[name=custom_startdate]").type = "date";
+        return this.toISO(this.customstartdate || start);
       }
-    };
-    $(document).on(
-      "change",
-      li_selector + " input[name=rockcalendar_date_hasTime]",
-      setCustomStartdateType
-    );
-    setCustomStartdateType();
+    }
 
-    // monitor mode change
-    const modeChange = () => {
-      let table = li.querySelector(".rc-rrule > table");
-      let mode = li.querySelector("input[name=mode]:checked").value;
-      if (mode === "advanced") {
-        // remove row with class remove
-        let row = table.querySelector("tr.remove");
-        if (row) row.remove();
-        li.querySelectorAll(".advanced").forEach((el) =>
-          el.classList.remove("uk-hidden")
-        );
-      } else {
-        li.querySelectorAll(".advanced").forEach((el) =>
-          el.classList.add("uk-hidden")
-        );
-        // clone first .uk-hidden row and add class remove
-        // insert this row directly before the cloned row
-        let row = table.querySelector("tr.uk-hidden");
-        if (row) {
-          let clone = row.cloneNode(true);
-          clone.classList.add("remove");
-          row.insertAdjacentElement("beforebegin", clone);
-        }
+    /**
+     * Take any date or date string and return a Z date as iso string
+     */
+    toISO(date) {
+      // if date is a string convert it to Z date
+      if (typeof date === "string") {
+        // if string ends with Z, remove the Z
+        if (date.endsWith("Z")) date = date.slice(0, -1);
+        date = new Date(date + "Z");
       }
-    };
-    $(document).on("change", li_selector + " input[name=mode]", modeChange);
-    modeChange();
+      return date.toISOString();
+    }
 
-    // handle clicks on delete button
-    $(document).on("click", li_selector + " a[data-remove-row]", (e) => {
-      e.preventDefault();
-      let rowId = $(e.target).closest("a").data("remove-row");
-      table.deleteRow(rowId);
-    });
+    /**
+     * Make the first character of a string uppercase
+     */
+    ucfirst(str) {
+      if (typeof str !== "string" || str.length === 0) return str;
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+  }
 
+  /**
+   * Init + Tests
+   */
+  setTimeout(() => {
+    let gui = new RecurringGUI();
+
+    // tests
+    // console.log(gui.dashDate("2024-09-30 11:00"), "custom dashdate");
+    // console.log(gui.toISO(gui.eventDate()), "eventDate()");
+    // console.log(gui.dashDate(gui.eventDate()), "dashDate(eventDate())");
+    // console.log(gui.getRRule(), "getRRule()");
+    // console.log(gui.getRRule().all(), "getRRule().all()");
+  }, 50);
+
+  return;
+
+  // build the tabulator table
+  setTimeout(() => {
     // handle clicks on "create events" button
     $(document).on("click", li_selector + " [data-create-events]", (e) => {
       e.preventDefault();
