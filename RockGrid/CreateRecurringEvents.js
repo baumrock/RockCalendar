@@ -10,7 +10,6 @@ document.addEventListener("RockGrid:init", (e) => {
 
   class RecurringGUI {
     constructor() {
-      this.deleteRows = [];
       this.li = grid.li.closest(".InputfieldRockDaterangePicker");
       this.configTable = this.li.querySelector(".rc-rrule > table");
       this.progressBar = this.li.querySelector("progress");
@@ -52,9 +51,9 @@ document.addEventListener("RockGrid:init", (e) => {
         layout: "fitDataStretch",
         data: [],
         columns: [
-          { title: "#", field: "id" },
+          { title: "#", field: "id", visible: false },
           {
-            title: "del",
+            title: "",
             field: "del",
             formatter: (cell) => {
               let rowID = cell.getData().id;
@@ -65,6 +64,7 @@ document.addEventListener("RockGrid:init", (e) => {
               );
             },
             hozAlign: "center",
+            headerSort: false,
           },
           { title: "Day", field: "day", headerFilter: "input" },
           { title: "Date", field: "date", headerFilter: "input", width: 100 },
@@ -89,7 +89,6 @@ document.addEventListener("RockGrid:init", (e) => {
       this.progressContainer.classList.remove("running");
       this.progressCancelButton.setAttribute("disabled", "disabled");
       this.createEventsButton.removeAttribute("disabled");
-      this.table.deleteRow(this.deleteRows);
     }
 
     /**
@@ -117,7 +116,6 @@ document.addEventListener("RockGrid:init", (e) => {
           let data = JSON.parse(msg);
           this.progressBar.value = data.progress * 100;
           this.li.querySelector("span.current").textContent = data.current;
-          this.deleteRow(data.id);
         },
         () => {
           console.log("done");
@@ -133,13 +131,6 @@ document.addEventListener("RockGrid:init", (e) => {
      */
     dashDate(date) {
       return this.toISO(date).split("T")[0];
-    }
-
-    /**
-     * Collect all ids and delete rows from the table every xx ms
-     */
-    deleteRow(id) {
-      this.deleteRows.push(id);
     }
 
     disableInputs() {
