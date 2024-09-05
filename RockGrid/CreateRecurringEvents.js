@@ -33,7 +33,7 @@ document.addEventListener("RockGrid:init", (e) => {
       this.bymonth = [];
       this.byweekday = [];
       this.set("locale", ProcessWire.config.RcLocale || "en-US");
-      this.set("mode", "advanced");
+      this.set("mode", "simple");
       this.resetInputs();
       this.buildTable();
       this.monitorChanges();
@@ -77,6 +77,9 @@ document.addEventListener("RockGrid:init", (e) => {
         paginationCounter: "rows",
       });
       this.table = table;
+
+      // attach event listeners
+      table.on("dataProcessed", this.setFirstAndLastEvent.bind(this));
     }
 
     createCancel(e) {
@@ -149,7 +152,7 @@ document.addEventListener("RockGrid:init", (e) => {
      * return time as HH:MM:SS
      */
     dotTime(date) {
-      if (!this.hasTime) return;
+      if (!this.hasTime) return "";
       return this.toISO(date).split("T")[1].substring(0, 8);
     }
 
@@ -242,7 +245,7 @@ document.addEventListener("RockGrid:init", (e) => {
         config.bymonth = this.bymonth.map((m) => parseInt(m));
 
       // set limit of 10 events if no count or until is set
-      if (!this.count && !this.until) config.count = 10;
+      if (!this.count && !this.until) config.count = grid.jsVars.endsNeverLimit;
 
       return config;
     }
@@ -343,16 +346,6 @@ document.addEventListener("RockGrid:init", (e) => {
 
     onChangeCustomstartdate() {
       if (!this.customstartdate) return;
-      // make sure that custom start date is never before event date
-      if (new Date(this.customstartdate) < new Date(this.eventDate())) {
-        // show uikit warning notification
-        UIkit.notification({
-          message: "Custom start date must not be before event date.",
-          status: "warning",
-          pos: "top-right",
-        });
-        this.set("customstartdate", this.eventDate());
-      }
       this.set("starttype", "custom", true);
     }
 
@@ -368,7 +361,7 @@ document.addEventListener("RockGrid:init", (e) => {
      * Set property of this class and trigger onPropChange if it exists
      */
     set(prop, value, updateEL = true) {
-      console.log("set", prop, value);
+      // console.log("set", prop, value);
       const changed = this[prop] !== value;
       if (!changed) return;
 
@@ -412,6 +405,15 @@ document.addEventListener("RockGrid:init", (e) => {
       this.onChange();
     }
 
+    setFirstAndLastEvent() {
+      let data = this.table.getData();
+      if (!data.length) return;
+      this.firstEvent = data[0];
+      this.lastEvent = data[data.length - 1];
+      this.li.querySelector(".first-event").textContent = this.firstEvent.php;
+      this.li.querySelector(".last-event").textContent = this.lastEvent.php;
+    }
+
     setTableData(rule) {
       let rows = rule.all().map((date, index) => {
         let ymd = this.dashDate(date);
@@ -427,7 +429,7 @@ document.addEventListener("RockGrid:init", (e) => {
           // time as HH:MM:SS
           time: time,
           // datetime formatted for php
-          php: ymd + " " + time,
+          php: (ymd + " " + time).trim(),
         };
       });
       // console.log(rows, "rows");

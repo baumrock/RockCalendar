@@ -4,12 +4,21 @@ namespace RockCalendar;
 
 use RockGrid\Grid;
 
+use function ProcessWire\rockcalendar;
+
 class CreateRecurringEvents extends Grid
 {
   public function getData()
   {
     // data comes from JS
     return false;
+  }
+
+  public function getJsVars(): array
+  {
+    return [
+      'endsNeverLimit' => rockcalendar()->endsNeverLimit ?? 100,
+    ];
   }
 
   /**

@@ -250,6 +250,16 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
         </script>',
         'value' => $this->locales,
       ]);
+
+      // max number of events if no limit is set
+      $inputfields->add([
+        'type' => 'integer',
+        'name' => 'endsNeverLimit',
+        'label' => 'Max Number of Events',
+        'description' => 'When creating recurring events, the user can set an end date. If no end date is set, this number of events is created. Default: 100',
+        'value' => $this->endsNeverLimit,
+        'placeholder' => 100,
+      ]);
     }
 
     return $inputfields;

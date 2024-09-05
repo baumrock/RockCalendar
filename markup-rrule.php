@@ -86,7 +86,15 @@
       </tr>
       <tr>
         <td>Result</td>
-        <td class='human-readable uk-text-bold'>
+        <td class='uk-flex uk-flex-wrap uk-flex-bottom' style='column-gap: 25px;'>
+          <span class='human-readable uk-text-bold'></span>
+          <div class='uk-text-small uk-text-muted uk-flex uk-flex-middle' style='column-gap: 5px;'>
+            <span class='uk-text-small first-event' title='First event' uk-tooltip></span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+              <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m18 15l3-3l-3-3M3 12h18M3 9v6" />
+            </svg>
+            <span class='uk-text-small last-event' title='Last event' uk-tooltip></span>
+          </div>
         </td>
       </tr>
     </tbody>

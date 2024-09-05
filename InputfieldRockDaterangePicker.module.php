@@ -48,6 +48,13 @@ class InputfieldRockDaterangePicker extends Inputfield
         'value' => "This event is part of a recurring series. You can edit the main event <a href='{$p->editUrl()}&modal={$this->wire->input->modal}'>here</a>.",
       ]);
     }
+    $fs->add([
+      'type' => 'RockGrid',
+      'name' => $this->name . '_events',
+      'grid' => 'RockCalendar\\EventsOfSeries',
+      'label' => 'Existing Events of this Series',
+      'icon' => 'calendar',
+    ]);
     $grid = $fs->render();
 
     return wire()->files->render(__DIR__ . '/markup.php', [
