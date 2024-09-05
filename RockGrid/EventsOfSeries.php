@@ -11,7 +11,7 @@ class EventsOfSeries extends Grid
 
   public function getData()
   {
-    return $this->wire->pages->findRaw("id>1000000000, limit=10", [
+    return $this->wire->pages->findRaw("id>1, limit=10", [
       'id',
       'title',
       'modified',

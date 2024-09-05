@@ -60,6 +60,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       },
       // item callback
       function ($rawItem, $rawInput) {
+        if ($rawItem->done) return;
         $event = $this->getEventFromSseInput($rawInput); // check access
         $date = $this->getDateRange($event);
         $date->setMainPage($event);

@@ -10,6 +10,8 @@ document.addEventListener("RockGrid:init", (e) => {
 
   class RecurringGUI {
     constructor() {
+      this.done = 0;
+      this.stream = null;
       this.li = grid.li.closest(".InputfieldRockDaterangePicker");
       this.configTable = this.li.querySelector(".rc-rrule > table");
       this.progressBar = this.li.querySelector("progress");
@@ -26,8 +28,8 @@ document.addEventListener("RockGrid:init", (e) => {
         "button[data-create-events]"
       );
       this.progressContainer = this.li.querySelector(".progress-container");
-      this.progressCancelButton = this.li.querySelector(
-        "button[data-progress-cancel]"
+      this.progressPauseButton = this.li.querySelector(
+        "button[data-progress-pause]"
       );
       this.bymonth = [];
       this.byweekday = [];
@@ -40,9 +42,9 @@ document.addEventListener("RockGrid:init", (e) => {
         "click",
         this.createStart.bind(this)
       );
-      this.progressCancelButton.addEventListener(
+      this.progressPauseButton.addEventListener(
         "click",
-        this.createCancel.bind(this)
+        this.createPause.bind(this)
       );
     }
 
@@ -54,14 +56,19 @@ document.addEventListener("RockGrid:init", (e) => {
           { title: "#", field: "id", visible: false },
           {
             title: "",
-            field: "del",
+            field: "created",
             formatter: (cell) => {
-              let rowID = cell.getData().id;
-              return (
-                '<a href data-remove-row="' +
-                rowID +
-                '"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg></a>'
-              );
+              let data = cell.getData();
+              if (data.created === 0) {
+                return (
+                  '<a href data-remove-row="' +
+                  data.id +
+                  '"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg></a>'
+                );
+              } else {
+                cell.getElement().style.background = "#C8E6C9";
+                return '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l5 5L20 7"/></svg>';
+              }
             },
             hozAlign: "center",
             headerSort: false,
@@ -80,14 +87,38 @@ document.addEventListener("RockGrid:init", (e) => {
 
       // attach event listeners
       table.on("dataProcessed", this.setFirstAndLastEvent.bind(this));
+      table.on("dataProcessed", (data) => {
+        this.setProgress(0);
+      });
     }
 
-    createCancel(e) {
+    setProgress(current) {
+      if (current === false) current = this.done;
+      this.done = current;
+      let total = this.table.getData().length;
+      let percent = total > 0 ? (current / total) * 100 : 0;
+      this.progressBar.value = percent;
+      this.li.querySelector(".current").textContent = current;
+      this.li.querySelector(".total").textContent = total;
+      if (percent < 100 && total > 0) {
+        this.createEventsButton.removeAttribute("disabled");
+      } else {
+        this.createEventsButton.setAttribute("disabled", "disabled");
+      }
+    }
+
+    createDone() {
+      this.createPause();
+      this.createEventsButton.setAttribute("disabled", "disabled");
+    }
+
+    createPause(e) {
       if (e) e.preventDefault();
       this.isRunning = false;
+      if (this.stream) this.stream.close();
       this.enableInputs();
       this.progressContainer.classList.remove("running");
-      this.progressCancelButton.setAttribute("disabled", "disabled");
+      this.progressPauseButton.setAttribute("disabled", "disabled");
       this.createEventsButton.removeAttribute("disabled");
     }
 
@@ -100,28 +131,31 @@ document.addEventListener("RockGrid:init", (e) => {
       this.disableInputs();
       this.progressContainer.classList.add("running");
       this.createEventsButton.setAttribute("disabled", "disabled");
-      this.progressCancelButton.removeAttribute("disabled");
-      RockGrid.sse(
-        "/rockcalendar/create-recurring-events/",
-        {
+      this.progressPauseButton.removeAttribute("disabled");
+      RockGrid.sse({
+        url: "/rockcalendar/create-recurring-events/",
+        data: {
           pid: this.getPageID(),
           diff: this.getDiff(),
           title: this.getTitle(),
           rows: this.table.getData().map((row) => ({
             id: row.id,
             date: row.php,
+            done: row.created,
           })),
         },
-        (msg) => {
-          let data = JSON.parse(msg);
-          this.progressBar.value = data.progress * 100;
-          this.li.querySelector("span.current").textContent = data.current;
+        onConnect: (stream) => {
+          this.stream = stream;
         },
-        () => {
-          console.log("done");
-          this.createCancel();
-        }
-      );
+        onMessage: (msg) => {
+          let data = JSON.parse(msg);
+          this.setProgress(data.current);
+          this.table.updateRow(data.id, { created: 1 });
+        },
+        onDone: () => {
+          this.createDone();
+        },
+      });
     }
 
     /**
@@ -285,13 +319,15 @@ document.addEventListener("RockGrid:init", (e) => {
         e.preventDefault();
         let rowId = $(e.target).closest("a").data("remove-row");
         this.table.deleteRow(rowId);
+        this.setProgress(false); // recalculate progress
       });
     }
 
     /**
      * Triggers on every change of any input throttled by xx ms
      */
-    onChange(delay = 50) {
+    onChange(prop) {
+      if (prop === "mode") return;
       clearTimeout(this.onChangeTimeout);
       this.onChangeTimeout = setTimeout(() => {
         // console.log("onChange");
@@ -301,7 +337,7 @@ document.addEventListener("RockGrid:init", (e) => {
           rule.toText()
         );
         this.setTableData(rule);
-      }, delay);
+      }, 50);
     }
 
     onChangeHasTime() {
@@ -393,7 +429,7 @@ document.addEventListener("RockGrid:init", (e) => {
         this[changeMethod]();
       }
 
-      this.onChange();
+      this.onChange(prop);
     }
 
     setFirstAndLastEvent() {
@@ -421,6 +457,7 @@ document.addEventListener("RockGrid:init", (e) => {
           time: time,
           // datetime formatted for php
           php: (ymd + " " + time).trim(),
+          created: 0,
         };
       });
       // console.log(rows, "rows");
