@@ -1,5 +1,5 @@
 <div class="progress-container uk-flex uk-flex-middle uk-margin-small-top" style="gap: 10px; align-items: stretch;">
-  <button data-create-events class="uk-button uk-button-primary uk-text-nowrap uk-flex uk-flex-middle">
+  <button type=button data-create-events class="uk-button uk-button-primary uk-text-nowrap uk-flex uk-flex-middle">
     <div class='uk-flex' style='width:30px; padding-right: 10px;'>
       <svg class='start' xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
         <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
@@ -11,7 +11,7 @@
     </div>
     Create Events
   </button>
-  <button disabled data-progress-cancel class='uk-button uk-button-secondary uk-text-nowrap uk-flex uk-flex-middle'>
+  <button type=button disabled data-progress-cancel class='uk-button uk-button-secondary uk-text-nowrap uk-flex uk-flex-middle'>
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
       <g class="icon-tabler" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="4" y="4" width="6" height="16" rx="2" />
