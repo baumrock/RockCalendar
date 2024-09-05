@@ -12,14 +12,14 @@
     Create Events
   </button>
   <button type=button disabled data-progress-pause class='uk-button uk-button-secondary uk-text-nowrap uk-flex uk-flex-middle'>
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" style="min-width: 20px; min-height: 20px;">
       <g class="icon-tabler" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="4" y="4" width="6" height="16" rx="2" />
         <rect x="14" y="4" width="6" height="16" rx="2" />
       </g>
     </svg>
   </button>
-  <span class="uk-flex uk-flex-middle progress-text">
+  <span class="uk-flex uk-flex-middle progress-text no-shrink">
     <span class="current">0</span>
     /
     <span class="total">0</span>

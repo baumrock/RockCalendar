@@ -36,6 +36,13 @@ document.addEventListener("RockGrid:init", (e) => {
       this.set("locale", ProcessWire.config.RcLocale || "en-US");
       this.set("mode", "simple");
       this.resetInputs();
+
+      // pre-populate customstartdate with eventDate
+      // custom date is event date without the trailing Z
+      let customstart = this.eventDate().slice(0, -1);
+      this.li.querySelector("input[name='customstartdate']").value =
+        customstart;
+
       this.buildTable();
       this.monitorChanges();
       this.createEventsButton.addEventListener(
@@ -225,31 +232,7 @@ document.addEventListener("RockGrid:init", (e) => {
     }
 
     getRRule() {
-      // first we get the rrule with a limit of 2
-      // then we use the second date as start date for the rrule
-      // this is to exclude the actual start date from the results
       let config = this.getRRuleConfig();
-      // console.log(config, "config");
-
-      // if start is the main event we remove the first start date
-      // if it is the same as the main event
-      const old = [config.until, config.count];
-      config.until = null;
-      config.count = 2;
-      let rule = new rrule.RRule(config);
-
-      let firstDate = rule.all()[0];
-      if (this.toISO(firstDate) === this.eventDate()) {
-        // get the second date from the rule
-        let start = rule.all()[1];
-
-        // set the start date in the config
-        config.dtstart = start;
-      }
-      config.until = old[0];
-      config.count = old[1];
-
-      // create the rule with the correct start date
       return new rrule.RRule(config);
     }
 
@@ -442,9 +425,12 @@ document.addEventListener("RockGrid:init", (e) => {
     }
 
     setTableData(rule) {
+      let eventDate = this.eventDate();
       let rows = rule.all().map((date, index) => {
         let ymd = this.dashDate(date);
         let time = this.dotTime(date);
+        let iso = this.toISO(date);
+        let created = iso === eventDate ? 1 : 0;
         return {
           id: index + 1,
           // day as short string
@@ -457,7 +443,7 @@ document.addEventListener("RockGrid:init", (e) => {
           time: time,
           // datetime formatted for php
           php: (ymd + " " + time).trim(),
-          created: 0,
+          created: created,
         };
       });
       // console.log(rows, "rows");
