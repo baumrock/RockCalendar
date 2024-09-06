@@ -55,7 +55,7 @@ class InputfieldRockCalendar extends InputfieldTextarea
         data-autoclose
       >Add Event</a>
       <div id='calendar-{$this->name}' class='rock-calendar'></div>
-      <script>RockCalendar.add('{$this->name}', '$locale');</script>";
+      <script>RockCalendar.add({id: '{$this->name}', lang: '$locale', pid: $p});</script>";
   }
 
   /**

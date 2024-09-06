@@ -3,10 +3,11 @@ var RockCalendar;
   let loaded = false;
 
   class Calendar {
-    constructor(id, lang) {
-      this.id = id;
-      this.lang = lang;
-      this.calendarEl = document.getElementById("calendar-" + id);
+    constructor(config) {
+      this.pid = config.pid;
+      this.id = config.id;
+      this.lang = config.lang;
+      this.calendarEl = document.getElementById("calendar-" + this.id);
       this.li = this.calendarEl.closest("li.Inputfield");
       this.addLink = this.li.querySelector("a.pw-modal.add-item");
       this.calendar = null;
@@ -21,7 +22,7 @@ var RockCalendar;
           editable: true,
           weekNumbers: true,
           locale: this.lang,
-          events: "/rockcalendar/events/?pid=1119&field=" + this.id,
+          events: "/rockcalendar/events/?pid=" + this.pid + "&field=" + this.id,
         },
         this.id
       );
