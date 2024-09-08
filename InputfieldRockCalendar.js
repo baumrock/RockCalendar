@@ -23,6 +23,7 @@ var RockCalendar;
           weekNumbers: true,
           locale: this.lang,
           events: "/rockcalendar/events/?pid=" + this.pid + "&field=" + this.id,
+          eventDidMount: this.eventDidMount.bind(this),
         },
         this.id
       );
@@ -53,7 +54,7 @@ var RockCalendar;
         });
       });
 
-      // click event
+      // click (edit) event
       calendar.on("eventClick", (info) => {
         // do not follow link on regular clicks (no cmd key pressed)
         if (!info.jsEvent.metaKey) {
@@ -94,6 +95,29 @@ var RockCalendar;
         calendar.refetchEvents();
         // trigger resize event to fix calendar display glitch
         window.dispatchEvent(new Event("resize"));
+      });
+    }
+
+    eventDidMount(info) {
+      const url = ProcessWire.config.urls.admin;
+      const tpl = this.li.querySelector(".tippy-tpl");
+      let markup = tpl.innerHTML;
+      markup = markup.replace(
+        "{hrefEdit}",
+        url + "page/edit/?id=" + info.event.id
+      );
+      markup = markup.replace(
+        "{hrefClone}",
+        url + "page/clone/?id=" + info.event.id
+      );
+      markup = markup.replace(
+        "{hrefDelete}",
+        url + "page/delete/?id=" + info.event.id
+      );
+      tippy(info.el, {
+        content: markup,
+        allowHTML: true,
+        interactive: true,
       });
     }
 
