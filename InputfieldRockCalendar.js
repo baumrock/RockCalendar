@@ -29,12 +29,11 @@ var RockCalendar;
       var calendar = new FullCalendar.Calendar(this.calendarEl, config);
       this.calendar = calendar;
       calendar.render();
-      this.addModal();
-      this.addEditCallbacks();
+      this.addCallbacks();
       $(document).on("pw-modal-closed", this.refresh.bind(this));
     }
 
-    addEditCallbacks() {
+    addCallbacks() {
       let calendar = this.calendar;
       calendar.on("eventDrop", (info) => {
         this.fetch("/rockcalendar/eventDrop/", {
@@ -70,10 +69,8 @@ var RockCalendar;
         $link.click();
         $link.remove();
       });
-    }
 
-    addModal() {
-      let calendar = this.calendar;
+      // add event
       calendar.on("select", (info) => {
         let end = new Date(info.endStr);
         end.setDate(end.getDate() - 1);
