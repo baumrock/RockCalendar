@@ -35,12 +35,16 @@ var RockCalendar;
 
     addCallbacks() {
       let calendar = this.calendar;
+
+      // drop event
       calendar.on("eventDrop", (info) => {
         this.fetch("/rockcalendar/eventDrop/", {
           id: info.event.id,
           start: info.event.startStr,
         });
       });
+
+      // resize event
       calendar.on("eventResize", (info) => {
         this.fetch("/rockcalendar/eventResize/", {
           id: info.event.id,
@@ -48,6 +52,8 @@ var RockCalendar;
           end: info.event.endStr,
         });
       });
+
+      // click event
       calendar.on("eventClick", (info) => {
         // do not follow link on regular clicks (no cmd key pressed)
         if (!info.jsEvent.metaKey) {
