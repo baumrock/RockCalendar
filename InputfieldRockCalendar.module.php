@@ -35,8 +35,6 @@ class InputfieldRockCalendar extends InputfieldTextarea
         $dir . "lib/FullCalendar/core/locales/$locale.global.min.js"
       );
     }
-    $this->wire->config->scripts->add($dir . 'assets/backend.js');
-    $this->wire->config->styles->add($dir . 'assets/backend.css');
   }
 
   /**
