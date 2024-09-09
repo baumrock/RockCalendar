@@ -114,7 +114,9 @@ class FieldtypeRockDaterangePicker extends Fieldtype
 
     // use datetime + strtotime to sanitize $value
     $date = new DateTime();
-    $date->setTimestamp(strtotime($value));
+    $ts = $value;
+    if (!is_numeric($ts)) $ts = strtotime($value);
+    $date->setTimestamp($ts);
 
     switch ($subfield) {
       case 'start':
@@ -130,17 +132,17 @@ class FieldtypeRockDaterangePicker extends Fieldtype
         $startDate = $date->format('Y-m-d 00:00:00');
         $date->modify('last day of this year');
         $endDate = $date->format('Y-m-d 23:59:59');
-        break;
+        return $query->where("$table.data <= '$endDate' AND $table.end >= '$startDate'");
       case 'month':
         $date->modify('first day of this month');
         $startDate = $date->format('Y-m-d 00:00:00');
         $date->modify('last day of this month');
         $endDate = $date->format('Y-m-d 23:59:59');
-        break;
+        return $query->where("$table.data <= '$endDate' AND $table.end >= '$startDate'");
       case 'day':
         $startDate = $date->format('Y-m-d 00:00:00');
         $endDate = $date->format('Y-m-d 23:59:59');
-        break;
+        return $query->where("$table.data <= '$endDate' AND $table.end >= '$startDate'");
       case 'inRange':
         /**
          * Usage:
@@ -160,10 +162,13 @@ class FieldtypeRockDaterangePicker extends Fieldtype
         $endDate->setTimestamp($endTS);
         $startDate = $startDate->format('Y-m-d H:i:s');
         $endDate = $endDate->format('Y-m-d H:i:s');
-    }
+        return $query->where("$table.data <= '$endDate' AND $table.end >= '$startDate'");
 
-    $query->where("$table.data <= '$endDate' AND $table.end >= '$startDate'");
-    return $query;
+      case 'series':
+        // find events of series
+        $query->where("$table.mainPage = $value OR $table.pages_id = $value");
+        return $query;
+    }
   }
 
   public function getInputfield(Page $page, Field $field)

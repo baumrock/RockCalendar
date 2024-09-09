@@ -79,6 +79,7 @@ var RockCalendar;
 
       // add event
       calendar.on("select", (info) => {
+        // console.log("selected");
         let end = new Date(info.endStr);
         end.setDate(end.getDate() - 1);
         end = end.toISOString().split("T")[0];
@@ -112,12 +113,23 @@ var RockCalendar;
       );
       markup = markup.replace(
         "{hrefDelete}",
-        url + "page/delete/?id=" + info.event.id
+        url + "page/edit/?id=" + info.event.id + "#ProcessPageEditDelete"
       );
       tippy(info.el, {
         content: markup,
         allowHTML: true,
         interactive: true,
+        appendTo: document.body,
+        onCreate: (instance) => {
+          instance.popper.addEventListener("click", (e) => {
+            const el = e.target.closest("[rc-action]");
+            if (!el) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const action = el.getAttribute("rc-action");
+            console.log(action);
+          });
+        },
       });
     }
 

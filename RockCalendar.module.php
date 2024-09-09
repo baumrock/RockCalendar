@@ -27,8 +27,10 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     wire()->addHookAfter('Page::loaded',                      $this, 'inheritFieldValues');
     wire()->addHookAfter('ProcessPageEdit::buildFormContent', $this, 'hookRecurringEventEdit');
     wire()->addHookProperty('Page::isRecurringEvent',         $this, 'isRecurringEvent');
+    wire()->addHookAfter('ProcessPageEdit::buildFormDelete',  $this, 'addTrashOptions');
+    wire()->addHookAfter('Pages::trashed',                    $this, 'hookTrashed');
 
-    $this->createRecurringEvents();
+    $this->addSseEndpoints();
 
     $f = wire()->fields->get(self::field_date);
     if (!$f) $this->___install();
@@ -42,7 +44,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     }
   }
 
-  private function createRecurringEvents()
+  private function addSseEndpoints()
   {
     // early exit if rockgrid is not installed
     if (!function_exists('\ProcessWire\rockgrid')) return;
@@ -77,6 +79,74 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
           'created' => $p->id,
         ];
       }
+    );
+
+    // add sse endpoint for trashing recurring events
+    rockgrid()->addSseEndpoint(
+      // url
+      '/rockcalendar/trash-events/',
+
+      // getItems() callback
+      function ($rawInput) {
+        $p = wire()->pages->get((int)$rawInput->pid);
+        if (!$p->id) return;
+        if (!$p->hasField(self::field_date)) return;
+        if (!$p->editable()) return;
+        return $this->getEventsOfSeries($p, $rawInput->type);
+      },
+
+      // item callback
+      function ($pageid) {
+        $pageid = (int)$pageid;
+        $p = wire()->pages->get($pageid);
+        if (!$p->id) return;
+        if (!$p->hasField(self::field_date)) return;
+        if (!$p->editable()) return;
+        // sleep(1);
+        $p->trash();
+        return [
+          'id' => $pageid,
+        ];
+      }
+    );
+  }
+
+  protected function addTrashOptions(HookEvent $event)
+  {
+    $p = $event->object->getPage();
+    if (!$p->hasField(self::field_date)) return;
+    if ($p->isTrash()) return;
+
+    // get all events of this series
+    $events = $this->getEventsOfSeries($p);
+    if (count($events) < 2) return;
+
+    /** @var InputfieldWrapper $form */
+    $form = $event->return;
+    $form->add([
+      'type' => 'radios',
+      'name' => 'rc-trash-type',
+      'label' => 'Select an option',
+      'options' => [
+        'self' => 'This event only',
+        'following' => 'This and all following events',
+        'all' => 'All events of this recurring series',
+      ],
+      'value' => 'self',
+      // add script tag that listens to change of rc-trash-type
+      // and checks the delete_page checkbox
+      'appendMarkup' => '<script>
+        document.addEventListener("change", function(e) {
+          if (e.target.name === "rc-trash-type") {
+            document.getElementById("delete_page").checked = true;
+          }
+        });
+      </script>'
+    ]);
+
+    $form->insertBefore(
+      $form->get('rc-trash-type'),
+      $form->get('delete_page')
     );
   }
 
@@ -183,6 +253,22 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     return $result;
   }
 
+  public function getEventsOfSeries(Page $p, string $type = 'self'): array
+  {
+    if (!$p->hasField(self::field_date)) return [];
+    $date = $p->getFormatted(self::field_date);
+    if (!$date->isRecurring) return [];
+    $selector = [
+      self::field_date . '.series' => $date->mainPage->id ?: $p->id,
+    ];
+    if ($type === 'following') {
+      $selector['id!='] = $p->id;
+      $selector[self::field_date . '.start>='] = $date->start();
+    }
+    $all = wire()->pages->findIDs($selector);
+    return $all;
+  }
+
   public function ___getItemArray(Page $p)
   {
     // find datepicker field and get value
@@ -195,6 +281,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       'end' => $date->end(offset: 1),
       'allDay' => $date->hasTime ? 0 : 1,
       'url' => $p->editUrl(),
+      'isRecurring' => $date->isRecurring,
     ];
   }
 
@@ -294,6 +381,17 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $event->return = $form;
   }
 
+  protected function hookTrashed(HookEvent $event): void
+  {
+    $type = wire()->input->post('rc-trash-type', 'string');
+    if (!$type) return;
+    if ($type === 'self') return;
+    wire()->session->redirect($this->processUrl('trash', [
+      'id' => $event->arguments(0)->id,
+      'type' => $type,
+    ]));
+  }
+
   protected function inheritFieldValues(HookEvent $event): void
   {
     /** @var Page $page */
@@ -341,6 +439,18 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       $mappings->$lang = $locale;
     }
     return $mappings;
+  }
+
+  public function processUrl($url, $params = []): string
+  {
+    $url = trim($url, '/');
+    $_params = '';
+    foreach ($params as $key => $value) {
+      $_params .= "$key=$value&";
+    }
+    $_params = trim($_params, '&');
+    $_params = $_params ? '?' . $_params : '';
+    return wire()->pages->get(2)->url . "setup/rockcalendar/$url/$_params";
   }
 
   public function setConfig(string $name, mixed $value): void

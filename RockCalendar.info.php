@@ -17,5 +17,6 @@ $info = [
     'InputfieldRockCalendar',
     'FieldtypeRockDaterangePicker',
     'InputfieldRockDaterangePicker',
+    'ProcessRockCalendar',
   ],
 ];
