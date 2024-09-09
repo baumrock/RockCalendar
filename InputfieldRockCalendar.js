@@ -36,19 +36,16 @@ var RockCalendar;
     }
 
     init() {
-      let config = ProcessWire.hookable(
-        "RockCalendar::config",
-        {
-          initialView: "dayGridMonth",
-          selectable: true,
-          editable: true,
-          weekNumbers: true,
-          locale: this.lang,
-          events: "/rockcalendar/events/?pid=" + this.pid + "&field=" + this.id,
-          eventDidMount: this.eventDidMount.bind(this),
-        },
-        this.id
-      );
+      let conf = {
+        initialView: "dayGridMonth",
+        selectable: true,
+        editable: true,
+        weekNumbers: true,
+        events: "/rockcalendar/events/?pid=" + this.pid + "&field=" + this.id,
+        eventDidMount: this.eventDidMount.bind(this),
+      };
+      if (this.lang) conf.locale = this.lang;
+      let config = ProcessWire.hookable("RockCalendar::config", conf, this.id);
       var calendar = new FullCalendar.Calendar(this.calendarEl, config);
       this.calendar = calendar;
       calendar.render();

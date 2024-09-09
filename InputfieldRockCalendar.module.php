@@ -47,9 +47,10 @@ class InputfieldRockCalendar extends InputfieldTextarea
   {
     $p = wire()->pages->get(wire()->input->get('id', 'int'));
     $locale = rockcalendar()->getUserLocale();
+    $url = wire()->pages->get(2)->url;
     return "
       <a
-        href='/cms/page/add/?parent_id=$p'
+        href='{$url}page/add/?parent_id=$p'
         class='pw-modal add-item uk-hidden'
         data-buttons='button.ui-button[type=submit]'
         data-autoclose

@@ -9,6 +9,7 @@ $info = [
   'icon' => 'calendar',
   'requires' => [
     'PHP>=8.1',
+    'RockCalendar',
   ],
   'installs' => [
     'InputfieldRockDaterangePicker',

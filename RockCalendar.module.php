@@ -70,7 +70,6 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
         $date->setMainPage($event);
         $range = $date->setStart($rawItem->date);
         $p = wire()->pages->new([
-          'template' => EventPage::tpl,
           'parent' => $event->parent,
           RockCalendar::field_date => $range,
           'title' => 'recurr',
@@ -385,6 +384,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
 
   public function getUserLocale(): string
   {
+    if (!wire()->languages) return '';
     $lang = wire()->user->language->name;
     return (string)$this->languageMappings()->$lang;
   }

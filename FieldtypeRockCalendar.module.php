@@ -19,6 +19,9 @@ class FieldtypeRockCalendar extends FieldtypeTextarea
       'installs' => [
         'InputfieldRockCalendar',
       ],
+      'requires' => [
+        'RockCalendar',
+      ],
     ];
   }
 

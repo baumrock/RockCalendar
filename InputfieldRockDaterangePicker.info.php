@@ -8,6 +8,7 @@ $info = [
   'summary' => 'Daterange Picker Inputfield for ProcessWire',
   'icon' => 'calendar',
   'requires' => [
+    'RockCalendar',
     'FieldtypeRockDaterangePicker',
   ],
 ];
