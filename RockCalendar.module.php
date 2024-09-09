@@ -28,7 +28,9 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     wire()->addHookAfter('ProcessPageEdit::buildFormContent', $this, 'hookRecurringEventEdit');
     wire()->addHookProperty('Page::isRecurringEvent',         $this, 'isRecurringEvent');
     wire()->addHookAfter('ProcessPageEdit::buildFormDelete',  $this, 'addTrashOptions');
+    wire()->addHookAfter('ProcessPageEdit::buildForm',        $this, 'autoClick');
     wire()->addHookAfter('Pages::trashed',                    $this, 'hookTrashed');
+    wire()->addHookAfter('ProcessPageList::execute',          $this, 'autoCloseModal');
 
     $this->addSseEndpoints();
 
@@ -148,6 +150,34 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       $form->get('rc-trash-type'),
       $form->get('delete_page')
     );
+  }
+
+  protected function autoClick(HookEvent $event)
+  {
+    /** @var InputfieldWrapper $form */
+    $form = $event->return;
+    $click = wire()->input->get('click', 'string');
+    if (!$click) return;
+    $form->appendMarkup .= "
+        <script>
+        $(document).ready(function() {
+          $('#$click').click();
+        });
+        </script>
+    ";
+  }
+
+  protected function autoCloseModal(HookEvent $event)
+  {
+    if (wire()->config->ajax) return;
+    if (!wire()->input->get('modal')) return;
+    $event->return .= '<script>
+      // from within this iframe click the the parents .ui-dialog-titlebar-close
+      $(document).ready(function() {
+        var closeBtn = window.parent.document.querySelector(".ui-dialog-titlebar-close");
+        if (closeBtn) closeBtn.click();
+      });
+      </script>';
   }
 
   private function err(string $msg): string

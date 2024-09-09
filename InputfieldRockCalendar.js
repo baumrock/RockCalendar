@@ -2,6 +2,28 @@ var RockCalendar;
 (() => {
   let loaded = false;
 
+  const openInModal = (href, options = {}) => {
+    // merge options with defaults
+    const defaults = {
+      autoclose: true,
+      buttons: "button.ui-button[type=submit]",
+    };
+    const opts = { ...defaults, ...options };
+
+    // create a fake link element in body
+    let link = document.createElement("a");
+    let $link = $(link);
+    $link.attr("href", href);
+    $link.addClass("pw-modal");
+    if (opts.autoclose) $link.attr("data-autoclose", "");
+    if (opts.buttons) $link.attr("data-buttons", opts.buttons);
+
+    // Use setTimeout to defer the click event
+    $link.on("click", pwModalOpenEvent);
+    $link.click();
+    $link.remove();
+  };
+
   class Calendar {
     constructor(config) {
       this.pid = config.pid;
@@ -65,16 +87,8 @@ var RockCalendar;
         let href =
           ProcessWire.config.urls.admin + "page/edit/?id=" + info.event.id;
 
-        // create a fake link element in body
-        let link = document.createElement("a");
-        let $link = $(link);
-        $link.attr("href", href);
-        $link.addClass("pw-modal");
-        $link.attr("data-autoclose", "");
-        $link.attr("data-buttons", "button.ui-button[type=submit]");
-        $link.on("click", pwModalOpenEvent);
-        $link.click();
-        $link.remove();
+        // open in modal
+        openInModal(href);
       });
 
       // add event
@@ -113,7 +127,7 @@ var RockCalendar;
       );
       markup = markup.replace(
         "{hrefDelete}",
-        url + "page/edit/?id=" + info.event.id + "#ProcessPageEditDelete"
+        url + "page/edit/?id=" + info.event.id + "&click=_ProcessPageEditDelete"
       );
       tippy(info.el, {
         content: markup,
@@ -126,8 +140,13 @@ var RockCalendar;
             if (!el) return;
             e.preventDefault();
             e.stopPropagation();
-            const action = el.getAttribute("rc-action");
-            console.log(action);
+
+            // close tippy
+            tippy.hideAll();
+
+            const href = el.getAttribute("href");
+            console.log("href", href);
+            openInModal(href);
           });
         },
       });
