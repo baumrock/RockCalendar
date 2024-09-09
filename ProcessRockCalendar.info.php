@@ -13,6 +13,7 @@ $info = [
   'page' => [
     'name' => 'rockcalendar',
     'parent' => 'setup',
-    'title' => 'RockCalendar'
+    'title' => 'RockCalendar',
+    'status' => 'hidden',
   ],
 ];

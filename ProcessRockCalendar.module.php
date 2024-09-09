@@ -82,7 +82,16 @@ class ProcessRockCalendar extends Process
             document.querySelector('progress').value = data.progress * 100;
           },
           onDone: () => {
-            window.location.href = '{$wire->pages->get(2)->url}?modal={$wire->input->get('modal', 'int')}';
+            if(!!{$wire->input->get('modal', 'int')}) {
+              // jump out of iframe
+              // find closest .ui-dialog
+              // click on .ui-dialog-titlebar-close
+              const dialog = window.parent.document.querySelector('.ui-dialog');
+              const closeButton = dialog.querySelector('.ui-dialog-titlebar-close');
+              closeButton.click();
+            } else {
+              window.location.href = '{$wire->pages->get(2)->url}';
+            }
           },
         });
         </script>
