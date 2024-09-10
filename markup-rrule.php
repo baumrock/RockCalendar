@@ -7,7 +7,7 @@
       Event date has been changed. Please save the page before creating additional events.
     </p>
   </div>
-  <table class='uk-table uk-table-small uk-table-striped uk-table-middle uk-margin-remove-top'>
+  <table class='uk-table uk-table-small uk-table-striped uk-table-middle uk-margin-remove'>
     <tbody>
       <tr>
         <td>Mode</td>

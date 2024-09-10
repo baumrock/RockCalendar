@@ -43,6 +43,9 @@
 .InputfieldRockDaterangePicker .progress-container.running .start {
   display: none !important;
 }
+.InputfieldRockDaterangePicker.simple .tabulator-header {
+  display: none;
+}
 .AdminStyleRock .daterangepicker td.in-range {
   background-color: var(--rock-gray-100);
 }

@@ -86,8 +86,8 @@ document.addEventListener("RockGrid:init", (e) => {
         ],
         selectableRows: false,
         pagination: true,
-        paginationSize: 10,
-        paginationSizeSelector: [10, 20, 50, 100],
+        paginationSize: 5,
+        paginationSizeSelector: [5, 10, 25, 50, 100],
         paginationCounter: "rows",
       });
       this.table = table;
@@ -334,6 +334,7 @@ document.addEventListener("RockGrid:init", (e) => {
 
     onChangeMode() {
       // if mode is simple, hide all tr.advanced
+      const header = this.li.querySelector(".tabulator-header");
       if (this.mode === "simple") {
         this.resetInputs();
         // add fake row after 2nd tr
@@ -344,6 +345,7 @@ document.addEventListener("RockGrid:init", (e) => {
         this.configTable.querySelectorAll("tr.advanced").forEach((tr) => {
           tr.classList.add("uk-hidden");
         });
+        this.li.classList.add("simple");
       } else {
         // remove fake row
         let fakeRow = this.configTable.querySelector(".fake-row");
@@ -351,6 +353,7 @@ document.addEventListener("RockGrid:init", (e) => {
         this.configTable.querySelectorAll("tr.advanced").forEach((tr) => {
           tr.classList.remove("uk-hidden");
         });
+        this.li.classList.remove("simple");
       }
     }
 
