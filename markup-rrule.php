@@ -68,7 +68,7 @@
         </td>
       </tr>
       <tr class='advanced uk-hidden'>
-        <td>On months</td>
+        <td>In months</td>
         <td class='uk-flex uk-flex-wrap' style='gap: 10px;'>
           <label><input type='checkbox' class='uk-checkbox' name='bymonth' value='1'> Jan</label>
           <label><input type='checkbox' class='uk-checkbox' name='bymonth' value='2'> Feb</label>
