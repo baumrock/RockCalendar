@@ -56,8 +56,8 @@
       </tr>
       <tr class='advanced uk-hidden'>
         <td>On weekdays</td>
-        <td class='uk-flex uk-flex-wrap' style='gap: 10px;'>
-          <input type='number' name='nth' class='uk-input' style='width: 80px;' min=1 max=5>
+        <td class='uk-flex uk-flex-wrap uk-flex-middle' style='gap: 10px;'>
+          Every <input type='number' name='nth' class='uk-input' style='width: 80px;' min=1 max=5 placeholder='1st'>
           <label><input type='checkbox' class='uk-checkbox' name='byweekday' value='MO'> Monday</label>
           <label><input type='checkbox' class='uk-checkbox' name='byweekday' value='TU'> Tuesday</label>
           <label><input type='checkbox' class='uk-checkbox' name='byweekday' value='WE'> Wednesday</label>
