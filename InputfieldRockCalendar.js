@@ -124,7 +124,7 @@ var RockCalendar;
       );
       markup = markup.replace(
         "{hrefDelete}",
-        url + "page/edit/?id=" + info.event.id + "&click=_ProcessPageEditDelete"
+        url + "page/edit/?id=" + info.event.id + "&tab=delete"
       );
       tippy(info.el, {
         content: markup,

@@ -28,7 +28,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     wire()->addHookAfter('ProcessPageEdit::buildFormContent', $this, 'hookRecurringEventEdit');
     wire()->addHookProperty('Page::isRecurringEvent',         $this, 'isRecurringEvent');
     wire()->addHookAfter('ProcessPageEdit::buildFormDelete',  $this, 'addTrashOptions');
-    wire()->addHookAfter('ProcessPageEdit::buildForm',        $this, 'autoClick');
+    wire()->addHookAfter('ProcessPageEdit::buildForm',        $this, 'openDeleteTab');
     wire()->addHookAfter('Pages::trashed',                    $this, 'hookTrashed');
     wire()->addHookAfter('ProcessPageList::execute',          $this, 'autoCloseModal');
 
@@ -149,21 +149,6 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       $form->get('rc-trash-type'),
       $form->get('delete_page')
     );
-  }
-
-  protected function autoClick(HookEvent $event)
-  {
-    /** @var InputfieldWrapper $form */
-    $form = $event->return;
-    $click = wire()->input->get('click', 'string');
-    if (!$click) return;
-    $form->appendMarkup .= "
-        <script>
-        $(document).ready(function() {
-          $('#$click').click();
-        });
-        </script>
-    ";
   }
 
   protected function autoCloseModal(HookEvent $event)
@@ -475,6 +460,19 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       $mappings->$lang = $locale;
     }
     return $mappings;
+  }
+
+  protected function openDeleteTab(HookEvent $event)
+  {
+    /** @var InputfieldWrapper $form */
+    $form = $event->return;
+    if (wire()->input->get('tab') === 'delete') {
+      $form->appendMarkup .= "<script>
+        $(document).ready(function() {
+          $('#_ProcessPageEditDelete').click();
+        });
+        </script>";
+    }
   }
 
   public function processUrl($url, $params = []): string
