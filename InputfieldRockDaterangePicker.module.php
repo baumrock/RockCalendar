@@ -43,9 +43,10 @@ class InputfieldRockDaterangePicker extends Inputfield
       ]);
     } else {
       $p = $this->value->mainPage;
+      $modal = (int)wire()->input->modal;
       $fs->add([
         'type' => 'markup',
-        'value' => "This event is part of a recurring series. You can edit the main event <a href='{$p->editUrl()}&modal={$this->wire->input->modal}'>here</a>.",
+        'value' => "This event is part of a recurring series. You can edit the main event <a href='{$p->editUrl()}&modal=$modal'>here</a>.",
       ]);
     }
     // $fs->add([
