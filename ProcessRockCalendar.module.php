@@ -29,9 +29,7 @@ class ProcessRockCalendar extends Process
       wire()->input->post('id') ?: wire()->input->get('id')
     );
 
-    // the trash type
-    $type = wire()->input->get('type', ['following', 'all']);
-
+    // check if page is valid
     if (!$p->hasField(RockCalendar::field_date)) {
       $form->add([
         'type' => 'markup',
@@ -51,9 +49,12 @@ class ProcessRockCalendar extends Process
       return $form->render();
     }
 
+    // add JS file
     $url = wire()->config->urls->siteModules;
     wire()->config->scripts->add($url . 'RockGrid/RockGrid.js');
 
+    // get events to trash
+    $type = wire()->input->get('type', ['following', 'all']);
     $all = rockcalendar()->getEventsOfSeries($p, $type);
     $num = count($all);
 
