@@ -128,11 +128,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       'type' => 'radios',
       'name' => 'rc-trash-type',
       'label' => 'Select an option',
-      'options' => [
-        'self' => 'This event only',
-        'following' => 'This and all following events',
-        'all' => 'All events of this recurring series',
-      ],
+      'options' => $this->trashOptions(),
       'value' => 'self',
       // add script tag that listens to change of rc-trash-type
       // and checks the delete_page checkbox
@@ -176,6 +172,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $p = wire()->pages->get((int)$input->id);
     if (!$p->id) return $this->err("Event $p not found");
     if (!$p->editable()) return $this->err("Event $p not editable");
+    if (!$this->hasDateRange($p)) return $this->err("Page $p has no daterange field");
     $date = $this->getDateRange($p);
     $diff = $date->diff();
     $newStart = strtotime($input->start);
@@ -246,7 +243,13 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $event = wire()->pages->get((int)$rawInput->pid);
     if (!$event->editable()) return false;
     if (!$event->id) return false;
+    if (!$this->hasDateRange($event)) return false;
     return $event;
+  }
+
+  public function hasDateRange(Page $p): bool
+  {
+    return $this->getDateRange($p) !== false;
   }
 
   public function ___getEvents(
@@ -404,7 +407,8 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
 
   protected function hookTrashed(HookEvent $event): void
   {
-    $type = wire()->input->post('rc-trash-type', 'string');
+    $validOptions = array_keys($this->trashOptions());
+    $type = wire()->input->post('rc-trash-type', $validOptions);
     if (!$type) return;
     if ($type === 'self') return;
     wire()->session->redirect($this->processUrl('trash', [
@@ -497,5 +501,14 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
   private function succ(string $msg): string
   {
     return json_encode(['success' => $msg]);
+  }
+
+  private function trashOptions(): array
+  {
+    return [
+      'self'      => 'This event only',
+      'following' => 'This and all following events',
+      'all'       => 'All events of this recurring series',
+    ];
   }
 }
