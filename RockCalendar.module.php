@@ -282,11 +282,17 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     return $result;
   }
 
-  public function getEventsOfSeries(Page $p, string $type = 'self'): array
+  public function getEventsOfSeries(Page $p, ?string $type = null): array
   {
+    // this is to support NULL types coming from sanitized input
+    $type = $type ?? 'self';
+
+    // early exits
     if (!$p->hasField(self::field_date)) return [];
     $date = $p->getFormatted(self::field_date);
     if (!$date->isRecurring) return [];
+
+    // build selector and return events
     $selector = [
       self::field_date . '.series' => $date->mainPage->id ?: $p->id,
     ];
