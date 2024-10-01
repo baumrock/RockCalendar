@@ -299,7 +299,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $date = $this->getDateRange($p);
     if (!$date) return;
 
-    $col = '#64B5F6';
+    $col = '#B2DFDB';
     if ($p->hasStatus(Page::statusUnpublished)) $col = '#E0E0E0';
 
     return [
