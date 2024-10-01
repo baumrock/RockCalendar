@@ -26,8 +26,8 @@ To show all upcoming events we only select events that have an "end" timestamp i
 $pages->find([
   'template' => 'event',
   'has_parent' => '/events',
-  'your_daterange_field.end>=' => 'now',
-  'sort' => 'your_daterange_field',
+  'rockcalendar_date.end>=' => 'now',
+  'sort' => 'rockcalendar_date',
   'limit' => 12,
 ]);
 ```
@@ -40,21 +40,21 @@ For a simple event calendar you might want to show all events from one day or mo
 $pages->find([
   'template' => 'event',
   'has_parent' => '/events',
-  'your_daterange_field.month' => '2024-08',
-  'sort' => 'your_daterange_field',
+  'rockcalendar_date.month' => '2024-08',
+  'sort' => 'rockcalendar_date',
 ]);
 ```
 
 Or for a day:
 
 ```php
-'your_daterange_field.day' => '2024-08-01',
+'rockcalendar_date.day' => '2024-08-01',
 ```
 
 Or for a year:
 
 ```php
-'your_daterange_field.year' => '2024',
+'rockcalendar_date.year' => '2024',
 ```
 
 ## Need More Selectors?
