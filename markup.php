@@ -17,16 +17,18 @@
     </svg>
     <?= $hasRangeLabel ?>
   </label>
-  <label class='uk-flex rc-button'>
-    <input <?= $isRecurring ? 'checked' : '' ?> name='<?= $name ?>_isRecurring' type='checkbox' class='isRecurring uk-checkbox' style='margin-top:2px;'>
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-        <path d="M19.933 13.041a8 8 0 1 1-9.925-8.788c3.899-1 7.935 1.007 9.425 4.747" />
-        <path d="M20 4v5h-5" />
-      </g>
-    </svg>
-    <?= $isRecurringLabel ?>
-  </label>
+  <?php if ($hasRockGrid): ?>
+    <label class='uk-flex rc-button'>
+      <input <?= $isRecurring ? 'checked' : '' ?> name='<?= $name ?>_isRecurring' type='checkbox' class='isRecurring uk-checkbox' style='margin-top:2px;'>
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+          <path d="M19.933 13.041a8 8 0 1 1-9.925-8.788c3.899-1 7.935 1.007 9.425 4.747" />
+          <path d="M20 4v5h-5" />
+        </g>
+      </svg>
+      <?= $isRecurringLabel ?>
+    </label>
+  <?php endif ?>
 </div>
 <input hidden name='<?= $name ?>_start' value='<?= $start ?>'>
 <input hidden name='<?= $name ?>_end' value='<?= $end ?>'>

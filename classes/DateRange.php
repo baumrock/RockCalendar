@@ -13,7 +13,7 @@ use function ProcessWire\wire;
 class DateRange extends WireData
 {
   public $allDay;
-  public $end;
+  public int $end;
   public string $fieldName;
   public bool $hasTime;
   public bool $hasRange;
@@ -111,6 +111,12 @@ class DateRange extends WireData
     $diff = $this->diff();
     $this->start = $this->getTS($start);
     $this->end = $this->start + $diff;
+    return $this;
+  }
+
+  public function setEnd(mixed $end): self
+  {
+    $this->end = $this->getTS($end);
     return $this;
   }
 

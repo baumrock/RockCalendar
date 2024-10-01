@@ -75,6 +75,12 @@ class FieldtypeRockDaterangePicker extends Fieldtype
     $table = $field->getTable();
     $database = wire()->database;
 
+    // this prevents base table not found during install
+    if (!$schemaVersion) {
+      $field->set('schemaVersion', 1);
+      return $schema;
+    }
+
     // version 1 + 2 removed before release
     if ($schemaVersion < 3 && $updateSchema) {
       try {

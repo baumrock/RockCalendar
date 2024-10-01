@@ -29,36 +29,39 @@ class InputfieldRockDaterangePicker extends Inputfield
     ]);
     $input = "<input $attrStr />";
 
-    $fs = new InputfieldFieldset();
-    if (!$this->value->mainPage->id) {
-      $fs->add([
-        'type' => 'RockGrid',
-        'name' => $this->name . '_create',
-        'grid' => 'RockCalendar\\CreateRecurringEvents',
-        'label' => 'Create Additional Events',
-        'icon' => 'plus',
-        // 'collapsed' => Inputfield::collapsedYes,
-        'prependMarkup' => wire()->files->render(__DIR__ . '/markup-rrule.php'),
-        'appendMarkup' => wire()->files->render(__DIR__ . '/markup-progress.php'),
-      ]);
-    } else {
-      $p = $this->value->mainPage;
-      $modal = (int)wire()->input->modal;
-      $fs->add([
-        'type' => 'markup',
-        'value' => "This event is part of a recurring series. You can edit the main event <a href='{$p->editUrl()}&modal=$modal'>here</a>.",
-      ]);
+    if (wire()->modules->isInstalled('RockGrid')) {
+      $fs = new InputfieldFieldset();
+      if (!$this->value->mainPage->id) {
+        $fs->add([
+          'type' => 'RockGrid',
+          'name' => $this->name . '_create',
+          'grid' => 'RockCalendar\\CreateRecurringEvents',
+          'label' => 'Create Additional Events',
+          'icon' => 'plus',
+          // 'collapsed' => Inputfield::collapsedYes,
+          'prependMarkup' => wire()->files->render(__DIR__ . '/markup-rrule.php'),
+          'appendMarkup' => wire()->files->render(__DIR__ . '/markup-progress.php'),
+        ]);
+      } else {
+        $p = $this->value->mainPage;
+        $modal = (int)wire()->input->modal;
+        $fs->add([
+          'type' => 'markup',
+          'value' => "This event is part of a recurring series. You can edit the main event <a href='{$p->editUrl()}&modal=$modal'>here</a>.",
+        ]);
+      }
+      // $fs->add([
+      //   'type' => 'RockGrid',
+      //   'name' => $this->name . '_events',
+      //   'grid' => 'RockCalendar\\EventsOfSeries',
+      //   'label' => 'Existing Events of this Series',
+      //   'icon' => 'calendar',
+      // ]);
+      $grid = $fs->render();
     }
-    // $fs->add([
-    //   'type' => 'RockGrid',
-    //   'name' => $this->name . '_events',
-    //   'grid' => 'RockCalendar\\EventsOfSeries',
-    //   'label' => 'Existing Events of this Series',
-    //   'icon' => 'calendar',
-    // ]);
-    $grid = $fs->render();
 
     return wire()->files->render(__DIR__ . '/markup.php', [
+      'hasRockGrid' => wire()->modules->isInstalled('RockGrid'),
       'hasTime' => $this->value->hasTime,
       'hasRange' => $this->value->hasRange,
       'start' => $this->value->start(),
@@ -74,7 +77,7 @@ class InputfieldRockDaterangePicker extends Inputfield
       'recurendcount' => $this->value->recurendcount ?: 1,
       'input' => $input,
       'name' => $this->name,
-      'grid' => $grid,
+      'grid' => $grid ?? false,
     ]);
   }
 

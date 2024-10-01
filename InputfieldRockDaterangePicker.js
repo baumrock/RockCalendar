@@ -31,10 +31,14 @@ var RockDaterange;
       this.initPicker();
       this.$hasTime.addEventListener("change", this.changed.bind(this));
       this.$hasRange.addEventListener("change", this.changed.bind(this));
-      this.$isRecurring.addEventListener(
-        "change",
-        this.recurringChanged.bind(this)
-      );
+
+      // only do this if RockGrid is installed
+      if (this.$isRecurring) {
+        this.$isRecurring.addEventListener(
+          "change",
+          this.recurringChanged.bind(this)
+        );
+      }
     }
 
     // public API to manipulate the field

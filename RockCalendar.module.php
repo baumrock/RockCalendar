@@ -18,6 +18,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
 {
   const prefix = 'rockcalendar_';
   const field_date = self::prefix . "date";
+  const field_calendar = self::prefix . "calendar";
 
   public function init()
   {
@@ -33,9 +34,6 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     wire()->addHookAfter('ProcessPageList::execute',          $this, 'autoCloseModal');
 
     $this->addSseEndpoints();
-
-    $f = wire()->fields->get(self::field_date);
-    if (!$f) $this->___install();
   }
 
   public function ready(): void
@@ -177,8 +175,8 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $diff = $date->diff();
     $newStart = strtotime($input->start);
     $newEnd = $newStart + $diff;
-    $date->start = $newStart;
-    $date->end = $newEnd;
+    $date->setStart($newStart);
+    $date->setEnd($newEnd);
     $p->setAndSave($date->fieldName, $date);
     return $this->succ("Event $p moved");
   }
@@ -193,8 +191,9 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $date = $this->getDateRange($p);
     $newStart = strtotime($input->start);
     $newEnd = strtotime($input->end) - 1; // account for FullCalendar date handling
-    $date->start = $newStart;
-    $date->end = $newEnd;
+    $date->setStart($newStart);
+    $date->setEnd($newEnd);
+    $date->hasRange = true;
     $p->setAndSave($date->fieldName, $date);
     return $this->succ("Event $p resized");
   }
@@ -257,11 +256,13 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     int $start,
     int $end,
     Field $field,
+    string $include = 'all',
   ): array {
     // find events in given date range
     $events = wire()->pages->find([
       'parent' => $pid,
       $field->name . '.inRange' => "$start - $end",
+      'include' => $include,
     ]);
     $result = [];
     foreach ($events as $event) {
@@ -297,6 +298,10 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     // find datepicker field and get value
     $date = $this->getDateRange($p);
     if (!$date) return;
+
+    $col = '#64B5F6';
+    if ($p->hasStatus(Page::statusUnpublished)) $col = '#E0E0E0';
+
     return [
       'id' => $p->id,
       'title' => $p->title,
@@ -305,6 +310,9 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       'allDay' => $date->hasTime ? 0 : 1,
       'url' => $p->editUrl(),
       'isRecurring' => $date->isRecurring,
+      'backgroundColor' => $col,
+      'borderColor' => $col,
+      'textColor' => '#212121',
     ];
   }
 
@@ -438,6 +446,12 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $field->type = 'FieldtypeRockDaterangePicker';
     $field->name = self::field_date;
     $field->label = 'Date';
+    $field->save();
+
+    $field = $this->wire(new Field());
+    $field->type = 'FieldtypeRockCalendar';
+    $field->name = self::field_calendar;
+    $field->label = 'Calendar';
     $field->save();
   }
 
