@@ -14,3 +14,5 @@ Recurring events will inherit all field values from the original event unless ex
 ```php
 $page->isRecurringEvent;
 ```
+
+-- more docs coming soon --
