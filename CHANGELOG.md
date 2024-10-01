@@ -1,4 +1,11 @@
-## 1.0.0 (2024-10-01)
+## [1.0.1](https://github.com/baumrock/RockCalendar/compare/v1.0.0...v1.0.1) (2024-10-01)
+
+
+### Bug Fixes
+
+* update colors to match video ([119fc38](https://github.com/baumrock/RockCalendar/commit/119fc3877bd0e72ca9317b6c508654c0ae7eb81e))
+
+## [1.0.0](https://github.com/baumrock/RockCalendar/compare/b0be848b0f226c724d997428460e660c804ccd7f...v1.0.0) (2024-10-01)
 
 
 ### ⚠ BREAKING CHANGES
