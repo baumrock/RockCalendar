@@ -132,3 +132,5 @@ That's it! You now have a fully functional calendar that shows events in a speci
 Please use your browser's developer console to inspect the network tab to see the requests and responses:
 
 <img src=https://i.imgur.com/iFsoTsr.png class=blur>
+
+For all features and options of FullCalendar, please refer to the <a href="https://fullcalendar.io/docs" target="_blank">FullCalendar documentation</a>.
