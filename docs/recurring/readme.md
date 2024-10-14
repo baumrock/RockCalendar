@@ -2,6 +2,8 @@
 
 ## Notes
 
+To use the recurring events feature, you have to purchase a license for RockGrid, as this module is used to render the recurring events user interface.
+
 ### Field inheritance
 
 Recurring events will inherit all field values from the original event unless explicitly overridden. This has two benefits:
