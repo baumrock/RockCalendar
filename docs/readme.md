@@ -6,7 +6,7 @@
 Docs are under construction. If you have questions, please ask in the forum thread linked below!
 </div>
 
-https://processwire.com/talk/topic/30460--
+<a href='https://processwire.com/talk/topic/30460--'>https://processwire.com/talk/topic/30460--</a>
 
 ## Notes
 
