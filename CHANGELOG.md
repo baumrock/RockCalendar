@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/baumrock/RockCalendar/compare/v1.0.2...v1.0.3) (2024-10-15)
+
+
+### Bug Fixes
+
+* prevent negative interval causing endless loop ([07ef0e4](https://github.com/baumrock/RockCalendar/commit/07ef0e4d97bf6df906b33300f03db2793728f167))
+
 ## [1.0.2](https://github.com/baumrock/RockCalendar/compare/v1.0.1...v1.0.2) (2024-10-15)
 
 
