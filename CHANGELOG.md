@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/baumrock/RockCalendar/compare/v1.0.1...v1.0.2) (2024-10-15)
+
+
+### Bug Fixes
+
+* error when no language mappings are set ([23ec3a5](https://github.com/baumrock/RockCalendar/commit/23ec3a5ac96d6df6fdd0ec2fef88c143455ee692))
+
 ## [1.0.1](https://github.com/baumrock/RockCalendar/compare/v1.0.0...v1.0.1) (2024-10-01)
 
 
