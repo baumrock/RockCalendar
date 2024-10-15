@@ -473,6 +473,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       if (!$line) continue;
       // split on colon and trim whitespace
       $parts = explode(':', $line);
+      if (count($parts) !== 2) continue;
       $lang = trim($parts[0]);
       $locale = trim($parts[1]);
       $mappings->$lang = $locale;
