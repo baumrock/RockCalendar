@@ -33,7 +33,7 @@
       <tr>
         <td>Repeat every</td>
         <td>
-          <input type='number' name='interval' class='uk-input uk-text-center'>
+          <input type='number' name='interval' class='uk-input uk-text-center' min=1>
           <select class='uk-select' name='freq'>
             <option value='YEARLY'>Years</option>
             <option value='MONTHLY'>Months</option>

@@ -252,6 +252,10 @@ document.addEventListener("RockGrid:init", (e) => {
       if (this.bymonth.length)
         config.bymonth = this.bymonth.map((m) => parseInt(m));
 
+      // make sure interval is never every smaller than 1
+      // as this would cause an infinite loop in rrule
+      if (config.interval < 1) config.interval = 1;
+
       // set limit of 10 events if no count or until is set
       if (!this.count && !this.until) config.count = grid.jsVars.endsNeverLimit;
 
@@ -330,6 +334,10 @@ document.addEventListener("RockGrid:init", (e) => {
       } else {
         input.type = "date";
       }
+    }
+
+    onChangeInterval() {
+      if (this.interval < 1) this.interval = 1;
     }
 
     onChangeMode() {
