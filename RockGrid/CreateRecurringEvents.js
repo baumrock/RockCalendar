@@ -257,7 +257,9 @@ document.addEventListener("RockGrid:init", (e) => {
       if (config.interval < 1) config.interval = 1;
 
       // set limit of 10 events if no count or until is set
-      if (!this.count && !this.until) config.count = grid.jsVars.endsNeverLimit;
+      if (!this.count && !this.until) {
+        config.count = grid.jsVars.endsNeverLimit || 100;
+      }
 
       return config;
     }
