@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/baumrock/RockCalendar/compare/v1.0.3...v1.0.4) (2024-10-15)
+
+
+### Bug Fixes
+
+* prevent page freeze if no limit is set, make sure to have max 100 rows in that case ([6e9f0e7](https://github.com/baumrock/RockCalendar/commit/6e9f0e7de1eedfb87aa5e4a47f561910cb9493cb))
+
 ## [1.0.3](https://github.com/baumrock/RockCalendar/compare/v1.0.2...v1.0.3) (2024-10-15)
 
 
