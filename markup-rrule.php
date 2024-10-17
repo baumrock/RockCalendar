@@ -59,6 +59,11 @@
         <td class='uk-flex uk-flex-wrap uk-flex-middle' style='gap: 10px;'>
           Every <select name='nth' class='uk-select' style='width: 80px;'>
             <option value='' selected></option>
+            <option value='-5'>5th to last</option>
+            <option value='-4'>4th to last</option>
+            <option value='-3'>3rd to last</option>
+            <option value='-2'>2nd to last</option>
+            <option value='-1'>last</option>
             <option value='1'>1st</option>
             <option value='2'>2nd</option>
             <option value='3'>3rd</option>
