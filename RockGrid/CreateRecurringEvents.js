@@ -411,6 +411,9 @@ document.addEventListener("RockGrid:init", (e) => {
                   element.checked = element.value === value;
                 });
                 break;
+              case "checkbox":
+                // do nothing
+                break;
               default:
                 el.value = value;
             }
