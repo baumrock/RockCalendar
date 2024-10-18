@@ -595,6 +595,6 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       'dec' => __('Dec'),
       'changed-warning' => __('Event date has been changed. Please save the page before creating additional events.'),
     ];
-    return $translations[$prop];
+    return array_key_exists($prop, $translations) ? $translations[$prop] : '';
   }
 }

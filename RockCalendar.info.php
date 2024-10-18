@@ -11,7 +11,7 @@ $info = [
   'icon' => 'calendar',
   'requires' => [
     'PHP>=8.1',
-    'RockJavaScriptHooks>=0.0.1',
+    'RockJavaScriptHooks>=1.0.0',
   ],
   'installs' => [
     'FieldtypeRockCalendar',

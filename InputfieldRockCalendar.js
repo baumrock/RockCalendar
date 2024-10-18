@@ -45,8 +45,7 @@ var RockCalendar;
         eventDidMount: this.eventDidMount.bind(this),
       };
       if (this.lang) conf.locale = this.lang;
-      let config = ProcessWire.hookable("RockCalendar::config", conf, this.id);
-      var calendar = new FullCalendar.Calendar(this.calendarEl, config);
+      var calendar = new FullCalendar.Calendar(this.calendarEl, conf);
       this.calendar = calendar;
       calendar.render();
       this.addCallbacks();

@@ -113,17 +113,16 @@ var RockDaterange;
     }
 
     settings() {
-      let locale = ProcessWire.hookable("RockDaterangePicker::locale", {
-        format: this.hasTime ? "DD.MM.YYYY HH:mm" : "DD.MM.YYYY",
-        firstDay: 1, // monday
-      });
       return {
         timePicker: this.hasTime,
         timePicker24Hour: true,
         singleDatePicker: !this.hasRange,
         buttonClasses: "uk-button uk-button-small",
         applyButtonClasses: "uk-button-primary",
-        locale: locale,
+        locale: {
+          format: this.hasTime ? "DD.MM.YYYY HH:mm" : "DD.MM.YYYY",
+          firstDay: 1, // monday
+        },
         startDate: this.startDate,
         endDate: this.endDate,
         autoApply: false,
