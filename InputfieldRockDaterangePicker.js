@@ -6,7 +6,9 @@ var RockDaterange;
     }
 
     init(name) {
-      this.pickers[name] = new RockCalendarDaterangePicker(name);
+      const picker = new RockCalendarDaterangePicker(name);
+      this.pickers[name] = picker;
+      picker.initPicker();
     }
   }
 
@@ -28,7 +30,6 @@ var RockDaterange;
       this.hasRange = false;
       this.isRecurring = false;
       this.changed();
-      this.initPicker();
       this.$hasTime.addEventListener("change", this.changed.bind(this));
       this.$hasRange.addEventListener("change", this.changed.bind(this));
 
