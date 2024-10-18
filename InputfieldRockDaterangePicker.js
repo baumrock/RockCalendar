@@ -6,17 +6,17 @@ var RockDaterange;
     }
 
     init(name) {
-      const picker = new RockCalendarDaterangePicker(name);
+      const picker = ProcessWire.wire(new RockDaterangePicker(name));
       this.pickers[name] = picker;
       picker.initPicker();
     }
   }
 
-  class RockCalendarDaterangePicker {
+  class RockDaterangePicker {
     constructor(name) {
+      this.name = name;
       this.picker = false;
       this.pickers = {};
-      this.name = name;
       this.$li = document.querySelector("#wrap_Inputfield_" + name);
       this.$picker = this.$li.querySelector("input[name=" + name + "]");
       this.$start = this.$li.querySelector("input[name=" + name + "_start]");
@@ -109,11 +109,11 @@ var RockDaterange;
     setDates() {
       this.startDate = this.picker.startDate;
       this.endDate = this.picker.endDate;
-      this.$start.value = this.picker.startDate.format("YYYY-MM-DD HH:mm:ss");
-      this.$end.value = this.picker.endDate.format("YYYY-MM-DD HH:mm:ss");
+      this.$start.value = this.startDate.format("YYYY-MM-DD HH:mm:ss");
+      this.$end.value = this.endDate.format("YYYY-MM-DD HH:mm:ss");
     }
 
-    settings() {
+    ___settings() {
       return {
         timePicker: this.hasTime,
         timePicker24Hour: true,
