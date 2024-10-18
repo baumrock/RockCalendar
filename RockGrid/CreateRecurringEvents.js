@@ -300,7 +300,15 @@ document.addEventListener("RockGrid:init", (e) => {
       // event time changed
       $(document).on("change", "input[name=rockcalendar_date]", () => {
         this.onChange();
+        // hide GUI for creating events
+        // this is because if, for example, a time is added to the main event
+        // but the page is not saved, then all recurring events will be
+        // fullday events without a time, which is hard to revert
         this.li.querySelector(".warning").classList.remove("uk-hidden");
+        this.li.querySelector(".warning").classList.add("uk-margin-remove");
+        this.li.querySelector("table").classList.add("uk-hidden");
+        this.li.querySelector(".RockGridWrapper").classList.add("uk-hidden");
+        this.li.querySelector(".progress-container").classList.add("uk-hidden");
       });
 
       // clicks on delete icon
