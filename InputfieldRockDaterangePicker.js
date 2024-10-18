@@ -1,16 +1,16 @@
 var RockDaterange;
 (() => {
-  class Pickers {
+  class RockCalendarDaterangePickers {
     constructor() {
       this.pickers = {};
     }
 
     init(name) {
-      this.pickers[name] = new Picker(name);
+      this.pickers[name] = new RockCalendarDaterangePicker(name);
     }
   }
 
-  class Picker {
+  class RockCalendarDaterangePicker {
     constructor(name) {
       this.picker = false;
       this.pickers = {};
@@ -130,7 +130,7 @@ var RockDaterange;
     }
   }
 
-  RockDaterange = new Pickers();
+  RockDaterange = new RockCalendarDaterangePickers();
 
   // auto-populate date in calendar modals
   $(document).ready(() => {
