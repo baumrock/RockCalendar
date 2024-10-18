@@ -6,7 +6,7 @@
 Docs are under construction. If you have questions, please ask in the forum thread linked below!
 </div>
 
-<a href='https://processwire.com/talk/topic/30460--'>https://processwire.com/talk/topic/30460--</a>
+https://processwire.com/talk/topic/30460-introducing-rockcalendar-a-powerful-and-flexible-calendar-module-for-processwire/
 
 ## Notes
 
