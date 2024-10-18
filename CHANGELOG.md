@@ -1,3 +1,11 @@
+## [1.2.0](https://github.com/baumrock/RockCalendar/compare/v1.1.1...v1.2.0) (2024-10-18)
+
+
+### Features
+
+* add german and finnish translations ([82bcf1b](https://github.com/baumrock/RockCalendar/commit/82bcf1bf266f0e40ecadad8be61c7dc28e956a3a))
+* hide GUI if time of main event is changed ([9851229](https://github.com/baumrock/RockCalendar/commit/9851229e2fb22cc25c768edccdcff9a7b70c1eed))
+
 ## [1.1.1](https://github.com/baumrock/RockCalendar/compare/v1.1.0...v1.1.1) (2024-10-18)
 
 
@@ -25,11 +33,4 @@
 ### Bug Fixes
 
 * prevent negative interval causing endless loop ([07ef0e4](https://github.com/baumrock/RockCalendar/commit/07ef0e4d97bf6df906b33300f03db2793728f167))
-
-## [1.0.2](https://github.com/baumrock/RockCalendar/compare/v1.0.1...v1.0.2) (2024-10-15)
-
-
-### Bug Fixes
-
-* error when no language mappings are set ([23ec3a5](https://github.com/baumrock/RockCalendar/commit/23ec3a5ac96d6df6fdd0ec2fef88c143455ee692))
 
