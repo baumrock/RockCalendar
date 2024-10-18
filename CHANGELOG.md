@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/baumrock/RockCalendar/compare/v1.1.0...v1.1.1) (2024-10-18)
+
+
+### Bug Fixes
+
+* prevent selected checkboxes updating value attribute of first checkbox ([f1895c5](https://github.com/baumrock/RockCalendar/commit/f1895c5b3a5c9c4ed1ca5f3cbb6fbd02f349aba5))
+
 ## [1.1.0](https://github.com/baumrock/RockCalendar/compare/v1.0.4...v1.1.0) (2024-10-17)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * error when no language mappings are set ([23ec3a5](https://github.com/baumrock/RockCalendar/commit/23ec3a5ac96d6df6fdd0ec2fef88c143455ee692))
-
-## [1.0.1](https://github.com/baumrock/RockCalendar/compare/v1.0.0...v1.0.1) (2024-10-01)
-
-
-### Bug Fixes
-
-* update colors to match video ([119fc38](https://github.com/baumrock/RockCalendar/commit/119fc3877bd0e72ca9317b6c508654c0ae7eb81e))
 
