@@ -1,0 +1,177 @@
+{
+    "file": "site\/modules\/RockCalendar\/RockCalendar.module.php",
+    "textdomain": "site--modules--rockcalendar--rockcalendar-module-php",
+    "translations": {
+        "367911305819a6ea428e94c95f3fe240": {
+            "text": "Zus\u00e4tzliche Events anlegen"
+        },
+        "9f9af6b131f118a06e6c677fc3b0433a": {
+            "text": "Zeit eingeben"
+        },
+        "6a2c36ced062a98b7dfb90e152540c51": {
+            "text": "Zeitraum eingeben"
+        },
+        "582ff616b727759a2208c65b27b0d309": {
+            "text": "Wiederkehrend"
+        },
+        "7c83a419ca3e7f344517298824216e24": {
+            "text": "Dieses Event ist Teil einer Serie."
+        },
+        "4bdf2ba832eecab6c6fa4413d7abd349": {
+            "text": "Klicken Sie hier um das Haupt-Event zu bearbeiten."
+        },
+        "20444a6d0a104a2fe36baaafdf6ef7b1": {
+            "text": "Wiederholen alle"
+        },
+        "650be61892bf690026089544abbd9d26": {
+            "text": "Modus"
+        },
+        "1fbb1e3943c2c6c560247ac8f9289780": {
+            "text": "Einfach"
+        },
+        "9b6545e4cea9b4ad4979d41bb9170e2b": {
+            "text": "Fortgeschritten"
+        },
+        "e4a00407f4e14849a66f076123f38494": {
+            "text": "Jahre"
+        },
+        "ef831a7b020689074c3df21c36dfc3c0": {
+            "text": "Monate"
+        },
+        "be71e9f41f9bc90aa6c88d78954051c7": {
+            "text": "Wochen"
+        },
+        "e807d3ccf8d24c8c1a3d86db5da78da8": {
+            "text": "Tage"
+        },
+        "6a7e73161603d87b26a8eac49dab0a9c": {
+            "text": "Stunden"
+        },
+        "f670ea66cfb0e90bd6090472ad692694": {
+            "text": "Minuten"
+        },
+        "8f19a8c7566af54ea8981029730e5465": {
+            "text": "Sekunden"
+        },
+        "672f67a2a2dbe63f7fba239f3af4f598": {
+            "text": "Endet am"
+        },
+        "a01fe6d89bdd5ae75a44534ebdfb2eaa": {
+            "text": "oder nach"
+        },
+        "16908b0605f2645dfcb4c3a8d248cef3": {
+            "text": "Events"
+        },
+        "8eea62084ca7e541d918e823422bd82e": {
+            "text": "Resultat"
+        },
+        "6f8522e0610541f1ef215a22ffa66ff6": {
+            "text": "Montag"
+        },
+        "5792315f09a5d54fb7e3d066672b507f": {
+            "text": "Dienstag"
+        },
+        "796c163589f295373e171842f37265d5": {
+            "text": "Mittwoch"
+        },
+        "78ae6f0cd191d25147e252dc54768238": {
+            "text": "Donnerstag"
+        },
+        "c33b138a163847cdb6caeeb7c9a126b4": {
+            "text": "Freitag"
+        },
+        "8b7051187b9191cdcdae6ed5a10e5adc": {
+            "text": "Samstag"
+        },
+        "9d1a0949c39e66a0cd65240bc0ac9177": {
+            "text": "Sonntag"
+        },
+        "8de74537b9d78f7e34ca4786e4a85972": {
+            "text": "Events erstellen"
+        },
+        "a6122a65eaa676f700ae68d393054a37": {
+            "text": "Beginn"
+        },
+        "99bc6bb3ea4642060c4dcb4601a45b15": {
+            "text": "An Wochentagen"
+        },
+        "ffcf70e892b8ac3facbac0f88602396b": {
+            "text": "Jeden"
+        },
+        "e0f720d0ebef3ec7d61be00b8f185687": {
+            "text": "f\u00fcnftletzter"
+        },
+        "39f1a2d6bf02b85e150ca9e39ddd4a3e": {
+            "text": "viertletzter"
+        },
+        "8ea3d852fc83f46e7eb9cd8bdf60f177": {
+            "text": "drittletzter"
+        },
+        "22ab4b8dab399f32f893852019b98f33": {
+            "text": "vorletzter"
+        },
+        "98bd1c45684cf587ac2347a92dd7bb51": {
+            "text": "letzter"
+        },
+        "8b04d5e3775d298e78455efc5ca404d5": {
+            "text": "erster"
+        },
+        "a9f0e61a137d86aa9db53465e0801612": {
+            "text": "zweiter"
+        },
+        "dd5c8bf51558ffcbe5007071908e9524": {
+            "text": "dritter"
+        },
+        "c0759f2416498708841e7975566360ce": {
+            "text": "vierter"
+        },
+        "0883a6520e6eb6c9304dcfb71034d053": {
+            "text": "f\u00fcnfter"
+        },
+        "b708e2a813044c61fc71a920b7002e38": {
+            "text": "In Monaten"
+        },
+        "7ce6b2286a5396e614b8484105d277e0": {
+            "text": "M\u00e4r"
+        },
+        "195fbb57ffe7449796d23466085ce6d8": {
+            "text": "Mai"
+        },
+        "594be08882c8e9d5efb9eeb62f303744": {
+            "text": "Okt"
+        },
+        "d207b4e0bce42a8f1555ce3a05e287f6": {
+            "text": "Dez"
+        },
+        "6070ddc342e006f6a0f2f25b7ed9b949": {
+            "text": "Haupt-Event"
+        },
+        "b28d6e549393b40f0022cd46540cea00": {
+            "text": "Event-Datum wurde ge\u00e4ndert. Bitte speichern Sie die Seite, bevor Sie wiederkehrende Events hinzuf\u00fcgen."
+        },
+        "e68564f23e0e939acea76dc3d2bc01bf": {
+            "text": "="
+        },
+        "ea171d540ccd5f0669171ef06d3cd848": {
+            "text": "="
+        },
+        "6d7215c4b3bc4716d026ac46c6d9ae64": {
+            "text": "="
+        },
+        "eb4b40c1221dad5b23fe7ef84d292be1": {
+            "text": "="
+        },
+        "a2866cd6efaa65c92278d4771a9eaec7": {
+            "text": "="
+        },
+        "22f1a4667604b8557c9b209c201b4bc6": {
+            "text": "="
+        },
+        "f04aa7019c490474fa3ce16e93501b57": {
+            "text": "="
+        },
+        "343e6957be77c6247aa2b8d0deb68bd6": {
+            "text": "="
+        }
+    }
+}

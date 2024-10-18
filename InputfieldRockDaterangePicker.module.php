@@ -36,7 +36,7 @@ class InputfieldRockDaterangePicker extends Inputfield
           'type' => 'RockGrid',
           'name' => $this->name . '_create',
           'grid' => 'RockCalendar\\CreateRecurringEvents',
-          'label' => 'Create Additional Events',
+          'label' => rockcalendar()->x('create-events'),
           'icon' => 'plus',
           // 'collapsed' => Inputfield::collapsedYes,
           'prependMarkup' => wire()->files->render(__DIR__ . '/markup-rrule.php'),
@@ -47,7 +47,10 @@ class InputfieldRockDaterangePicker extends Inputfield
         $modal = (int)wire()->input->modal;
         $fs->add([
           'type' => 'markup',
-          'value' => "This event is part of a recurring series. You can edit the main event <a href='{$p->editUrl()}&modal=$modal'>here</a>.",
+          'value' => rockcalendar()->x('part-of-series')
+            . " <a href='{$p->editUrl()}&modal=$modal'>"
+            . rockcalendar()->x('click-here')
+            . "</a>",
         ]);
       }
       // $fs->add([
@@ -66,9 +69,9 @@ class InputfieldRockDaterangePicker extends Inputfield
       'hasRange' => $this->value->hasRange,
       'start' => $this->value->start(),
       'end' => $this->value->end(),
-      'hasTimeLabel' => $this->_('Enter time'),
-      'hasRangeLabel' => $this->_('Enter range'),
-      'isRecurringLabel' => $this->_('Recurring'),
+      'hasTimeLabel' => rockcalendar()->x('enter-time'),
+      'hasRangeLabel' => rockcalendar()->x('enter-range'),
+      'isRecurringLabel' => rockcalendar()->x('recurring'),
       'isRecurring' => $this->value->isRecurring,
       'every' => $this->value->every,
       'everytype' => $this->value->everytype,

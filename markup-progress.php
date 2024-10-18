@@ -1,3 +1,8 @@
+<?php
+
+namespace ProcessWire;
+
+?>
 <div class="progress-container uk-flex uk-flex-middle uk-margin-small-top" style="gap: 10px; align-items: stretch;">
   <button type=button data-create-events class="uk-button uk-button-primary uk-text-nowrap uk-flex uk-flex-middle">
     <div class='uk-flex' style='width:30px; padding-right: 10px;'>
@@ -9,7 +14,7 @@
       </svg>
       <div uk-spinner class="spinner uk-hidden"></div>
     </div>
-    Create Events
+    <?= rockcalendar()->x('create-events-button') ?>
   </button>
   <button type=button disabled data-progress-pause class='uk-button uk-button-secondary uk-text-nowrap uk-flex uk-flex-middle'>
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" style="min-width: 20px; min-height: 20px;">
