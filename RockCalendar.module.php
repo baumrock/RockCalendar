@@ -42,6 +42,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     if ($locale) {
       wire()->config->js('RcLocale', $locale);
     }
+    wire()->config->js('RockCalendar', self::translations());
   }
 
   private function addSseEndpoints()
@@ -520,18 +521,9 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     return json_encode(['success' => $msg]);
   }
 
-  private function trashOptions(): array
+  public static function translations(): array
   {
     return [
-      'self'      => 'This event only',
-      'following' => 'This and all following events',
-      'all'       => 'All events of this recurring series',
-    ];
-  }
-
-  public static function x($prop)
-  {
-    $translations = [
       'create-events' => __('Create Additional Events'),
       'enter-time' => __('Enter time'),
       'enter-range' => __('Enter range'),
@@ -596,7 +588,54 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       'nov' => __('Nov'),
       'dec' => __('Dec'),
       'changed-warning' => __('Event date has been changed. Please save the page before creating additional events.'),
+
+      // datepicker
+      'applyLabel' => __('Apply'),
+      'cancelLabel' => __('Cancel'),
+      'fromLabel' => __('From'),
+      'toLabel' => __('To'),
+      'customRangeLabel' => __('Custom range'),
+      'weekLabel' => __('Week Label (eg W for week or KW for Kalenderwoche)'),
+      'firstDay' => __('First day of week (0 = Sunday, 1 = Monday)'),
+      'daysOfWeek' => [
+        __('Su'),
+        __('Mo'),
+        __('Tu'),
+        __('We'),
+        __('Th'),
+        __('Fr'),
+        __('Sa'),
+      ],
+      'monthNames' => [
+        __('Jan'),
+        __('Feb'),
+        __('Mar'),
+        __('Apr'),
+        __('May'),
+        __('Jun'),
+        __('Jul'),
+        __('Aug'),
+        __('Sep'),
+        __('Oct'),
+        __('Nov'),
+        __('Dec'),
+      ],
+      'dt-minute' => __('MM/DD/YYYY HH:mm'),
+      'dt-date' => __('MM/DD/YYYY'),
     ];
-    return array_key_exists($prop, $translations) ? $translations[$prop] : '';
+  }
+
+  private function trashOptions(): array
+  {
+    return [
+      'self'      => 'This event only',
+      'following' => 'This and all following events',
+      'all'       => 'All events of this recurring series',
+    ];
+  }
+
+  public static function x($prop)
+  {
+    return array_key_exists($prop, self::translations()) ? self::translations()[$prop] : '';
   }
 }
