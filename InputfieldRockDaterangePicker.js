@@ -102,6 +102,7 @@ var RockDaterange;
         setDates() {
           this.startDate = this.picker.startDate;
           this.endDate = this.picker.endDate;
+          // iso format - do not make this translateable!
           this.$start.value = this.startDate.format("YYYY-MM-DD HH:mm:ss");
           this.$end.value = this.endDate.format("YYYY-MM-DD HH:mm:ss");
         },
@@ -114,13 +115,25 @@ var RockDaterange;
             buttonClasses: "uk-button uk-button-small",
             applyButtonClasses: "uk-button-primary",
             locale: {
-              format: this.hasTime ? "DD.MM.YYYY HH:mm" : "DD.MM.YYYY",
-              firstDay: 1, // monday
+              format: this.hasTime ? this.x("dt-minute") : this.x("dt-date"),
+              firstDay: parseInt(this.x("firstDay")) || 0,
+              applyLabel: this.x("applyLabel"),
+              cancelLabel: this.x("cancelLabel"),
+              daysOfWeek: this.x("daysOfWeek"),
+              monthNames: this.x("monthNames"),
+              fromLabel: this.x("fromLabel"),
+              toLabel: this.x("toLabel"),
+              customRangeLabel: this.x("customRangeLabel"),
+              weekLabel: this.x("weekLabel"),
             },
             startDate: this.startDate,
             endDate: this.endDate,
             autoApply: false,
           };
+        },
+
+        x(prop) {
+          return ProcessWire.config.RockCalendar[prop];
         },
       },
       "RockCalendarPicker"
