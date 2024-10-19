@@ -1,133 +1,141 @@
 var RockDaterange;
 (() => {
+  const newPicker = (name) => {
+    return ProcessWire.wire(
+      {
+        init(name) {
+          this.name = name;
+          this.picker = false;
+          this.pickers = {};
+          this.$li = document.querySelector("#wrap_Inputfield_" + name);
+          this.$picker = this.$li.querySelector("input[name=" + name + "]");
+          this.$start = this.$li.querySelector(
+            "input[name=" + name + "_start]"
+          );
+          this.$end = this.$li.querySelector("input[name=" + name + "_end]");
+          this.$hasTime = this.$li.querySelector("input.hasTime");
+          this.$hasRange = this.$li.querySelector("input.hasRange");
+          this.$isRecurring = this.$li.querySelector("input.isRecurring");
+          this.startDate = this.getDate(this.$start.value);
+          this.endDate = this.getDate(this.$end.value);
+          this.hasTime = false;
+          this.hasRange = false;
+          this.isRecurring = false;
+          this.changed();
+          this.initPicker();
+          this.$hasTime.addEventListener("change", this.changed.bind(this));
+          this.$hasRange.addEventListener("change", this.changed.bind(this));
+
+          // only do this if RockGrid is installed
+          if (this.$isRecurring) {
+            this.$isRecurring.addEventListener(
+              "change",
+              this.recurringChanged.bind(this)
+            );
+          }
+        },
+
+        // public API to manipulate the field
+
+        setEndDate(date) {
+          let parsedDate = this.getDate(date);
+          let formattedDate = parsedDate.format("DD/MM/YYYY HH:mm:ss");
+          this.picker.setEndDate(formattedDate);
+          this.setDates();
+        },
+
+        setHasRange(bool) {
+          this.$hasRange.checked = bool;
+          this.changed();
+        },
+
+        setHasTime(bool) {
+          this.$hasTime.checked = bool;
+          this.changed();
+        },
+
+        setStartDate(date) {
+          let parsedDate = this.getDate(date);
+          let formattedDate = parsedDate.format("DD/MM/YYYY HH:mm:ss");
+          this.picker.setStartDate(formattedDate);
+          this.setDates();
+        },
+
+        // internal
+
+        callback(start, end) {
+          this.setDates(start, end);
+        },
+
+        changed() {
+          this.hasTime = this.$hasTime.checked;
+          this.hasRange = this.$hasRange.checked;
+          if (!this.picker) return;
+          this.picker.remove();
+          this.initPicker();
+          this.setDates();
+        },
+
+        getDate(str) {
+          return moment(str);
+        },
+
+        initPicker() {
+          $(this.$picker).daterangepicker(
+            this.settings(),
+            this.callback.bind(this)
+          );
+          this.picker = $(this.$picker).data("daterangepicker");
+          // console.log("picker", this.picker);
+          this.setDates();
+        },
+
+        recurringChanged() {
+          this.isRecurring = this.$isRecurring.checked;
+          let container = this.$li.querySelector(".rc-recurring-container");
+          if (this.isRecurring) {
+            container.classList.remove("uk-hidden");
+          } else {
+            container.classList.add("uk-hidden");
+          }
+        },
+        setDates() {
+          this.startDate = this.picker.startDate;
+          this.endDate = this.picker.endDate;
+          this.$start.value = this.startDate.format("YYYY-MM-DD HH:mm:ss");
+          this.$end.value = this.endDate.format("YYYY-MM-DD HH:mm:ss");
+        },
+
+        ___settings() {
+          return {
+            timePicker: this.hasTime,
+            timePicker24Hour: true,
+            singleDatePicker: !this.hasRange,
+            buttonClasses: "uk-button uk-button-small",
+            applyButtonClasses: "uk-button-primary",
+            locale: {
+              format: this.hasTime ? "DD.MM.YYYY HH:mm" : "DD.MM.YYYY",
+              firstDay: 1, // monday
+            },
+            startDate: this.startDate,
+            endDate: this.endDate,
+            autoApply: false,
+          };
+        },
+      },
+      "RockCalendarPicker"
+    );
+  };
+
   class RockCalendarDaterangePickers {
     constructor() {
       this.pickers = {};
     }
 
     init(name) {
-      const picker = ProcessWire.wire(new RockDaterangePicker(name));
+      const picker = newPicker(name);
+      picker.init(name);
       this.pickers[name] = picker;
-      picker.initPicker();
-    }
-  }
-
-  class RockDaterangePicker {
-    constructor(name) {
-      this.name = name;
-      this.picker = false;
-      this.pickers = {};
-      this.$li = document.querySelector("#wrap_Inputfield_" + name);
-      this.$picker = this.$li.querySelector("input[name=" + name + "]");
-      this.$start = this.$li.querySelector("input[name=" + name + "_start]");
-      this.$end = this.$li.querySelector("input[name=" + name + "_end]");
-      this.$hasTime = this.$li.querySelector("input.hasTime");
-      this.$hasRange = this.$li.querySelector("input.hasRange");
-      this.$isRecurring = this.$li.querySelector("input.isRecurring");
-      this.startDate = this.getDate(this.$start.value);
-      this.endDate = this.getDate(this.$end.value);
-      this.hasTime = false;
-      this.hasRange = false;
-      this.isRecurring = false;
-      this.changed();
-      this.$hasTime.addEventListener("change", this.changed.bind(this));
-      this.$hasRange.addEventListener("change", this.changed.bind(this));
-
-      // only do this if RockGrid is installed
-      if (this.$isRecurring) {
-        this.$isRecurring.addEventListener(
-          "change",
-          this.recurringChanged.bind(this)
-        );
-      }
-    }
-
-    // public API to manipulate the field
-
-    setEndDate(date) {
-      let parsedDate = this.getDate(date);
-      let formattedDate = parsedDate.format("DD/MM/YYYY HH:mm:ss");
-      this.picker.setEndDate(formattedDate);
-      this.setDates();
-    }
-
-    setHasRange(bool) {
-      this.$hasRange.checked = bool;
-      this.changed();
-    }
-
-    setHasTime(bool) {
-      this.$hasTime.checked = bool;
-      this.changed();
-    }
-
-    setStartDate(date) {
-      let parsedDate = this.getDate(date);
-      let formattedDate = parsedDate.format("DD/MM/YYYY HH:mm:ss");
-      this.picker.setStartDate(formattedDate);
-      this.setDates();
-    }
-
-    // internal
-
-    callback(start, end) {
-      this.setDates(start, end);
-    }
-
-    changed() {
-      this.hasTime = this.$hasTime.checked;
-      this.hasRange = this.$hasRange.checked;
-      if (!this.picker) return;
-      this.picker.remove();
-      this.initPicker();
-      this.setDates();
-    }
-
-    getDate(str) {
-      return moment(str);
-    }
-
-    initPicker() {
-      $(this.$picker).daterangepicker(
-        this.settings(),
-        this.callback.bind(this)
-      );
-      this.picker = $(this.$picker).data("daterangepicker");
-      this.setDates();
-    }
-
-    recurringChanged() {
-      this.isRecurring = this.$isRecurring.checked;
-      let container = this.$li.querySelector(".rc-recurring-container");
-      if (this.isRecurring) {
-        container.classList.remove("uk-hidden");
-      } else {
-        container.classList.add("uk-hidden");
-      }
-    }
-
-    setDates() {
-      this.startDate = this.picker.startDate;
-      this.endDate = this.picker.endDate;
-      this.$start.value = this.startDate.format("YYYY-MM-DD HH:mm:ss");
-      this.$end.value = this.endDate.format("YYYY-MM-DD HH:mm:ss");
-    }
-
-    ___settings() {
-      return {
-        timePicker: this.hasTime,
-        timePicker24Hour: true,
-        singleDatePicker: !this.hasRange,
-        buttonClasses: "uk-button uk-button-small",
-        applyButtonClasses: "uk-button-primary",
-        locale: {
-          format: this.hasTime ? "DD.MM.YYYY HH:mm" : "DD.MM.YYYY",
-          firstDay: 1, // monday
-        },
-        startDate: this.startDate,
-        endDate: this.endDate,
-        autoApply: false,
-      };
     }
   }
 
