@@ -1,3 +1,15 @@
+## [1.4.0](https://github.com/baumrock/RockCalendar/compare/v1.3.1...v1.4.0) (2024-10-19)
+
+
+### Features
+
+* improve getEvents to make it possible to just return a PageArray ([992033d](https://github.com/baumrock/RockCalendar/commit/992033d1a505f29292f6556865fea222653ff5e8))
+
+
+### Bug Fixes
+
+* refactor to support hookable methods ([9b825c2](https://github.com/baumrock/RockCalendar/commit/9b825c2455247e3eccc17b379970d022bb2a924a))
+
 ## [1.3.1](https://github.com/baumrock/RockCalendar/compare/v1.3.0...v1.3.1) (2024-10-19)
 
 
@@ -31,11 +43,4 @@
 
 * add german and finnish translations ([82bcf1b](https://github.com/baumrock/RockCalendar/commit/82bcf1bf266f0e40ecadad8be61c7dc28e956a3a))
 * hide GUI if time of main event is changed ([9851229](https://github.com/baumrock/RockCalendar/commit/9851229e2fb22cc25c768edccdcff9a7b70c1eed))
-
-## [1.1.1](https://github.com/baumrock/RockCalendar/compare/v1.1.0...v1.1.1) (2024-10-18)
-
-
-### Bug Fixes
-
-* prevent selected checkboxes updating value attribute of first checkbox ([f1895c5](https://github.com/baumrock/RockCalendar/commit/f1895c5b3a5c9c4ed1ca5f3cbb6fbd02f349aba5))
 
