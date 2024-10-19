@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/baumrock/RockCalendar/compare/v1.3.0...v1.3.1) (2024-10-19)
+
+
+### Bug Fixes
+
+* grammar issue in DE translations ([4b18850](https://github.com/baumrock/RockCalendar/commit/4b1885079f76b7502c26394d2601ae5a8729e5bd))
+
 ## [1.3.0](https://github.com/baumrock/RockCalendar/compare/v1.2.1...v1.3.0) (2024-10-19)
 
 
@@ -31,11 +38,4 @@
 ### Bug Fixes
 
 * prevent selected checkboxes updating value attribute of first checkbox ([f1895c5](https://github.com/baumrock/RockCalendar/commit/f1895c5b3a5c9c4ed1ca5f3cbb6fbd02f349aba5))
-
-## [1.1.0](https://github.com/baumrock/RockCalendar/compare/v1.0.4...v1.1.0) (2024-10-17)
-
-
-### Features
-
-* allow rrules like every "last, ..." friday ([ee956d3](https://github.com/baumrock/RockCalendar/commit/ee956d3c8170eac33e271036e9ced9fc49d48040))
 
