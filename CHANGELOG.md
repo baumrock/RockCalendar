@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/baumrock/RockCalendar/compare/v1.4.0...v1.4.1) (2024-10-19)
+
+
+### Bug Fixes
+
+* finish translations and add docs ([2efe473](https://github.com/baumrock/RockCalendar/commit/2efe473efa0bc087dc8bfc5f3d19d7647174299e))
+
 ## [1.4.0](https://github.com/baumrock/RockCalendar/compare/v1.3.1...v1.4.0) (2024-10-19)
 
 
@@ -35,12 +42,4 @@
 ### Bug Fixes
 
 * change JS file to use new JS hooks syntax ([ce33ea1](https://github.com/baumrock/RockCalendar/commit/ce33ea1779b9a9bb92470ee26f39424a7e9253d8))
-
-## [1.2.0](https://github.com/baumrock/RockCalendar/compare/v1.1.1...v1.2.0) (2024-10-18)
-
-
-### Features
-
-* add german and finnish translations ([82bcf1b](https://github.com/baumrock/RockCalendar/commit/82bcf1bf266f0e40ecadad8be61c7dc28e956a3a))
-* hide GUI if time of main event is changed ([9851229](https://github.com/baumrock/RockCalendar/commit/9851229e2fb22cc25c768edccdcff9a7b70c1eed))
 
