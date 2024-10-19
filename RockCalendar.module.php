@@ -216,6 +216,13 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       $endTS,
       $field,
     );
+    if ($data instanceof PageArray) {
+      $result = [];
+      foreach ($data as $event) {
+        $result[] = $this->getItemArray($event) ?? [];
+      }
+      $data = $result;
+    }
     return json_encode($data);
   }
 
@@ -257,18 +264,13 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     int $end,
     Field $field,
     string $include = 'all',
-  ): array {
+  ): PageArray {
     // find events in given date range
-    $events = wire()->pages->find([
+    return wire()->pages->find([
       'parent' => $pid,
       $field->name . '.inRange' => "$start - $end",
       'include' => $include,
     ]);
-    $result = [];
-    foreach ($events as $event) {
-      $result[] = $this->getItemArray($event) ?? [];
-    }
-    return $result;
   }
 
   public function getEventsOfSeries(Page $p, ?string $type = null): array
