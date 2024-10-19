@@ -90,21 +90,6 @@ var RockDaterange;
           this.setDates();
         },
 
-        ___localeDatepicker() {
-          return {
-            format: this.hasTime ? this.x("dt-minute") : this.x("dt-date"),
-            firstDay: parseInt(this.x("firstDay")) || 0,
-            applyLabel: this.x("applyLabel"),
-            cancelLabel: this.x("cancelLabel"),
-            daysOfWeek: this.x("daysOfWeek"),
-            monthNames: this.x("monthNames"),
-            fromLabel: this.x("fromLabel"),
-            toLabel: this.x("toLabel"),
-            customRangeLabel: this.x("customRangeLabel"),
-            weekLabel: this.x("weekLabel"),
-          };
-        },
-
         recurringChanged() {
           this.isRecurring = this.$isRecurring.checked;
           let container = this.$li.querySelector(".rc-recurring-container");
@@ -128,7 +113,18 @@ var RockDaterange;
             singleDatePicker: !this.hasRange,
             buttonClasses: "uk-button uk-button-small",
             applyButtonClasses: "uk-button-primary",
-            locale: this.localeDatepicker(),
+            locale: {
+              format: this.hasTime ? this.x("dt-minute") : this.x("dt-date"),
+              firstDay: parseInt(this.x("firstDay")) || 0,
+              applyLabel: this.x("applyLabel"),
+              cancelLabel: this.x("cancelLabel"),
+              daysOfWeek: this.x("daysOfWeek"),
+              monthNames: this.x("monthNames"),
+              fromLabel: this.x("fromLabel"),
+              toLabel: this.x("toLabel"),
+              customRangeLabel: this.x("customRangeLabel"),
+              weekLabel: this.x("weekLabel"),
+            },
             startDate: this.startDate,
             endDate: this.endDate,
             autoApply: false,
