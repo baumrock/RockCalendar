@@ -70,11 +70,11 @@ namespace ProcessWire;
             <option value='-3'><?= rockcalendar()->x('-3') ?></option>
             <option value='-2'><?= rockcalendar()->x('-2') ?></option>
             <option value='-1'><?= rockcalendar()->x('-1') ?></option>
-            <option value='1'><?= rockcalendar()->x('1') ?></option>
-            <option value='2'><?= rockcalendar()->x('2') ?></option>
-            <option value='3'><?= rockcalendar()->x('3') ?></option>
-            <option value='4'><?= rockcalendar()->x('4') ?></option>
-            <option value='5'><?= rockcalendar()->x('5') ?></option>
+            <option value='1'><?= rockcalendar()->x('+1') ?></option>
+            <option value='2'><?= rockcalendar()->x('+2') ?></option>
+            <option value='3'><?= rockcalendar()->x('+3') ?></option>
+            <option value='4'><?= rockcalendar()->x('+4') ?></option>
+            <option value='5'><?= rockcalendar()->x('+5') ?></option>
           </select>
           <label>
             <input type='checkbox' class='uk-checkbox' name='byweekday' value='MO'>
