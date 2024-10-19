@@ -349,7 +349,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       $inputfields->add([
         'type' => 'textarea',
         'name' => 'locales',
-        'label' => 'Locale Language Mappings',
+        'label' => 'Locale Language Mappings (for FullCalendar)',
         'description' => 'Assign a locale to each installed language by clicking on the listed items below. Enter one mapping per line. Example: default:de-at',
         'notes' => "Installed languages: $langsStr
       Available locales: $locales",
@@ -371,6 +371,13 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
           });
         </script>',
         'value' => $this->locales,
+      ]);
+
+      // show link to docs
+      $inputfields->add([
+        'type' => 'markup',
+        'label' => 'Translations',
+        'value' => 'Please see the docs <a href="https://www.baumrock.com/en/processwire/modules/rockcalendar/docs/translations/" target="_blank">here</a>.',
       ]);
 
       // max number of events if no limit is set
