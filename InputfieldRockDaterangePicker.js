@@ -102,6 +102,7 @@ var RockDaterange;
         setDates() {
           this.startDate = this.picker.startDate;
           this.endDate = this.picker.endDate;
+          // iso format - do not make this translateable!
           this.$start.value = this.startDate.format("YYYY-MM-DD HH:mm:ss");
           this.$end.value = this.endDate.format("YYYY-MM-DD HH:mm:ss");
         },
