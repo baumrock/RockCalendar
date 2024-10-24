@@ -2,6 +2,8 @@
 
 You can use hooks to modify the events and item array before they are rendered.
 
+<div class='uk-alert uk-alert-warning'>Hooks for RockCalendar need to be placed in `/site/init.php` and not in `/site/ready.php`!</div>
+
 ## getEvents
 
 This hook provides a way to modify which events are displayed in the fullcalendar. By default the calendar will display all child pages, but you can change that easily:
