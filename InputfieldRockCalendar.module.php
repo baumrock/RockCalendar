@@ -55,7 +55,7 @@ class InputfieldRockCalendar extends InputfieldTextarea
         data-buttons='button.ui-button[type=submit]'
         data-autoclose
       >Add Event</a>
-      <div id='calendar-{$this->name}' class='rock-calendar'></div>
+      <div id='calendar-{$this->name}' class='RockCalendar'></div>
       <template class='tippy-tpl'>
         <div class='uk-flex uk-flex-middle uk-flex-center' style='gap:10px'>
           <a href='{hrefEdit}' class='uk-link-reset' rc-action='edit'>
