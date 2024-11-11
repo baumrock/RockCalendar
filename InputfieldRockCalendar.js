@@ -26,6 +26,7 @@ var RockCalendar;
 
   class Calendar {
     constructor(config) {
+      this.hidden = true;
       this.pid = config.pid;
       this.id = config.id;
       this.lang = config.lang;
@@ -41,7 +42,12 @@ var RockCalendar;
         selectable: true,
         editable: true,
         weekNumbers: true,
-        events: "/rockcalendar/events/?pid=" + this.pid + "&field=" + this.id,
+        events:
+          ProcessWire.config.urls.root +
+          "rockcalendar/events/?pid=" +
+          this.pid +
+          "&field=" +
+          this.id,
         eventDidMount: this.eventDidMount.bind(this),
       };
       if (this.lang) conf.locale = this.lang;
@@ -50,6 +56,7 @@ var RockCalendar;
       calendar.render();
       this.addCallbacks();
       $(document).on("pw-modal-closed", this.refresh.bind(this));
+      setInterval(this.initSize.bind(this), 50);
     }
 
     addCallbacks() {
@@ -57,7 +64,7 @@ var RockCalendar;
 
       // drop event
       calendar.on("eventDrop", (info) => {
-        this.fetch("/rockcalendar/eventDrop/", {
+        this.fetch(ProcessWire.config.urls.root + "rockcalendar/eventDrop/", {
           id: info.event.id,
           start: info.event.startStr,
         });
@@ -65,7 +72,7 @@ var RockCalendar;
 
       // resize event
       calendar.on("eventResize", (info) => {
-        this.fetch("/rockcalendar/eventResize/", {
+        this.fetch(ProcessWire.config.urls.root + "rockcalendar/eventResize/", {
           id: info.event.id,
           start: info.event.startStr,
           end: info.event.endStr,
@@ -104,8 +111,7 @@ var RockCalendar;
         if (!button) return;
         if (!button.matches(".ui-dialog-titlebar-close")) return;
         calendar.refetchEvents();
-        // trigger resize event to fix calendar display glitch
-        window.dispatchEvent(new Event("resize"));
+        this.refresh();
       });
     }
 
@@ -141,7 +147,7 @@ var RockCalendar;
             tippy.hideAll();
 
             const href = el.getAttribute("href");
-            console.log("href", href);
+            // console.log("href", href);
             openInModal(href);
           });
         },
@@ -176,10 +182,29 @@ var RockCalendar;
         });
     }
 
-    refresh() {
-      this.calendar.refetchEvents();
+    /**
+     * When a calendar is placed inside a fieldset we need to init the size
+     * when the visibility changes.
+     * See https://shorturl.at/pSyou
+     */
+    initSize() {
+      const el = this.calendar.el;
+      const hidden = el.offsetParent === null;
+      // if hidden state did not change, do nothing
+      if (this.hidden === hidden) return;
+      // otherwise redraw the calendar
+      this.redraw();
+      this.hidden = hidden;
+    }
+
+    redraw() {
       // trigger resize event to fix calendar display glitch
       window.dispatchEvent(new Event("resize"));
+    }
+
+    refresh() {
+      this.calendar.refetchEvents();
+      this.redraw();
     }
   }
 
