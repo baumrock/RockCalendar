@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/baumrock/RockCalendar/compare/v1.4.1...v1.4.2) (2024-11-11)
+
+
+### Bug Fixes
+
+* redraw calendar when tab switched ([74f011b](https://github.com/baumrock/RockCalendar/commit/74f011b29dbde7c89169117a54ed83de982a48ed))
+
 ## [1.4.1](https://github.com/baumrock/RockCalendar/compare/v1.4.0...v1.4.1) (2024-10-19)
 
 
@@ -35,11 +42,4 @@
 ### Bug Fixes
 
 * wrong translatable text reference ([fb74838](https://github.com/baumrock/RockCalendar/commit/fb7483890eef1c441d69b7366a0da4b1824f216d))
-
-## [1.2.1](https://github.com/baumrock/RockCalendar/compare/v1.2.0...v1.2.1) (2024-10-18)
-
-
-### Bug Fixes
-
-* change JS file to use new JS hooks syntax ([ce33ea1](https://github.com/baumrock/RockCalendar/commit/ce33ea1779b9a9bb92470ee26f39424a7e9253d8))
 
