@@ -38,9 +38,8 @@ var RockDaterange;
         // public API to manipulate the field
 
         setEndDate(date) {
-          let parsedDate = this.getDate(date);
-          let formattedDate = parsedDate.format("DD/MM/YYYY HH:mm:ss");
-          this.picker.setEndDate(formattedDate);
+          let moment = this.getDate(date);
+          this.picker.setEndDate(moment);
           this.setDates();
         },
 
@@ -55,9 +54,8 @@ var RockDaterange;
         },
 
         setStartDate(date) {
-          let parsedDate = this.getDate(date);
-          let formattedDate = parsedDate.format("DD/MM/YYYY HH:mm:ss");
-          this.picker.setStartDate(formattedDate);
+          let moment = this.getDate(date);
+          this.picker.setStartDate(moment);
           this.setDates();
         },
 
@@ -76,8 +74,12 @@ var RockDaterange;
           this.setDates();
         },
 
+        /**
+         * Get date from string
+         * IMPORTANT: str must be in the YYYY-MM-DD format!
+         */
         getDate(str) {
-          return moment(str);
+          return moment(str, "YYYY-MM-DD");
         },
 
         initPicker() {
