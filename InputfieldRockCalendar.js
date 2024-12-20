@@ -97,16 +97,21 @@ var RockCalendar;
       // add event
       calendar.on("select", (info) => {
         // console.log("selected");
+        // Get the end date from the selection info
         let end = new Date(info.endStr);
+        // Subtract one day since FullCalendar's end date is exclusive
         end.setDate(end.getDate() - 1);
+        // Convert to YYYY-MM-DD format
         end = end.toISOString().split("T")[0];
+        // Store start and end dates in localStorage for the add form
         localStorage.setItem("eventStartDate", info.startStr);
         localStorage.setItem("eventEndDate", end);
+        // Trigger click on the add new event link
         this.addLink.click();
       });
 
       // listen to modal close
-      document.addEventListener("click", function (event) {
+      document.addEventListener("click", (event) => {
         let button = event.target.closest("button");
         if (!button) return;
         if (!button.matches(".ui-dialog-titlebar-close")) return;
