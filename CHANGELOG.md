@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/baumrock/RockCalendar/compare/v1.4.2...v1.4.3) (2024-12-20)
+
+
+### Bug Fixes
+
+* error when using other timezones ([e001131](https://github.com/baumrock/RockCalendar/commit/e00113120926196e8d2bc1c4832c85423d977499))
+
 ## [1.4.2](https://github.com/baumrock/RockCalendar/compare/v1.4.1...v1.4.2) (2024-11-11)
 
 
@@ -30,16 +37,4 @@
 ### Bug Fixes
 
 * grammar issue in DE translations ([4b18850](https://github.com/baumrock/RockCalendar/commit/4b1885079f76b7502c26394d2601ae5a8729e5bd))
-
-## [1.3.0](https://github.com/baumrock/RockCalendar/compare/v1.2.1...v1.3.0) (2024-10-19)
-
-
-### Features
-
-* make settings hookable ([47ccc67](https://github.com/baumrock/RockCalendar/commit/47ccc670a9c6148731fc53b282553d374b757b9d))
-
-
-### Bug Fixes
-
-* wrong translatable text reference ([fb74838](https://github.com/baumrock/RockCalendar/commit/fb7483890eef1c441d69b7366a0da4b1824f216d))
 
