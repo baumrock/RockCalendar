@@ -5,6 +5,7 @@ var RockCalendar;
   const openInModal = (href, options = {}) => {
     // merge options with defaults
     const defaults = {
+      calendar: false,
       autoclose: true,
       buttons: "button.ui-button[type=submit]",
     };
@@ -14,14 +15,15 @@ var RockCalendar;
     let link = document.createElement("a");
     let $link = $(link);
     $link.attr("href", href);
-    $link.addClass("pw-modal");
+    $link.addClass("pw-modal rc-link-remove");
     if (opts.autoclose) $link.attr("data-autoclose", "");
     if (opts.buttons) $link.attr("data-buttons", opts.buttons);
-
-    // Use setTimeout to defer the click event
     $link.on("click", pwModalOpenEvent);
+    $link.on("pw-modal-closed", () => {
+      if (opts.calendar) opts.calendar.refresh();
+      $link.remove();
+    });
     $link.click();
-    $link.remove();
   };
 
   class Calendar {
@@ -55,7 +57,6 @@ var RockCalendar;
       this.calendar = calendar;
       calendar.render();
       this.addCallbacks();
-      $(document).on("pw-modal-closed", this.refresh.bind(this));
       setInterval(this.initSize.bind(this), 50);
     }
 
@@ -106,8 +107,11 @@ var RockCalendar;
         // Store start and end dates in localStorage for the add form
         localStorage.setItem("eventStartDate", info.startStr);
         localStorage.setItem("eventEndDate", end);
-        // Trigger click on the add new event link
-        this.addLink.click();
+        // open modal to create event
+        openInModal(
+          ProcessWire.config.urls.admin + "page/add/?parent_id=" + this.pid,
+          { calendar: this }
+        );
       });
 
       // listen to modal close
