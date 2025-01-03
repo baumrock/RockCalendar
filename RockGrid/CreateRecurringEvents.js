@@ -139,8 +139,9 @@ document.addEventListener("RockGrid:init", (e) => {
       this.progressContainer.classList.add("running");
       this.createEventsButton.setAttribute("disabled", "disabled");
       this.progressPauseButton.removeAttribute("disabled");
+      const url = ProcessWire.config.urls.root;
       RockGrid.sse({
-        url: "/rockcalendar/create-recurring-events/",
+        url: url + "rockcalendar/create-recurring-events/",
         data: {
           pid: this.getPageID(),
           diff: this.getDiff(),
