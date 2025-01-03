@@ -92,7 +92,7 @@ var RockCalendar;
           ProcessWire.config.urls.admin + "page/edit/?id=" + info.event.id;
 
         // open in modal
-        openInModal(href);
+        openInModal(href, { calendar: this });
       });
 
       // add event
@@ -157,7 +157,7 @@ var RockCalendar;
 
             const href = el.getAttribute("href");
             // console.log("href", href);
-            openInModal(href);
+            openInModal(href, { calendar: this });
           });
         },
       });
