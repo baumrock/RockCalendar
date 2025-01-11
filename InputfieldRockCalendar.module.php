@@ -47,15 +47,7 @@ class InputfieldRockCalendar extends InputfieldTextarea
   {
     $p = wire()->pages->get(wire()->input->get('id', 'int'));
     $locale = rockcalendar()->getUserLocale();
-    $url = wire()->pages->get(2)->url;
-    return "
-      <a
-        href='{$url}page/add/?parent_id=$p'
-        class='pw-modal add-item uk-hidden'
-        data-buttons='button.ui-button[type=submit]'
-        data-autoclose
-      >Add Event</a>
-      <div id='calendar-{$this->name}' class='RockCalendar'></div>
+    return "<div id='calendar-{$this->name}' class='RockCalendar'></div>
       <template class='tippy-tpl'>
         <div class='uk-flex uk-flex-middle uk-flex-center' style='gap:10px'>
           <a href='{hrefEdit}' class='uk-link-reset' rc-action='edit'>

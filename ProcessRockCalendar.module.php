@@ -71,7 +71,7 @@ class ProcessRockCalendar extends Process
         </div>
         <script>
         RockGrid.sse({
-          url: '/rockcalendar/trash-events/',
+          url: ProcessWire.config.urls.root + 'rockcalendar/trash-events/',
           data: {
             pid: {$p->id},
             type: '{$type}',
