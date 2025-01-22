@@ -76,10 +76,10 @@ var RockDaterange;
 
         /**
          * Get date from string
-         * IMPORTANT: str must be in the YYYY-MM-DD format!
+         * IMPORTANT: str must be in the YYYY-MM-DD HH:mm:ss format!
          */
         getDate(str) {
-          return moment(str, "YYYY-MM-DD");
+          return moment(str, "YYYY-MM-DD HH:mm:ss");
         },
 
         initPicker() {
