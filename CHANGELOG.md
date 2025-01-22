@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/baumrock/RockCalendar/compare/v1.5.0...v1.5.1) (2025-01-22)
+
+
+### Bug Fixes
+
+* datetime input losing time input ([5219895](https://github.com/baumrock/RockCalendar/commit/52198955a006294c64fc195e1907a56aa4fb0ef8))
+
 ## [1.5.0](https://github.com/baumrock/RockCalendar/compare/v1.4.3...v1.5.0) (2025-01-11)
 
 
@@ -32,16 +39,4 @@
 ### Bug Fixes
 
 * finish translations and add docs ([2efe473](https://github.com/baumrock/RockCalendar/commit/2efe473efa0bc087dc8bfc5f3d19d7647174299e))
-
-## [1.4.0](https://github.com/baumrock/RockCalendar/compare/v1.3.1...v1.4.0) (2024-10-19)
-
-
-### Features
-
-* improve getEvents to make it possible to just return a PageArray ([992033d](https://github.com/baumrock/RockCalendar/commit/992033d1a505f29292f6556865fea222653ff5e8))
-
-
-### Bug Fixes
-
-* refactor to support hookable methods ([9b825c2](https://github.com/baumrock/RockCalendar/commit/9b825c2455247e3eccc17b379970d022bb2a924a))
 
