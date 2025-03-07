@@ -1,3 +1,10 @@
+## [1.6.0](https://github.com/baumrock/RockCalendar/compare/v1.5.1...v1.6.0) (2025-03-07)
+
+
+### Features
+
+* add support for custom fields on recurring events ([77682b0](https://github.com/baumrock/RockCalendar/commit/77682b07525389ed4c19762d7dee514a1aaaf9c5))
+
 ## [1.5.1](https://github.com/baumrock/RockCalendar/compare/v1.5.0...v1.5.1) (2025-01-22)
 
 
@@ -32,11 +39,4 @@
 ### Bug Fixes
 
 * redraw calendar when tab switched ([74f011b](https://github.com/baumrock/RockCalendar/commit/74f011b29dbde7c89169117a54ed83de982a48ed))
-
-## [1.4.1](https://github.com/baumrock/RockCalendar/compare/v1.4.0...v1.4.1) (2024-10-19)
-
-
-### Bug Fixes
-
-* finish translations and add docs ([2efe473](https://github.com/baumrock/RockCalendar/commit/2efe473efa0bc087dc8bfc5f3d19d7647174299e))
 
