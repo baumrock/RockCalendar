@@ -15,7 +15,9 @@ Recurring events will inherit all field values from the original event unless ex
 
 It might be necessary to add custom fields to recurring events. For example you might want to add a subject to every recurring event (like the topic of a weekly podcast).
 
-By default all fields except the date field are hidden in the recurring events' page edit screen. But you can hook into the fields that are kept which means you can add custom fields to recurring events as needed:
+By default all fields except the date field are hidden in the recurring events' page edit screen. That means that if you add a field to your event's template, it will not be visible in the recurring event's page edit screen but rather inherit the value from the main event.
+
+To prevent that you can hook into the array of fields that are "kept" in the page editor and allow to have custom values (not inherited from the main event):
 
 ```php
 // eg in /site/ready.php
