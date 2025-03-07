@@ -414,7 +414,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $mainPage = $date->mainPage;
     if (!$mainPage->id) return;
 
-    $keep = [self::field_date];
+    $keep = $this->keepFields($mainPage);
     foreach ($form->getAll() as $field) {
       if (in_array($field->name, $keep)) continue;
       $form->remove($field);
@@ -444,8 +444,9 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     if (!$date->isRecurring) return;
     $mainPage = $date->mainPage;
     if (!$mainPage->id) return;
+    $keep = $this->keepFields($mainPage);
     foreach ($mainPage->fields as $f) {
-      if ($f->name == self::field_date) continue;
+      if (in_array($f->name, $keep)) continue;
       $page->set($f->name, $mainPage->get($f->name));
     }
   }
@@ -473,6 +474,18 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $date = $page->getFormatted(self::field_date);
     if (!$date->isRecurring) return;
     $event->return = true;
+  }
+
+  /**
+   * Array of fields to keep on individual recurring events
+   * By default we only show the date field (which is always individual for
+   * every recurring instance)
+   * @param Page $page
+   * @return array
+   */
+  public function ___keepFields(Page $page): array
+  {
+    return [self::field_date];
   }
 
   public function languageMappings(): WireData
