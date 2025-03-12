@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/baumrock/RockCalendar/compare/v1.6.0...v1.6.1) (2025-03-12)
+
+
+### Bug Fixes
+
+* calendar getting wrong page on multisite installation ([1a53d82](https://github.com/baumrock/RockCalendar/commit/1a53d82c10f1af72575c9fcff761544e45eb7e13))
+
 ## [1.6.0](https://github.com/baumrock/RockCalendar/compare/v1.5.1...v1.6.0) (2025-03-07)
 
 
@@ -32,11 +39,4 @@
 ### Bug Fixes
 
 * error when using other timezones ([e001131](https://github.com/baumrock/RockCalendar/commit/e00113120926196e8d2bc1c4832c85423d977499))
-
-## [1.4.2](https://github.com/baumrock/RockCalendar/compare/v1.4.1...v1.4.2) (2024-11-11)
-
-
-### Bug Fixes
-
-* redraw calendar when tab switched ([74f011b](https://github.com/baumrock/RockCalendar/commit/74f011b29dbde7c89169117a54ed83de982a48ed))
 
