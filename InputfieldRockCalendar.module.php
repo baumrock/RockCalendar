@@ -45,7 +45,10 @@ class InputfieldRockCalendar extends InputfieldTextarea
    */
   public function ___render()
   {
-    $p = wire()->pages->get(wire()->input->get('id', 'int'));
+    if (!wire()->process instanceof ProcessPageEdit) {
+      throw new WireException("RockCalendar field currently only supported on a regular PW page edit");
+    }
+    $p = wire()->process->getPage();
     $locale = rockcalendar()->getUserLocale();
     return "<div id='calendar-{$this->name}' class='RockCalendar'></div>
       <template class='tippy-tpl'>
