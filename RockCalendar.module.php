@@ -39,6 +39,9 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $locale = $this->getUserLocale();
     if ($locale) wire()->config->js('RcLocale', $locale);
     wire()->config->js('RockCalendar', self::translations());
+
+    // note: needs to be in ready!
+    // see https://processwire.com/talk/topic/30460-introducing-rockcalendar-a-powerful-and-flexible-calendar-module-for-processwire/?do=findComment&comment=247704
     $this->addSseEndpoints();
   }
 
