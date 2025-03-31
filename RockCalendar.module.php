@@ -32,17 +32,14 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     wire()->addHookAfter('ProcessPageEdit::buildForm',        $this, 'openDeleteTab');
     wire()->addHookAfter('Pages::trashed',                    $this, 'hookTrashed');
     wire()->addHookAfter('ProcessPageList::execute',          $this, 'autoCloseModal');
-
-    $this->addSseEndpoints();
   }
 
   public function ready(): void
   {
     $locale = $this->getUserLocale();
-    if ($locale) {
-      wire()->config->js('RcLocale', $locale);
-    }
+    if ($locale) wire()->config->js('RcLocale', $locale);
     wire()->config->js('RockCalendar', self::translations());
+    $this->addSseEndpoints();
   }
 
   private function addSseEndpoints()
