@@ -2,6 +2,9 @@
 
 namespace ProcessWire;
 
+/**
+ * GUI for the progressbar
+ */
 ?>
 <div class="progress-container uk-flex uk-flex-middle uk-margin-small-top" style="gap: 10px; align-items: stretch;">
   <button type=button data-create-events class="uk-button uk-button-primary uk-text-nowrap uk-flex uk-flex-middle">

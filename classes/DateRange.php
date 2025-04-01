@@ -5,6 +5,7 @@ namespace RockDaterangePicker;
 use DateTime;
 use IntlDateFormatter;
 use OpenPsa\Ranger\Ranger;
+use ProcessWire\NullPage;
 use ProcessWire\Page;
 use ProcessWire\WireData;
 
@@ -19,7 +20,7 @@ class DateRange extends WireData
   public bool $hasRange;
   public bool $isRecurring;
   public int $start;
-  public $mainPage;
+  public ?Page $mainPage;
 
   public function __construct($arr = [])
   {
@@ -31,6 +32,12 @@ class DateRange extends WireData
     $this->hasRange = $data->hasRange ?: false;
     $this->isRecurring = $data->isRecurring ?: false;
     $this->mainPage = wire()->pages->get((int)(string)$data->mainPage);
+  }
+
+  public function detach(): void
+  {
+    $this->isRecurring = false;
+    $this->mainPage = new NullPage();
   }
 
   /**

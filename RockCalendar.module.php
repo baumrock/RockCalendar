@@ -164,6 +164,13 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     return json_encode(['error' => $msg]);
   }
 
+  /**
+   * Move a single event out of series
+   * @param HookEvent $event
+   * @return string
+   * @throws WireException
+   * @throws WirePermissionException
+   */
   protected function eventDrop(HookEvent $event)
   {
     $input = json_decode(file_get_contents('php://input'), true);
@@ -172,6 +179,8 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     if (!$p->id) return $this->err("Event $p not found");
     if (!$p->editable()) return $this->err("Event $p not editable");
     if (!$this->hasDateRange($p)) return $this->err("Page $p has no daterange field");
+
+    /** @var DateRange $date */
     $date = $this->getDateRange($p);
     $diff = $date->diff();
     $newStart = strtotime($input->start);
@@ -179,6 +188,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $date->setStart($newStart);
     $date->setEnd($newEnd);
     $p->setAndSave($date->fieldName, $date);
+
     return $this->succ("Event $p moved");
   }
 
@@ -312,10 +322,13 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       'end' => $date->end(offset: 1),
       'allDay' => $date->hasTime ? 0 : 1,
       'url' => $p->editUrl(),
-      'isRecurring' => $date->isRecurring,
       'backgroundColor' => $col,
       'borderColor' => $col,
       'textColor' => '#212121',
+
+      // extended props
+      // will be accessible from js via event.extendedProps
+      'isRecurring' => $date->isRecurring,
     ];
   }
 

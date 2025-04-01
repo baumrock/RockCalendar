@@ -38,7 +38,7 @@ class InputfieldRockDaterangePicker extends Inputfield
           'grid' => 'RockCalendar\\CreateRecurringEvents',
           'label' => rockcalendar()->x('create-events'),
           'icon' => 'plus',
-          // 'collapsed' => Inputfield::collapsedYes,
+          'collapsed' => Inputfield::collapsedYes,
           'prependMarkup' => wire()->files->render(__DIR__ . '/markup-rrule.php'),
           'appendMarkup' => wire()->files->render(__DIR__ . '/markup-progress.php'),
         ]);

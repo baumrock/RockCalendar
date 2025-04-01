@@ -2,6 +2,9 @@
 
 namespace ProcessWire;
 
+/**
+ * RRule GUI inside the field's markup
+ */
 ?>
 <div class='rc-rrule'>
   <div class='warning uk-hidden uk-alert uk-alert-warning'>
@@ -40,13 +43,13 @@ namespace ProcessWire;
         <td>
           <input type='number' name='interval' class='uk-input uk-text-center' min=1>
           <select class='uk-select' name='freq'>
-            <option value='YEARLY'><?= rockcalendar()->x('years') ?></option>
-            <option value='MONTHLY'><?= rockcalendar()->x('months') ?></option>
-            <option value='WEEKLY'><?= rockcalendar()->x('weeks') ?></option>
-            <option value='DAILY'><?= rockcalendar()->x('days') ?></option>
-            <option value='HOURLY'><?= rockcalendar()->x('hours') ?></option>
-            <option value='MINUTELY'><?= rockcalendar()->x('minutes') ?></option>
             <option value='SECONDLY'><?= rockcalendar()->x('seconds') ?></option>
+            <option value='MINUTELY'><?= rockcalendar()->x('minutes') ?></option>
+            <option value='HOURLY'><?= rockcalendar()->x('hours') ?></option>
+            <option value='DAILY'><?= rockcalendar()->x('days') ?></option>
+            <option value='WEEKLY'><?= rockcalendar()->x('weeks') ?></option>
+            <option value='MONTHLY'><?= rockcalendar()->x('months') ?></option>
+            <option value='YEARLY'><?= rockcalendar()->x('years') ?></option>
           </select>
         </td>
       </tr>
