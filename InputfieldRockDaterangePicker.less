@@ -20,11 +20,19 @@
     table {
       td {
         white-space: nowrap;
+        padding: 5px 5px;
       }
       td:first-child {
         width: 1%;
         white-space: nowrap;
-        padding-right: 20px;
+        padding-right: 10px;
+        text-align: right;
+        background-color: #efefef;
+        border-top: 2px solid white;
+        border-bottom: 2px solid white;
+      }
+      td:nth-child(2) {
+        padding-left: 10px;
       }
     }
     [name="freq"]:not(.fake-important):not(.fake-important) {
@@ -55,11 +63,6 @@
         display: none !important;
       }
     }
-  }
-
-  // hide tabulator header on simple mode
-  &.simple .tabulator-header {
-    display: none;
   }
 }
 

@@ -621,6 +621,20 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       'nov' => __('Nov'),
       'dec' => __('Dec'),
       'changed-warning' => __('Event date has been changed. Please save the page before creating additional events.'),
+      'note' => __('Note'),
+      'expert' => __('Expert'),
+
+      // help notes
+      'help-byweekday' => __('Days of the week to repeat on'),
+      'help-bymonth' => __('Months to repeat on'),
+      'help-wkst' => __('First day of the week'),
+      'help-bysetpos' => __('Either a number or a sequence of numbers. "First workday of the month": Repeat every 1 month, byweekday=MO, bysetpos=1'),
+      'help-bymonthday' => __('Either a number or a sequence of numbers. "First and last day of the month": Repeat every 1 month, bymonthday=1,-1'),
+      'help-byyearday' => __('Either a number or a sequence of numbers. "First and last day of the year": Repeat every 1 year, byyearday=1,-1'),
+      'help-byweekno' => __('Either a number or a sequence of numbers. "First and last week of the year": Repeat every 1 year, byweekno=1,-1'),
+      'help-byhour' => __('Either a number or a sequence of numbers. "Working hours": Repeat every 1 hour, byhour=9,10,...,16'),
+      'help-byminute' => __('Either a number or a sequence of numbers.'),
+      'help-bysecond' => __('Either a number or a sequence of numbers.'),
 
       // datepicker
       'applyLabel' => __('Apply'),
@@ -669,6 +683,6 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
 
   public static function x($prop)
   {
-    return array_key_exists($prop, self::translations()) ? self::translations()[$prop] : '';
+    return array_key_exists($prop, self::translations()) ? self::translations()[$prop] : $prop;
   }
 }

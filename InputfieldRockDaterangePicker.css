@@ -15,11 +15,19 @@
 }
 .InputfieldRockDaterangePicker .rc-rrule table td {
   white-space: nowrap;
+  padding: 5px 5px;
 }
 .InputfieldRockDaterangePicker .rc-rrule table td:first-child {
   width: 1%;
   white-space: nowrap;
-  padding-right: 20px;
+  padding-right: 10px;
+  text-align: right;
+  background-color: #efefef;
+  border-top: 2px solid white;
+  border-bottom: 2px solid white;
+}
+.InputfieldRockDaterangePicker .rc-rrule table td:nth-child(2) {
+  padding-left: 10px;
 }
 .InputfieldRockDaterangePicker .rc-rrule [name="freq"]:not(.fake-important):not(.fake-important) {
   width: 150px;
@@ -42,9 +50,6 @@
 }
 .InputfieldRockDaterangePicker .progress-container.running .start {
   display: none !important;
-}
-.InputfieldRockDaterangePicker.simple .tabulator-header {
-  display: none;
 }
 .AdminStyleRock .daterangepicker td.in-range {
   background-color: var(--rock-gray-100);

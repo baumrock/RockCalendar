@@ -1,6 +1,11 @@
 document.addEventListener("RockGrid:init", (e) => {
   const grid = e.detail;
 
+  // initial selected mode (for development)
+  // const mode = "simple";
+  // const mode = "advanced";
+  const mode = "expert";
+
   // do everything below only for this specific grid
   if (grid.name !== "RockCalendar-CreateRecurringEvents") return;
   if (typeof rrule === "undefined") {
@@ -34,7 +39,7 @@ document.addEventListener("RockGrid:init", (e) => {
       this.bymonth = [];
       this.byweekday = [];
       this.set("locale", ProcessWire.config.RcLocale || "en-US");
-      this.set("mode", "simple");
+      this.set("mode", mode);
       this.resetInputs();
 
       // pre-populate customstartdate with eventDate
@@ -238,30 +243,123 @@ document.addEventListener("RockGrid:init", (e) => {
     }
 
     getRRuleConfig() {
-      let config = {
-        freq: rrule.RRule[this.freq],
-        interval: parseInt(this.interval),
-        count: parseInt(this.count),
-        dtstart: new Date(this.startDate()),
-      };
+      // basic config
+      let config = {};
+
+      // ----- reset config -----
+      // this is to reset it back to the event's date when mode is changed
+      // to simple and at the same time keep the custom start date when mode
+      // is changed back to advanced or expert
+      config.dtstart = new Date(this.startDate());
+
+      // ----- simple settings -----
+      // repeat every ...
+      config.interval = parseInt(this.interval);
+      config.freq = rrule.RRule[this.freq];
+      // ends on
       if (this.until) config.until = new Date(this.until);
-      if (this.byweekday.length)
-        config.byweekday = this.byweekday.map((d) => {
-          if (!this.nth) return rrule.RRule[d];
-          return rrule.RRule[d].nth(parseInt(this.nth));
-        });
-      if (this.bymonth.length)
-        config.bymonth = this.bymonth.map((m) => parseInt(m));
+      if (this.count) config.count = parseInt(this.count);
+
+      // ----- advanced settings -----
+      if (this.mode == "advanced" || this.mode == "expert") {
+        // byweekday
+        if (this.byweekday.length)
+          config.byweekday = this.byweekday.map((d) => {
+            if (!this.nth) return rrule.RRule[d];
+            return rrule.RRule[d].nth(parseInt(this.nth));
+          });
+
+        // bymonth
+        if (this.bymonth.length)
+          config.bymonth = this.bymonth.map((m) => parseInt(m));
+      }
+
+      // ----- expert settings -----
+      if (this.mode == "expert") {
+        // wkst - week start day
+        if (this.wkst) config.wkst = rrule.RRule[this.wkst];
+
+        // bysetpos - e.g., 1st, 2nd, -1 (last), -2 (second to last)
+        if (this.bysetpos) {
+          const bysetposValues = this.bysetpos
+            .split(",")
+            .map((val) => parseInt(val.trim()));
+          if (bysetposValues.length && !isNaN(bysetposValues[0])) {
+            config.bysetpos = bysetposValues;
+          }
+        }
+
+        // bymonthday - day of the month (1-31 or -31 to -1)
+        if (this.bymonthday) {
+          const bymonthdayValues = this.bymonthday
+            .split(",")
+            .map((val) => parseInt(val.trim()));
+          if (bymonthdayValues.length && !isNaN(bymonthdayValues[0])) {
+            config.bymonthday = bymonthdayValues;
+          }
+        }
+
+        // byyearday - day of the year (1-366 or -366 to -1)
+        if (this.byyearday) {
+          const byyeardayValues = this.byyearday
+            .split(",")
+            .map((val) => parseInt(val.trim()));
+          if (byyeardayValues.length && !isNaN(byyeardayValues[0])) {
+            config.byyearday = byyeardayValues;
+          }
+        }
+
+        // byweekno - ISO week number (1-53 or -53 to -1)
+        if (this.byweekno) {
+          const byweeknoValues = this.byweekno
+            .split(",")
+            .map((val) => parseInt(val.trim()));
+          if (byweeknoValues.length && !isNaN(byweeknoValues[0])) {
+            config.byweekno = byweeknoValues;
+          }
+        }
+
+        // byhour - hour (0-23)
+        if (this.byhour) {
+          const byhourValues = this.byhour
+            .split(",")
+            .map((val) => parseInt(val.trim()));
+          if (byhourValues.length && !isNaN(byhourValues[0])) {
+            config.byhour = byhourValues;
+          }
+        }
+
+        // byminute - minute (0-59)
+        if (this.byminute) {
+          const byminuteValues = this.byminute
+            .split(",")
+            .map((val) => parseInt(val.trim()));
+          if (byminuteValues.length && !isNaN(byminuteValues[0])) {
+            config.byminute = byminuteValues;
+          }
+        }
+
+        // bysecond - second (0-59)
+        if (this.bysecond) {
+          const bysecondValues = this.bysecond
+            .split(",")
+            .map((val) => parseInt(val.trim()));
+          if (bysecondValues.length && !isNaN(bysecondValues[0])) {
+            config.bysecond = bysecondValues;
+          }
+        }
+      }
 
       // make sure interval is never every smaller than 1
       // as this would cause an infinite loop in rrule
       if (config.interval < 1) config.interval = 1;
 
-      // set limit of 10 events if no count or until is set
+      // set a low limit if no count or until is set to avoid performance issues
       if (!this.count && !this.until) {
         config.count = grid.jsVars.endsNeverLimit || 100;
       }
 
+      // console.log(config);
       return config;
     }
 
@@ -325,7 +423,6 @@ document.addEventListener("RockGrid:init", (e) => {
      * Triggers on every change of any input throttled by xx ms
      */
     onChange(prop) {
-      if (prop === "mode") return;
       clearTimeout(this.onChangeTimeout);
       this.onChangeTimeout = setTimeout(() => {
         // console.log("onChange");
@@ -355,24 +452,29 @@ document.addEventListener("RockGrid:init", (e) => {
       // if mode is simple, hide all tr.advanced
       const header = this.li.querySelector(".tabulator-header");
       if (this.mode === "simple") {
-        this.resetInputs();
-        // add fake row after 2nd tr
-        let fakeRow = document.createElement("tr");
-        fakeRow.classList.add("fake-row");
-        let secondRow = this.configTable.querySelectorAll("tr")[1];
-        secondRow.insertAdjacentElement("afterend", fakeRow);
+        // simple
         this.configTable.querySelectorAll("tr.advanced").forEach((tr) => {
           tr.classList.add("uk-hidden");
         });
-        this.li.classList.add("simple");
-      } else {
-        // remove fake row
-        let fakeRow = this.configTable.querySelector(".fake-row");
-        if (fakeRow) fakeRow.remove();
+        this.configTable.querySelectorAll("tr.expert").forEach((tr) => {
+          tr.classList.add("uk-hidden");
+        });
+      } else if (this.mode === "advanced") {
+        // advanced
         this.configTable.querySelectorAll("tr.advanced").forEach((tr) => {
           tr.classList.remove("uk-hidden");
         });
-        this.li.classList.remove("simple");
+        this.configTable.querySelectorAll("tr.expert").forEach((tr) => {
+          tr.classList.add("uk-hidden");
+        });
+      } else {
+        // expert
+        this.configTable.querySelectorAll("tr.advanced").forEach((tr) => {
+          tr.classList.remove("uk-hidden");
+        });
+        this.configTable.querySelectorAll("tr.expert").forEach((tr) => {
+          tr.classList.remove("uk-hidden");
+        });
       }
     }
 
@@ -480,6 +582,7 @@ document.addEventListener("RockGrid:init", (e) => {
      */
     startDate() {
       let start = this.eventDate();
+      if (this.mode == "simple") return start;
       if (this.starttype === "main") {
         return start;
       } else {
