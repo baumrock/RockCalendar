@@ -1,3 +1,10 @@
+## [1.7.0](https://github.com/baumrock/RockCalendar/compare/v1.6.3...v1.7.0) (2025-04-04)
+
+
+### Features
+
+* add new "expert" mode :) ([b2c46db](https://github.com/baumrock/RockCalendar/commit/b2c46dbe288cb7fd935fc43c424eeed6df39689c))
+
 ## [1.6.3](https://github.com/baumrock/RockCalendar/compare/v1.6.2...v1.6.3) (2025-04-01)
 
 
@@ -25,11 +32,4 @@
 ### Features
 
 * add support for custom fields on recurring events ([77682b0](https://github.com/baumrock/RockCalendar/commit/77682b07525389ed4c19762d7dee514a1aaaf9c5))
-
-## [1.5.1](https://github.com/baumrock/RockCalendar/compare/v1.5.0...v1.5.1) (2025-01-22)
-
-
-### Bug Fixes
-
-* datetime input losing time input ([5219895](https://github.com/baumrock/RockCalendar/commit/52198955a006294c64fc195e1907a56aa4fb0ef8))
 
