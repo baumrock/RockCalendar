@@ -2,9 +2,9 @@ document.addEventListener("RockGrid:init", (e) => {
   const grid = e.detail;
 
   // initial selected mode (for development)
-  // const mode = "simple";
+  const mode = "simple";
   // const mode = "advanced";
-  const mode = "expert";
+  // const mode = "expert";
 
   // do everything below only for this specific grid
   if (grid.name !== "RockCalendar-CreateRecurringEvents") return;
