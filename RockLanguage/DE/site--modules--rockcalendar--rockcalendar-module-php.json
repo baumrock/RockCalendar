@@ -220,6 +220,39 @@
         },
         "addc6b0b2c59594f745655d957182baa": {
             "text": "DD.MM.YYYY"
+        },
+        "3b0649c72650c313a357338dcdfb64ec": {
+            "text": "Hinweis"
+        },
+        "0b84df4e0b66e9d55b22eefb55ca928f": {
+            "text": "Experte"
+        },
+        "56a7cbb94eda7729f767a07f55887192": {
+            "text": "Wiederholung an folgenden Wochentagen"
+        },
+        "124c73ba4240eabd7d3331af271a329c": {
+            "text": "Wiederholung in folgenden Monaten"
+        },
+        "6a4bb3d78eae10076729e0a34d8a9bc6": {
+            "text": "Erster Tag der Woche"
+        },
+        "9c0b30a17d20a0b1f007750d4162999e": {
+            "text": "Entweder eine Zahl oder eine Folge von Zahlen. \"Erster Werktag des Monats\": Wiederholung alle 1 Monate, byweekday=MO, bysetpos=1"
+        },
+        "88ea35b4d044dc0faf9b3d685662d3c0": {
+            "text": "Entweder eine Zahl oder eine Folge von Zahlen. \"Erster und letzter Tag des Monats\": Wiederholung alle 1 Monate, bymonthday=1,-1"
+        },
+        "ed1c1ba1000f1c2261d5dbdb911a1524": {
+            "text": "Entweder eine Zahl oder eine Folge von Zahlen. \"Erster und letzter Tag des Jahres\": Wiederholung alle 1 Jahre, byyearday=1,-1"
+        },
+        "6237252ea2eb1c0ccfa295a624cf4d4f": {
+            "text": "Entweder eine Zahl oder eine Folge von Zahlen. \"Erste und letzte Woche des Jahres\": Wiederholung alle 1 Jahre, byweekno=1,-1"
+        },
+        "693039390ca55b56d22986aac7f8551d": {
+            "text": "Entweder eine Zahl oder eine Folge von Zahlen. \"Arbeitsstunden\": Wiederholung alle 1 Stunden, byhour=9,10,...,16"
+        },
+        "37dc5ec3101b01ac035b343be161e0ed": {
+            "text": "Entweder eine Zahl oder eine Folge von Zahlen."
         }
     }
 }
