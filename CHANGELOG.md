@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/baumrock/RockCalendar/compare/v1.7.0...v1.7.1) (2025-04-06)
+
+
+### Bug Fixes
+
+* start with simple mode ([292319b](https://github.com/baumrock/RockCalendar/commit/292319bd29ee821d72b953669d9b800c89e0343d))
+
 ## [1.7.0](https://github.com/baumrock/RockCalendar/compare/v1.6.3...v1.7.0) (2025-04-04)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * calendar getting wrong page on multisite installation ([1a53d82](https://github.com/baumrock/RockCalendar/commit/1a53d82c10f1af72575c9fcff761544e45eb7e13))
-
-## [1.6.0](https://github.com/baumrock/RockCalendar/compare/v1.5.1...v1.6.0) (2025-03-07)
-
-
-### Features
-
-* add support for custom fields on recurring events ([77682b0](https://github.com/baumrock/RockCalendar/commit/77682b07525389ed4c19762d7dee514a1aaaf9c5))
 
