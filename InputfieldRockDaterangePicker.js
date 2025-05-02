@@ -7,8 +7,8 @@ var RockDaterange;
           this.name = name;
           this.picker = false;
           this.pickers = {};
-          this.$li = document.querySelector("#wrap_Inputfield_" + name);
-          this.$picker = this.$li.querySelector("input[name=" + name + "]");
+          this.$picker = document.querySelector("input[name=" + name + "]");
+          this.$li = this.$picker.closest("li.InputfieldRockDaterangePicker");
           this.$start = this.$li.querySelector(
             "input[name=" + name + "_start]"
           );
