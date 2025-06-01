@@ -44,8 +44,46 @@ wire()->addHookAfter('RockCalendar::keepFields', function ($event) {
 
 ## API
 
+### Checking for Recurring Events
+
+All events created by RockCalendar are regular ProcessWire pages. To check whether a given page is a recurring event or not you can do this:
+
 ```php
-$page->isRecurringEvent;
+if($page->isRecurringEvent) {
+  // do something
+}
 ```
 
--- more docs coming soon --
+### Create Recurring Events
+
+The intention of this module is to create recurring events via the GUI. This is where the user can define the schedule, can exlude certain events from being created, etc.
+
+Even though events are just regular ProcessWire pages and you can use the PW API to create them, recurring events are a bit different. You need to provide a schedule and you need to provide correct dates (both start and end dates) etc.
+
+The first step is always to create the base event:
+
+```php
+$baseEvent = rockcalendar()->createEvent(
+  parent: $pages->get(123),
+  title: 'TEST',
+  date: [
+    'start' => '2025-06-03',
+  ],
+);
+```
+
+Once that event is created you can create, for example, the following events on the next 3 days:
+
+```php
+$date = $baseEvent->startDate();
+for ($i = 0; $i < 3; $i++) {
+  $date->modify('+1 day');
+  $baseEvent->createRecurringEvent($date);
+}
+```
+
+There is even a shorthand syntax for this:
+
+```php
+$baseEvent->createRecurringEvents('+1 day', 3);
+```

@@ -2,6 +2,7 @@
 
 namespace ProcessWire;
 
+use DateTime;
 use RockDaterangePicker\DateRange;
 
 /**
@@ -28,6 +29,9 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     wire()->addHookAfter('Page::loaded',                      $this, 'inheritFieldValues');
     wire()->addHookAfter('ProcessPageEdit::buildFormContent', $this, 'hookRecurringEventEdit');
     wire()->addHookProperty('Page::isRecurringEvent',         $this, 'isRecurringEvent');
+    wire()->addHookMethod('Page::startDate',                  $this, 'addStartDate');
+    wire()->addHookMethod('Page::createRecurringEvent',       $this, 'addCreateRecurringEvent');
+    wire()->addHookMethod('Page::createRecurringEvents',      $this, 'addCreateRecurringEvents');
     wire()->addHookAfter('ProcessPageEdit::buildFormDelete',  $this, 'addTrashOptions');
     wire()->addHookAfter('ProcessPageEdit::buildForm',        $this, 'openDeleteTab');
     wire()->addHookAfter('Pages::trashed',                    $this, 'hookTrashed');
@@ -43,6 +47,36 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     // note: needs to be in ready!
     // see https://processwire.com/talk/topic/30460-introducing-rockcalendar-a-powerful-and-flexible-calendar-module-for-processwire/?do=findComment&comment=247704
     $this->addSseEndpoints();
+  }
+
+  /**
+   * Add a recurring event to the base event
+   *
+   * Usage:
+   * $baseEvent->createRecurringEvent($date);
+   * $baseEvent->createRecurringEvent('2025-06-02');
+   */
+  protected function addCreateRecurringEvent(HookEvent $event)
+  {
+    $event->return = $this->createRecurringEvent(
+      event: $event->object,
+      start: $event->arguments(0),
+    );
+  }
+
+  /**
+   * Create multiple recurring events
+   *
+   * Usage:
+   * $baseEvent->createRecurringEvents('+1 day', 3);
+   */
+  protected function addCreateRecurringEvents(HookEvent $event)
+  {
+    $event->return = $this->createRecurringEvents(
+      event: $event->object,
+      diff: $event->arguments(0),
+      recurrences: $event->arguments(1),
+    );
   }
 
   private function addSseEndpoints()
@@ -65,15 +99,9 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       function ($rawItem, $rawInput) {
         if ($rawItem->done) return;
         $event = $this->getEventFromSseInput($rawInput); // check access
-        $date = $this->getDateRange($event);
-        $date->setMainPage($event);
-        $range = $date->setStart($rawItem->date);
-        $p = wire()->pages->new([
-          'parent' => $event->parent,
-          RockCalendar::field_date => $range,
-          'title' => 'recurr',
-          'name' => uniqid(),
-        ]);
+
+        $start = $rawItem->date;
+        $p = $this->createRecurringEvent($event, $start);
         return [
           'id' => $rawItem->id,
           'created' => $p->id,
@@ -109,6 +137,15 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
         ];
       }
     );
+  }
+
+  protected function addStartDate(HookEvent $event)
+  {
+    $p = $event->object;
+    $event->return = false;
+    if (!$p->hasField(self::field_date)) return;
+    $date = $this->getDateRange($p);
+    $event->return = $date->startDate();
   }
 
   protected function addTrashOptions(HookEvent $event)
@@ -157,6 +194,80 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
         if (closeBtn) closeBtn.click();
       });
       </script>';
+  }
+
+  /**
+   * Create a single event
+   *
+   * Usage:
+   * $baseEvent = rockcalendar()->createEvent(
+   *   parent: $pages->get(1018),
+   *   title: 'TEST',
+   *   date: [
+   *     'start' => '2025-06-02',
+   *   ],
+   * );
+   */
+  public function createEvent(
+    mixed $parent,
+    string $title,
+    array $date,
+  ): Page {
+    $date = new DateRange($date);
+    return wire()->pages->new([
+      'parent' => $parent,
+      self::field_date => $date,
+      'title' => $title,
+    ]);
+  }
+
+  /**
+   * Create a single recurring event
+   *
+   * Usage:
+   * rockcalendar()->createRecurringEvent(
+   *   event: $baseEvent,
+   *   start: '2025-06-02',
+   * );
+   */
+  public function createRecurringEvent(
+    Page $event,
+    DateTime|string $start,
+  ): Page {
+    $date = $this->getDateRange($event);
+    $date->setMainPage($event);
+    $range = $date->setStart($start);
+    $p = wire()->pages->new([
+      'parent' => $event->parent,
+      self::field_date => $range,
+      'title' => 'recurr',
+      'name' => uniqid(),
+    ]);
+    return $p;
+  }
+
+  /**
+   * Create multiple recurring events
+   *
+   * Usage:
+   * rockcalendar()->createRecurringEvents(
+   *   event: $baseEvent,
+   *   diff: '+1 day',
+   *   recurrences: 3,
+   * );
+   */
+  public function createRecurringEvents(
+    Page $event,
+    string $diff,
+    int $recurrences,
+  ): array {
+    $created = [];
+    $start = $event->startDate();
+    for ($i = 0; $i < $recurrences; $i++) {
+      $start->modify($diff);
+      $created[] = $this->createRecurringEvent($event, $start);
+    }
+    return $created;
   }
 
   private function err(string $msg): string
@@ -243,7 +354,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     return array_key_exists($prop, $config) ? $config[$prop] : null;
   }
 
-  protected function getDateRange(Page $p): DateRange|false
+  public function getDateRange(Page $p): DateRange|false
   {
     foreach ($p->fields as $f) {
       if ($f->type instanceof FieldtypeRockDaterangePicker) {
