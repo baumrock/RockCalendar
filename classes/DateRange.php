@@ -136,6 +136,11 @@ class DateRange extends WireData
     return date($format, $this->start + $offset);
   }
 
+  public function startDate(): DateTime
+  {
+    return (new DateTime())->setTimestamp($this->start);
+  }
+
   public function __toString()
   {
     return $this->ranger();
