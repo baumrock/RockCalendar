@@ -1,3 +1,15 @@
+## [1.8.0](https://github.com/baumrock/RockCalendar/compare/v1.7.1...v1.8.0) (2025-06-01)
+
+
+### Features
+
+* add php api for creating recurring events ([94fd468](https://github.com/baumrock/RockCalendar/commit/94fd468af92ca826ed436519f19ffc030e3b12df))
+
+
+### Bug Fixes
+
+* daterange picker not working in repeater items ([74084b3](https://github.com/baumrock/RockCalendar/commit/74084b3a3138ed1bc22ae19635b7d2ee37fd2210))
+
 ## [1.7.1](https://github.com/baumrock/RockCalendar/compare/v1.7.0...v1.7.1) (2025-04-06)
 
 
@@ -25,11 +37,4 @@
 ### Bug Fixes
 
 * sse endpoints not working on multilang websites ([ea4b278](https://github.com/baumrock/RockCalendar/commit/ea4b278717a92035b0511eacacab3161a8d8e4f5))
-
-## [1.6.1](https://github.com/baumrock/RockCalendar/compare/v1.6.0...v1.6.1) (2025-03-12)
-
-
-### Bug Fixes
-
-* calendar getting wrong page on multisite installation ([1a53d82](https://github.com/baumrock/RockCalendar/commit/1a53d82c10f1af72575c9fcff761544e45eb7e13))
 
