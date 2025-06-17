@@ -23,6 +23,10 @@ Docs are under construction. If you have questions, please ask in the forum thre
 
 https://processwire.com/talk/topic/30460-introducing-rockcalendar-a-powerful-and-flexible-calendar-module-for-processwire/
 
+## Limitations
+
+RockCalendar does currently not support different timezones. If a user adds an event at 2025-12-24 18:00:00 this will be considered to be the local time and stored without timezone information in the database like this.
+
 ## Notes
 
 - To use the recurring events feature, you have to purchase a license for RockGrid as this module is used to render the recurring events user interface.

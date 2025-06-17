@@ -11,6 +11,77 @@ Recurring events will inherit all field values from the original event unless ex
 - Instant updates: Imagine you have 100 recurring events, and you update the title of the original event. With field inheritance, you don't have to update the title of the 100 recurring events, it will automatically update.
 - Less data: Instead of storing 100 times the same field value, the recurring event will inherit the value from the original event. This means that the recurring event will have the same field values as the original event without needing any additional storage.
 
+## API
+
+### Checking for Recurring Events
+
+All events created by RockCalendar are regular ProcessWire pages. To check whether a given page is a recurring event or not you can do this:
+
+```php
+if($page->isRecurringEvent) {
+  // do something
+}
+```
+
+### Finding Recurring Events
+
+You can find all events that belong to the same recurring series using the `findEventsOfSeries()` method. This method takes a page (event) and returns all related events in the series.
+
+```php
+// Get all events in the series
+$allEvents = rockcalendar()->findEventsOfSeries($page);
+
+// Get all following events (after the given event)
+$followingEvents = rockcalendar()->findEventsOfSeries($page, 'following');
+
+// Get all previous events (before the given event)
+$previousEvents = rockcalendar()->findEventsOfSeries($page, 'previous');
+
+// Include the current event in the results
+$followingEventsIncludingSelf = rockcalendar()->findEventsOfSeries($page, 'following', true);
+```
+
+The method accepts three parameters:
+- `$p`: The page (event) to find related events for
+- `$type`: The type of events to find ('all', 'following', or 'previous')
+- `$includeSelf`: Whether to include the current event in the results (default: false)
+
+The method returns a PageArray containing all matching events.
+
+### Create Recurring Events
+
+The intention of this module is to create recurring events via the GUI. This is where the user can define the schedule, can exlude certain events from being created, etc.
+
+Even though events are just regular ProcessWire pages and you can use the PW API to create them, recurring events are a bit different. You need to provide a schedule and you need to provide correct dates (both start and end dates) etc.
+
+The first step is always to create the base event:
+
+```php
+$baseEvent = rockcalendar()->createEvent(
+  parent: $pages->get(123),
+  title: 'TEST',
+  date: [
+    'start' => '2025-06-03',
+  ],
+);
+```
+
+Once that event is created you can create, for example, the following events on the next 3 days:
+
+```php
+$date = $baseEvent->startDate();
+for ($i = 0; $i < 3; $i++) {
+  $date = $date->modify('+1 day');
+  $baseEvent->createRecurringEvent($date);
+}
+```
+
+There is even a shorthand syntax for this:
+
+```php
+$baseEvent->createRecurringEvents('+1 day', 3);
+```
+
 ## Custom fields for recurring events
 
 It might be necessary to add custom fields to recurring events. For example you might want to add a subject to every recurring event (like the topic of a weekly podcast).
@@ -42,48 +113,13 @@ wire()->addHookAfter('RockCalendar::keepFields', function ($event) {
 
 <img src=https://i.imgur.com/KYjy6C2.png class=blur>
 
-## API
+## Detaching Events
 
-### Checking for Recurring Events
-
-All events created by RockCalendar are regular ProcessWire pages. To check whether a given page is a recurring event or not you can do this:
+You can detach an event from the series from the GUI by unchecking the "recurring" checkbox or via API like this:
 
 ```php
-if($page->isRecurringEvent) {
-  // do something
-}
+$event = wire()->pages->get(123);
+$event->detachFromSeries();
 ```
 
-### Create Recurring Events
-
-The intention of this module is to create recurring events via the GUI. This is where the user can define the schedule, can exlude certain events from being created, etc.
-
-Even though events are just regular ProcessWire pages and you can use the PW API to create them, recurring events are a bit different. You need to provide a schedule and you need to provide correct dates (both start and end dates) etc.
-
-The first step is always to create the base event:
-
-```php
-$baseEvent = rockcalendar()->createEvent(
-  parent: $pages->get(123),
-  title: 'TEST',
-  date: [
-    'start' => '2025-06-03',
-  ],
-);
-```
-
-Once that event is created you can create, for example, the following events on the next 3 days:
-
-```php
-$date = $baseEvent->startDate();
-for ($i = 0; $i < 3; $i++) {
-  $date->modify('+1 day');
-  $baseEvent->createRecurringEvent($date);
-}
-```
-
-There is even a shorthand syntax for this:
-
-```php
-$baseEvent->createRecurringEvents('+1 day', 3);
-```
+This will copy all previously inherited field values from the main event to this event.

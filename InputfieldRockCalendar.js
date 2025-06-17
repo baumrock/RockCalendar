@@ -33,6 +33,7 @@ var RockCalendar;
       this.id = config.id;
       this.lang = config.lang;
       this.calendarEl = document.getElementById("calendar-" + this.id);
+      this.wrapper = this.calendarEl.closest(".rockcalendar-wrapper");
       this.li = this.calendarEl.closest("li.Inputfield");
       this.addLink = this.li.querySelector("a.pw-modal.add-item");
       this.calendar = null;
@@ -63,21 +64,75 @@ var RockCalendar;
     addCallbacks() {
       let calendar = this.calendar;
 
-      // drop event
+      // get recurring options
+      const options =
+        this.wrapper.querySelector(".recurring-options").innerHTML;
+
+      // drop event (move event to another day)
       calendar.on("eventDrop", (info) => {
-        this.fetch(ProcessWire.config.urls.root + "rockcalendar/eventDrop/", {
-          id: info.event.id,
-          start: info.event.startStr,
-        });
+        const url = ProcessWire.config.urls.root + "rockcalendar/eventDrop/";
+        const isRecurring = info.event.extendedProps.isRecurring;
+        if (isRecurring) {
+          // show modal to choose option
+          UIkit.modal.confirm(options).then(
+            () => {
+              // get selected option
+              const option = document.querySelector(
+                "input[name='recurring-option']:checked"
+              ).value;
+              this.fetch(url, {
+                id: info.event.id,
+                start: info.event.startStr,
+                option: option,
+              }).then(() => {
+                this.refresh();
+              });
+            },
+            () => {
+              info.revert();
+            }
+          );
+        } else {
+          // move single event
+          this.fetch(url, {
+            id: info.event.id,
+            start: info.event.startStr,
+          });
+        }
       });
 
       // resize event
       calendar.on("eventResize", (info) => {
-        this.fetch(ProcessWire.config.urls.root + "rockcalendar/eventResize/", {
-          id: info.event.id,
-          start: info.event.startStr,
-          end: info.event.endStr,
-        });
+        const url = ProcessWire.config.urls.root + "rockcalendar/eventResize/";
+        const isRecurring = info.event.extendedProps.isRecurring;
+        if (isRecurring) {
+          // show modal to choose option
+          UIkit.modal.confirm(options).then(
+            () => {
+              // get selected option
+              const option = document.querySelector(
+                "input[name='recurring-option']:checked"
+              ).value;
+              this.fetch(url, {
+                id: info.event.id,
+                start: info.event.startStr,
+                end: info.event.endStr,
+                option: option,
+              }).then(() => {
+                this.refresh();
+              });
+            },
+            () => {
+              info.revert();
+            }
+          );
+        } else {
+          this.fetch(url, {
+            id: info.event.id,
+            start: info.event.startStr,
+            end: info.event.endStr,
+          });
+        }
       });
 
       // click (edit) event
@@ -119,7 +174,6 @@ var RockCalendar;
         let button = event.target.closest("button");
         if (!button) return;
         if (!button.matches(".ui-dialog-titlebar-close")) return;
-        calendar.refetchEvents();
         this.refresh();
       });
     }
@@ -164,7 +218,7 @@ var RockCalendar;
     }
 
     fetch(endpoint, data) {
-      fetch(endpoint, {
+      return fetch(endpoint, {
         method: "POST",
         headers: {
           "X-Requested-With": "XMLHttpRequest",

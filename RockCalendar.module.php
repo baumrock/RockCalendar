@@ -2,7 +2,12 @@
 
 namespace ProcessWire;
 
+use DateInterval;
+use DateMalformedStringException;
 use DateTime;
+use DateTimeImmutable;
+use DateTimeZone;
+use PDOException;
 use RockDaterangePicker\DateRange;
 
 /**
@@ -36,6 +41,8 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     wire()->addHookAfter('ProcessPageEdit::buildForm',        $this, 'openDeleteTab');
     wire()->addHookAfter('Pages::trashed',                    $this, 'hookTrashed');
     wire()->addHookAfter('ProcessPageList::execute',          $this, 'autoCloseModal');
+    wire()->addHook('Page::detachFromSeries',                 $this, 'detachFromSeries');
+    wire()->addHook('Page::changeDays',                       $this, 'addchangeDays');
   }
 
   public function ready(): void
@@ -47,6 +54,14 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     // note: needs to be in ready!
     // see https://processwire.com/talk/topic/30460-introducing-rockcalendar-a-powerful-and-flexible-calendar-module-for-processwire/?do=findComment&comment=247704
     $this->addSseEndpoints();
+  }
+
+  protected function addchangeDays(HookEvent $event): void
+  {
+    $event->return = $this->changeDays(
+      $event->object,
+      $event->arguments(0),
+    );
   }
 
   /**
@@ -158,13 +173,20 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $events = $this->getEventsOfSeries($p);
     if (count($events) < 2) return;
 
+    // prepare options
+    $options = [];
+    foreach ($this->recurringOptions() as $key => $label) {
+      if ($key === 'detach') continue;
+      $options[$key] = $label;
+    }
+
     /** @var InputfieldWrapper $form */
     $form = $event->return;
     $form->add([
       'type' => 'radios',
       'name' => 'rc-trash-type',
       'label' => 'Select an option',
-      'options' => $this->trashOptions(),
+      'options' => $options,
       'value' => 'self',
       // add script tag that listens to change of rc-trash-type
       // and checks the delete_page checkbox
@@ -194,6 +216,53 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
         if (closeBtn) closeBtn.click();
       });
       </script>';
+  }
+
+  /**
+   * Change the duration of the given event (in days)
+   *
+   * @param Page $p
+   * @param DateInterval $duration
+   * @return void
+   */
+  public function changeDays(
+    Page $p,
+    DateInterval $duration,
+  ): void {
+    $date = $this->getDateRange($p);
+    $date->setStart($date->start(), false);
+
+    // set end date
+    $end = $date->startDate()->modify($duration->format('%r%a days'));
+    $date->setEnd($end->modify('-1 second'));
+    $p->setAndSave(self::field_date, $date);
+  }
+
+  /**
+   * Change date of the given event based on the changes from $old to $new
+   *
+   * Example:
+   * $old = 2025-06-02 10:00
+   * $new = 2025-06-03 20:00
+   *
+   * $p before = 2025-07-01 08:00
+   * $p after = 2025-07-02 18:00
+   *
+   * @param Page $p
+   * @param DateRange $old
+   * @param DateRange $new
+   * @return void
+   */
+  public function changeEventDate(
+    Page $p,
+    DateRange $old,
+    DateRange $new
+  ): void {
+    $date = $this->getDateRange($p);
+    $p->setAndSave(
+      $date->fieldName,
+      $date->modify($old, $new)
+    );
   }
 
   /**
@@ -236,10 +305,10 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
   ): Page {
     $date = $this->getDateRange($event);
     $date->setMainPage($event);
-    $range = $date->setStart($start);
+    $date->setStart($start);
     $p = wire()->pages->new([
       'parent' => $event->parent,
-      self::field_date => $range,
+      self::field_date => $date,
       'title' => 'recurr',
       'name' => uniqid(),
     ]);
@@ -264,10 +333,81 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $created = [];
     $start = $event->startDate();
     for ($i = 0; $i < $recurrences; $i++) {
-      $start->modify($diff);
+      $start = $start->modify($diff);
       $created[] = $this->createRecurringEvent($event, $start);
     }
     return $created;
+  }
+
+  /**
+   * Detach the given event from the series
+   * @param Page $p
+   * @return void|null
+   */
+  public function detachEvent(Page $p)
+  {
+    $date = $this->getDateRange($p);
+    if (!$date) return;
+    if (!$date->isRecurring) return;
+
+    // if we have no main event set, we are detaching the main event
+    $mainEvent = $date->mainPage;
+    if (!$mainEvent->id) return $this->detachMainEvent($p);
+
+    // detach the recurring event
+    $date->detach();
+    $p->setAndSave(self::field_date, $date);
+
+    // copy all field values from main event to this event
+    $keepFields = $this->keepFields($p);
+    foreach ($mainEvent->fields as $field) {
+      if (in_array($field->name, $keepFields)) continue;
+      $p->setAndSave($field->name, $mainEvent->get($field->name));
+    }
+  }
+
+  protected function detachFromSeries(HookEvent $event): void
+  {
+    $this->detachEvent($event->object);
+  }
+
+  public function detachMainEvent(Page $p)
+  {
+    $date = $this->getDateRange($p);
+    if (!$date) return;
+    if (!$date->isRecurring) return;
+    if ($date->mainPage->id) {
+      throw new WireException("This is not the main event of the series!");
+    }
+
+    // get next event, which will become the new main event
+    $nextEvent = $this->findEventsOfSeries($p, 'following')->eq(1);
+
+    // now that we pulled the next event, we can detach this event
+    $date->detach();
+    $p->setAndSave(self::field_date, $date);
+
+    // if there is no next event, we have nothing more to do
+    if (!$nextEvent) return;
+
+    // copy all fields from this event to the next event
+    $keepFields = $this->keepFields($p);
+    foreach ($p->fields as $field) {
+      if (in_array($field->name, $keepFields)) continue;
+      $nextEvent->setAndSave($field->name, $p->get($field->name));
+    }
+
+    // update all mainPage entries
+    $sql = "UPDATE `field_rockcalendar_date`
+      SET `mainPage` = {$nextEvent->id}
+      WHERE `mainPage` = {$p->id}";
+    wire()->database->exec($sql);
+
+    // reset the mainPage of the next event
+    $sql = "UPDATE `field_rockcalendar_date`
+      SET `mainPage` = 0
+      WHERE `pages_id` = {$nextEvent->id}";
+    wire()->database->exec($sql);
   }
 
   private function err(string $msg): string
@@ -291,14 +431,29 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     if (!$p->editable()) return $this->err("Event $p not editable");
     if (!$this->hasDateRange($p)) return $this->err("Page $p has no daterange field");
 
-    /** @var DateRange $date */
-    $date = $this->getDateRange($p);
-    $diff = $date->diff();
-    $newStart = strtotime($input->start);
-    $newEnd = $newStart + $diff;
-    $date->setStart($newStart);
-    $date->setEnd($newEnd);
-    $p->setAndSave($date->fieldName, $date);
+    // move this event or following?
+    $option = $input->string('option');
+
+    if ($option === 'following') {
+      // get following events
+      $followingEvents = $this->findEventsOfSeries($p, 'following');
+      $dates = $this->moveEventTo($p, $input->start);
+      foreach ($followingEvents as $event) {
+        if ($event->id === $p->id) continue;
+        $this->changeEventDate($event, $dates[0], $dates[1]);
+      }
+    } elseif ($option === 'all') {
+      // get all events of series
+      $allEvents = $this->findEventsOfSeries($p);
+      $dates = $this->moveEventTo($p, $input->start);
+      foreach ($allEvents as $event) {
+        if ($event->id === $p->id) continue;
+        $this->changeEventDate($event, $dates[0], $dates[1]);
+      }
+    } else {
+      $this->moveEventTo($p, $input->start);
+      if ($option === 'detach') $p->detachFromSeries();
+    }
 
     return $this->succ("Event $p moved");
   }
@@ -310,14 +465,27 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $p = wire()->pages->get((int)$input->id);
     if (!$p->id) return $this->err("Event $p not found");
     if (!$p->editable()) return $this->err("Event $p not editable");
-    $date = $this->getDateRange($p);
-    $newStart = strtotime($input->start);
-    $newEnd = strtotime($input->end) - 1; // account for FullCalendar date handling
-    $date->setStart($newStart);
-    $date->setEnd($newEnd);
-    $date->hasRange = true;
-    $p->setAndSave($date->fieldName, $date);
+
+    // move this event or following?
+    $option = $input->string('option');
+    $duration = $this->getInterval($input->start, $input->end);
+    $p->changeDays($duration);
+
+    $events = $this->findEventsOfSeries($p, $option);
+    foreach ($events as $event) {
+      $event->changeDays($duration);
+    }
+    if ($option === 'detach') $p->detachFromSeries();
+
     return $this->succ("Event $p resized");
+  }
+
+  public function getInterval(string $start, string $end): DateInterval
+  {
+    $startDate = $this->datetime($start);
+    $endDate = $this->datetime($end);
+    $diff = $startDate->diff($endDate);
+    return $diff;
   }
 
   protected function eventsJSON(HookEvent $event)
@@ -348,14 +516,69 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     return json_encode($data);
   }
 
+  /**
+   * Find events of this series (including the given event)
+   *
+   * Options for type:
+   * - all: all events of this series
+   * - following: all events of this series that are after the given event
+   * - previous: all events of this series that are before the given event
+   * - self: only the given event
+   */
+  public function findEventsOfSeries(
+    Page|string|int $p,
+    string $type = 'all',
+  ): PageArray {
+    // check if page is valid
+    $p = wire()->pages->get((string)$p);
+    $date = $this->getDateRange($p);
+    if (!$date) return new PageArray();
+    if (!$date->isRecurring) return new PageArray();
+
+    // get the main event
+    $mainEvent = $date->mainPage;
+    if (!$mainEvent->id) $mainEvent = $p;
+
+    // get all events of series
+    if ($type === 'all') {
+      return wire()->pages->find([
+        'rockcalendar_date.series=' => $mainEvent->id,
+      ]);
+    }
+
+    // get following events
+    if ($type === 'following') {
+      return wire()->pages->find([
+        'rockcalendar_date.series=' => $mainEvent->id,
+        'rockcalendar_date.start>=' => $date->start,
+      ]);
+    }
+
+    // get previous events
+    if ($type === 'previous') {
+      return wire()->pages->find([
+        'rockcalendar_date.series=' => $mainEvent->id,
+        'rockcalendar_date.start<=' => $date->start,
+      ]);
+    }
+
+    // get single event
+    if ($type === 'self' || $type === 'detach') {
+      return (new PageArray())->add($p);
+    }
+
+    return new PageArray();
+  }
+
   public function getConfig(string $prop): mixed
   {
     $config = wire()->modules->getConfig($this);
     return array_key_exists($prop, $config) ? $config[$prop] : null;
   }
 
-  public function getDateRange(Page $p): DateRange|false
+  public function getDateRange(Page|string|int $p): DateRange|false
   {
+    $p = wire()->pages->get((string)$p);
     foreach ($p->fields as $f) {
       if ($f->type instanceof FieldtypeRockDaterangePicker) {
         $date = $p->getFormatted($f->name);
@@ -549,7 +772,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
 
   protected function hookTrashed(HookEvent $event): void
   {
-    $validOptions = array_keys($this->trashOptions());
+    $validOptions = array_keys($this->recurringOptions());
     $type = wire()->input->post('rc-trash-type', $validOptions);
     if (!$type) return;
     if ($type === 'self') return;
@@ -563,11 +786,18 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
   {
     /** @var Page $page */
     $page = $event->object;
+
+    // early exits
     if (!$page->hasField(self::field_date)) return;
     $date = $page->getFormatted(self::field_date);
     if (!$date->isRecurring) return;
     $mainPage = $date->mainPage;
     if (!$mainPage->id) return;
+
+    // prevent infinite loop
+    if ($mainPage->id === $page->id) return;
+
+    // inherit field values
     $keep = $this->keepFields($mainPage);
     foreach ($mainPage->fields as $f) {
       if (in_array($f->name, $keep)) continue;
@@ -628,6 +858,43 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     return $mappings;
   }
 
+  /**
+   * Move a single event to a new start date
+   *
+   * @param Page $p
+   * @param string $start
+   * @return array
+   */
+  public function moveEventTo(Page $p, string $start): array
+  {
+    $newDate = $this->getDateRange($p);
+    $oldDate = clone $newDate;
+
+    $oldStartDate = $newDate->startDate();
+    $newStartDate = $this->datetime($start);
+    $diff = $oldStartDate->diff($newStartDate);
+    $newEndDate = $newDate->endDate()->add($diff);
+    $newDate->setStart($newStartDate);
+    $newDate->setEnd($newEndDate);
+    $p->setAndSave($newDate->fieldName, $newDate);
+
+    return [$oldDate, $newDate];
+  }
+
+  public function datetime(
+    string $datetime = 'now',
+    ?string $timezone = null
+  ): DateTime {
+    return new DateTime($datetime, $timezone ? new DateTimeZone($timezone) : null);
+  }
+
+  public function datetimeimmutable(
+    string $datetime = 'now',
+    ?string $timezone = null
+  ): DateTimeImmutable {
+    return new DateTimeImmutable($datetime, $timezone ? new DateTimeZone($timezone) : null);
+  }
+
   protected function openDeleteTab(HookEvent $event)
   {
     /** @var InputfieldWrapper $form */
@@ -651,6 +918,16 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $_params = trim($_params, '&');
     $_params = $_params ? '?' . $_params : '';
     return wire()->pages->get(2)->url . "setup/rockcalendar/$url/$_params";
+  }
+
+  public function recurringOptions(): array
+  {
+    return [
+      'self'      => __('This event only'),
+      'detach'    => __('This event only (detach from series)'),
+      'following' => __('This and all following events'),
+      'all'       => __('All events of this recurring series'),
+    ];
   }
 
   public function setConfig(string $name, mixed $value): void
@@ -734,6 +1011,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       'changed-warning' => __('Event date has been changed. Please save the page before creating additional events.'),
       'note' => __('Note'),
       'expert' => __('Expert'),
+      'change-date-of' => __('Change date of...'),
 
       // help notes
       'help-byweekday' => __('Days of the week to repeat on'),
@@ -780,15 +1058,6 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       ],
       'dt-minute' => __('MM/DD/YYYY HH:mm'),
       'dt-date' => __('MM/DD/YYYY'),
-    ];
-  }
-
-  private function trashOptions(): array
-  {
-    return [
-      'self'      => 'This event only',
-      'following' => 'This and all following events',
-      'all'       => 'All events of this recurring series',
     ];
   }
 
