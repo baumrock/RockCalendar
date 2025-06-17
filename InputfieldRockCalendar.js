@@ -1,6 +1,7 @@
 var RockCalendar;
 (() => {
   let loaded = false;
+  let preventRefresh = false;
 
   const openInModal = (href, options = {}) => {
     // merge options with defaults
@@ -20,7 +21,10 @@ var RockCalendar;
     if (opts.buttons) $link.attr("data-buttons", opts.buttons);
     $link.on("click", pwModalOpenEvent);
     $link.on("pw-modal-closed", () => {
-      if (opts.calendar) opts.calendar.refresh();
+      console.log("pw-modal-closed");
+      if (opts.calendar) {
+        if (!preventRefresh) opts.calendar.refresh();
+      }
       $link.remove();
     });
     $link.click();
@@ -70,7 +74,7 @@ var RockCalendar;
 
       // drop event (move event to another day)
       calendar.on("eventDrop", (info) => {
-        const url = ProcessWire.config.urls.root + "rockcalendar/eventDrop/";
+        const url = "/rockcalendar/eventDrop/";
         const isRecurring = info.event.extendedProps.isRecurring;
         if (isRecurring) {
           // show modal to choose option
@@ -103,7 +107,7 @@ var RockCalendar;
 
       // resize event
       calendar.on("eventResize", (info) => {
-        const url = ProcessWire.config.urls.root + "rockcalendar/eventResize/";
+        const url = "/rockcalendar/eventResize/";
         const isRecurring = info.event.extendedProps.isRecurring;
         if (isRecurring) {
           // show modal to choose option
@@ -169,12 +173,35 @@ var RockCalendar;
         );
       });
 
-      // listen to modal close
+      // cleanup unmodified unpublished pages on modal close
       document.addEventListener("click", (event) => {
         let button = event.target.closest("button");
         if (!button) return;
         if (!button.matches(".ui-dialog-titlebar-close")) return;
-        this.refresh();
+
+        // delete page on modal close
+        const dialog = button.closest(".ui-dialog");
+        if (!dialog) return;
+
+        // get page id from #PageIDIndicator inside the iframe
+        const iframe = dialog.querySelector("iframe");
+        if (!iframe) return;
+
+        const el = iframe.contentWindow.document.querySelector(
+          "[rockcalendar-cleanup]"
+        );
+        if (!el) return;
+
+        const pageId = parseInt(el.getAttribute("rockcalendar-cleanup"));
+        if (!pageId) return;
+
+        preventRefresh = true;
+        this.fetch("/rockcalendar/cleanup/", { pageId }).then(() => {
+          this.refresh();
+          setTimeout(() => {
+            preventRefresh = false;
+          }, 1000);
+        });
       });
     }
 
@@ -218,12 +245,21 @@ var RockCalendar;
     }
 
     fetch(endpoint, data) {
-      return fetch(endpoint, {
+      // remove leading slash
+      endpoint = endpoint.replace(/^\//, "");
+
+      // Convert data object to FormData
+      const formData = new FormData();
+      for (const [key, value] of Object.entries(data)) {
+        formData.append(key, value);
+      }
+
+      return fetch(ProcessWire.config.urls.root + endpoint, {
         method: "POST",
         headers: {
           "X-Requested-With": "XMLHttpRequest",
         },
-        body: JSON.stringify(data),
+        body: formData,
       })
         .then((response) => response.json())
         .then((json) => {

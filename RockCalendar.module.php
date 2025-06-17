@@ -28,19 +28,25 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
 
   public function init()
   {
+    // url hooks
     wire()->addHookAfter('/rockcalendar/events/',             $this, 'eventsJSON');
     wire()->addHookAfter('/rockcalendar/eventDrop/',          $this, 'eventDrop');
     wire()->addHookAfter('/rockcalendar/eventResize/',        $this, 'eventResize');
-    wire()->addHookAfter('Page::loaded',                      $this, 'inheritFieldValues');
+    wire()->addHookAfter('/rockcalendar/cleanup/',            $this, 'cleanup');
+
+    // regular hooks
     wire()->addHookAfter('ProcessPageEdit::buildFormContent', $this, 'hookRecurringEventEdit');
-    wire()->addHookProperty('Page::isRecurringEvent',         $this, 'isRecurringEvent');
-    wire()->addHookMethod('Page::startDate',                  $this, 'addStartDate');
-    wire()->addHookMethod('Page::createRecurringEvent',       $this, 'addCreateRecurringEvent');
-    wire()->addHookMethod('Page::createRecurringEvents',      $this, 'addCreateRecurringEvents');
     wire()->addHookAfter('ProcessPageEdit::buildFormDelete',  $this, 'addTrashOptions');
     wire()->addHookAfter('ProcessPageEdit::buildForm',        $this, 'openDeleteTab');
     wire()->addHookAfter('Pages::trashed',                    $this, 'hookTrashed');
     wire()->addHookAfter('ProcessPageList::execute',          $this, 'autoCloseModal');
+
+    // Page hooks
+    wire()->addHookAfter('Page::loaded',                      $this, 'inheritFieldValues');
+    wire()->addHookProperty('Page::isRecurringEvent',         $this, 'isRecurringEvent');
+    wire()->addHookMethod('Page::startDate',                  $this, 'addStartDate');
+    wire()->addHookMethod('Page::createRecurringEvent',       $this, 'addCreateRecurringEvent');
+    wire()->addHookMethod('Page::createRecurringEvents',      $this, 'addCreateRecurringEvents');
     wire()->addHook('Page::detachFromSeries',                 $this, 'detachFromSeries');
     wire()->addHook('Page::changeDays',                       $this, 'addchangeDays');
   }
@@ -266,6 +272,28 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
   }
 
   /**
+   * Url hook endpoint to auto-cleanup unsaved pages
+   * @param HookEvent $event
+   * @return string
+   */
+  protected function cleanup(HookEvent $event)
+  {
+    $pageId = wire()->input->post('pageId', 'int');
+    $p = wire()->pages->get($pageId);
+
+    if (!$this->hasDateRange($p)) return $this->err("Invalid page");
+    if (!$p->editable()) return $this->err("Event $p not editable");
+    if (!$p->hasStatus(Page::statusUnpublished)) return $this->err("Event $p not unpublished");
+    if ($p->modified > $p->created) return $this->err("Event $p not unmodified");
+
+    // delete page (skip trash)
+    $p->delete();
+
+    // send empty success message to prevent JSON error in console
+    return $this->succ("");
+  }
+
+  /**
    * Create a single event
    *
    * Usage:
@@ -416,7 +444,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
   }
 
   /**
-   * Move a single event out of series
+   * Handle event drop
    * @param HookEvent $event
    * @return string
    * @throws WireException
@@ -424,8 +452,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
    */
   protected function eventDrop(HookEvent $event)
   {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $input = new WireInputData($input);
+    $input = wire()->input->post;
     $p = wire()->pages->get((int)$input->id);
     if (!$p->id) return $this->err("Event $p not found");
     if (!$p->editable()) return $this->err("Event $p not editable");
@@ -460,8 +487,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
 
   protected function eventResize(HookEvent $event)
   {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $input = new WireInputData($input);
+    $input = wire()->input->post;
     $p = wire()->pages->get((int)$input->id);
     if (!$p->id) return $this->err("Event $p not found");
     if (!$p->editable()) return $this->err("Event $p not editable");

@@ -89,6 +89,12 @@ class InputfieldRockDaterangePicker extends Inputfield
       'additionalfields' => $fs->render(),
     ]);
 
+    // add cleanup indicator with page id
+    $p = $this->process->getPage();
+    if ($p->hasStatus(Page::statusUnpublished) && $p->modified === $p->created) {
+      $markup .= "<div rockcalendar-cleanup='$p'></div>";
+    }
+
     return $markup;
   }
 
