@@ -1045,7 +1045,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       'changed-warning' => __('Event date has been changed. Please save the page before creating additional events.'),
       'note' => __('Note'),
       'expert' => __('Expert'),
-      'change-date-of' => __('Change date of...'),
+      'change-date-of' => __('Change date'),
 
       // help notes
       'help-byweekday' => __('Days of the week to repeat on'),
