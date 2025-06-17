@@ -57,6 +57,8 @@ class InputfieldRockCalendar extends InputfieldTextarea
       $options .= "<label><input class='uk-radio' type='radio' name='recurring-option' value='$key' $checked> $label</label><br>";
     }
 
+    $translations = rockcalendar()->frontendTranslations();
+
     return "
       <div class='rockcalendar-wrapper'>
         <div id='calendar-{$this->name}' class='RockCalendar'></div>
@@ -78,7 +80,12 @@ class InputfieldRockCalendar extends InputfieldTextarea
             $options
           </div>
         </template>
-        <script>RockCalendar.add({id: '{$this->name}', lang: '$locale', pid: $p});</script>
+        <script>RockCalendar.add({
+          id: '{$this->name}',
+          lang: '$locale',
+          x: $translations,
+          pid: $p
+        });</script>
       </div>
     ";
   }

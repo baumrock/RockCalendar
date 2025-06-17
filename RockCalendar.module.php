@@ -506,6 +506,14 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     return $this->succ("Event $p resized");
   }
 
+  public function frontendTranslations(): string
+  {
+    return json_encode([
+      'ok' => __('OK'),
+      'cancel' => __('Cancel'),
+    ]);
+  }
+
   public function getInterval(string $start, string $end): DateInterval
   {
     $startDate = $this->datetime($start);

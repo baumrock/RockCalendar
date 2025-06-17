@@ -41,6 +41,7 @@ var RockCalendar;
       this.li = this.calendarEl.closest("li.Inputfield");
       this.addLink = this.li.querySelector("a.pw-modal.add-item");
       this.calendar = null;
+      this.translations = config.x;
     }
 
     init() {
@@ -78,7 +79,7 @@ var RockCalendar;
         const isRecurring = info.event.extendedProps.isRecurring;
         if (isRecurring) {
           // show modal to choose option
-          UIkit.modal.confirm(options).then(
+          UIkit.modal.confirm(options, this.confirmModalButtons()).then(
             () => {
               // get selected option
               const option = document.querySelector(
@@ -111,7 +112,7 @@ var RockCalendar;
         const isRecurring = info.event.extendedProps.isRecurring;
         if (isRecurring) {
           // show modal to choose option
-          UIkit.modal.confirm(options).then(
+          UIkit.modal.confirm(options, this.confirmModalButtons()).then(
             () => {
               // get selected option
               const option = document.querySelector(
@@ -203,6 +204,15 @@ var RockCalendar;
           }, 1000);
         });
       });
+    }
+
+    confirmModalButtons() {
+      return {
+        i18n: {
+          ok: this.x("ok"),
+          cancel: this.x("cancel"),
+        },
+      };
     }
 
     eventDidMount(info) {
@@ -305,6 +315,10 @@ var RockCalendar;
       this.calendar.refetchEvents();
       this.redraw();
     }
+
+    x(key) {
+      return this.translations[key] || key;
+    }
   }
 
   class Calendars {
@@ -312,8 +326,8 @@ var RockCalendar;
       this.calendars = {};
     }
 
-    add(id, lang) {
-      let cal = new Calendar(id, lang);
+    add(id, lang, x) {
+      let cal = new Calendar(id, lang, x);
       this.calendars[id] = cal;
       if (loaded) cal.init();
     }
