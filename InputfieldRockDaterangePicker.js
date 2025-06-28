@@ -20,11 +20,16 @@ var RockDaterange;
           this.endDate = this.getDate(this.$end.value);
           this.hasTime = false;
           this.hasRange = false;
-          this.isRecurring = false;
+          this.isRecurring = this.$isRecurring.checked;
           this.changed();
           this.initPicker();
           this.$hasTime.addEventListener("change", this.changed.bind(this));
+          this.$hasTime.addEventListener("change", this.dateChanged.bind(this));
           this.$hasRange.addEventListener("change", this.changed.bind(this));
+          this.$hasRange.addEventListener(
+            "change",
+            this.dateChanged.bind(this)
+          );
 
           // only do this if RockGrid is installed
           if (this.$isRecurring) {
@@ -66,12 +71,24 @@ var RockDaterange;
         },
 
         changed() {
+          // note: don't debounce me!!
           this.hasTime = this.$hasTime.checked;
           this.hasRange = this.$hasRange.checked;
           if (!this.picker) return;
           this.picker.remove();
           this.initPicker();
           this.setDates();
+        },
+
+        dateChanged() {
+          // show options field (self/following/all)
+          const optionsField = this.$li.querySelector(
+            ".Inputfield_change-date-of"
+          );
+          if (optionsField) {
+            // unhide options field if its a recurring event
+            if (this.isRecurring) optionsField.classList.remove("uk-hidden");
+          }
         },
 
         /**
@@ -90,11 +107,21 @@ var RockDaterange;
           this.picker = $(this.$picker).data("daterangepicker");
           // console.log("picker", this.picker);
           this.setDates();
+
+          // monitor date changes coming from the picker
+          $(this.$picker).on(
+            "apply.daterangepicker",
+            this.dateChanged.bind(this)
+          );
+          // monitor changes of the input field directly
+          $(this.$picker).on("change", this.dateChanged.bind(this));
         },
 
         recurringChanged() {
           this.isRecurring = this.$isRecurring.checked;
-          let container = this.$li.querySelector(".rc-recurring-container");
+          let container = this.$li.querySelector(
+            ".Inputfield_rockcalendar_date_create"
+          );
           if (this.isRecurring) {
             container.classList.remove("uk-hidden");
           } else {

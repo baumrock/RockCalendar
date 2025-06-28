@@ -29,8 +29,9 @@ class InputfieldRockDaterangePicker extends Inputfield
     ]);
     $input = "<input $attrStr />";
 
+    $fs = new InputfieldFieldset();
+
     if (wire()->modules->isInstalled('RockGrid')) {
-      $fs = new InputfieldFieldset();
       if (!$this->value->mainPage->id) {
         $fs->add([
           'type' => 'RockGrid',
@@ -41,6 +42,7 @@ class InputfieldRockDaterangePicker extends Inputfield
           'collapsed' => Inputfield::collapsedYes,
           'prependMarkup' => wire()->files->render(__DIR__ . '/markup-rrule.php'),
           'appendMarkup' => wire()->files->render(__DIR__ . '/markup-progress.php'),
+          'wrapClass' => $this->value->isRecurring ?: 'uk-hidden',
         ]);
       } else {
         $p = $this->value->mainPage;
@@ -53,17 +55,21 @@ class InputfieldRockDaterangePicker extends Inputfield
             . "</a>",
         ]);
       }
-      // $fs->add([
-      //   'type' => 'RockGrid',
-      //   'name' => $this->name . '_events',
-      //   'grid' => 'RockCalendar\\EventsOfSeries',
-      //   'label' => 'Existing Events of this Series',
-      //   'icon' => 'calendar',
-      // ]);
-      $grid = $fs->render();
     }
 
-    return wire()->files->render(__DIR__ . '/markup.php', [
+    // add change options
+    $options = new InputfieldRadios();
+    $options->name = 'change-date-of';
+    $options->label = rockcalendar()->x('change-date-of');
+    $options->wrapClass('uk-hidden');
+    foreach (rockcalendar()->recurringOptions() as $key => $label) {
+      $options->addOption($key, $label, [
+        'checked' => $key === 'self',
+      ]);
+    }
+    $fs->add($options);
+
+    $markup = wire()->files->render(__DIR__ . '/markup.php', [
       'hasRockGrid' => wire()->modules->isInstalled('RockGrid'),
       'hasTime' => $this->value->hasTime,
       'hasRange' => $this->value->hasRange,
@@ -80,8 +86,16 @@ class InputfieldRockDaterangePicker extends Inputfield
       'recurendcount' => $this->value->recurendcount ?: 1,
       'input' => $input,
       'name' => $this->name,
-      'grid' => $grid ?? false,
+      'additionalfields' => $fs->render(),
     ]);
+
+    // add cleanup indicator with page id
+    $p = $this->process->getPage();
+    if ($p->hasStatus(Page::statusUnpublished) && $p->modified === $p->created) {
+      $markup .= "<div rockcalendar-cleanup='$p'></div>";
+    }
+
+    return $markup;
   }
 
   public function renderReady(?Inputfield $parent = null, $renderValueMode = false)
@@ -102,6 +116,7 @@ class InputfieldRockDaterangePicker extends Inputfield
   {
     $name = $this->name;
     $old = $this->value;
+    if (!$old instanceof DateRange) return;
     $isRecurring = !!$input->get($name . '_isRecurring');
     $new = new DateRange([
       'start' => $input->get($name . '_start'),
@@ -109,10 +124,35 @@ class InputfieldRockDaterangePicker extends Inputfield
       'hasTime' => !!$input->get($name . '_hasTime'),
       'hasRange' => !!$input->get($name . '_hasRange'),
       'isRecurring' => $isRecurring,
-      'mainPage' => $isRecurring ? $old->mainPage : null,
+      'mainPage' => $isRecurring ? $old->mainPage : new NullPage(),
     ]);
+    // no change, nothing to do
     if ($old->hash() === $new->hash()) return;
+
+    // get event from ProcessPageEdit
+    $event = $this->process->getPage();
+    $option = $input->string('change-date-of');
+
+    // detach event from series
+    // if recurring checkbox is unchecked
+    if ($old->isRecurring && !$new->isRecurring) $event->detachFromSeries();
+
+    // or if option is "detach"
+    if ($option === 'detach') {
+      wire()->addHookAfter('Pages::saved', function (HookEvent $e) {
+        $e->arguments(0)->detachFromSeries();
+      });
+    }
+
+    // track change
     $this->trackChange('value');
     $this->value = $new;
+
+    // change date of other events of series
+    $allEvents = rockcalendar()->findEventsOfSeries($event, $option);
+    foreach ($allEvents as $e) {
+      if ($e->id === $event->id) continue;
+      rockcalendar()->changeEventDate($e, $old, $new);
+    }
   }
 }

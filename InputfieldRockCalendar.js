@@ -1,6 +1,7 @@
 var RockCalendar;
 (() => {
   let loaded = false;
+  let preventRefresh = false;
 
   const openInModal = (href, options = {}) => {
     // merge options with defaults
@@ -20,7 +21,10 @@ var RockCalendar;
     if (opts.buttons) $link.attr("data-buttons", opts.buttons);
     $link.on("click", pwModalOpenEvent);
     $link.on("pw-modal-closed", () => {
-      if (opts.calendar) opts.calendar.refresh();
+      console.log("pw-modal-closed");
+      if (opts.calendar) {
+        if (!preventRefresh) opts.calendar.refresh();
+      }
       $link.remove();
     });
     $link.click();
@@ -33,9 +37,11 @@ var RockCalendar;
       this.id = config.id;
       this.lang = config.lang;
       this.calendarEl = document.getElementById("calendar-" + this.id);
+      this.wrapper = this.calendarEl.closest(".rockcalendar-wrapper");
       this.li = this.calendarEl.closest("li.Inputfield");
       this.addLink = this.li.querySelector("a.pw-modal.add-item");
       this.calendar = null;
+      this.translations = config.x;
     }
 
     init() {
@@ -63,21 +69,75 @@ var RockCalendar;
     addCallbacks() {
       let calendar = this.calendar;
 
-      // drop event
+      // get recurring options
+      const options =
+        this.wrapper.querySelector(".recurring-options").innerHTML;
+
+      // drop event (move event to another day)
       calendar.on("eventDrop", (info) => {
-        this.fetch(ProcessWire.config.urls.root + "rockcalendar/eventDrop/", {
-          id: info.event.id,
-          start: info.event.startStr,
-        });
+        const url = "/rockcalendar/eventDrop/";
+        const isRecurring = info.event.extendedProps.isRecurring;
+        if (isRecurring) {
+          // show modal to choose option
+          UIkit.modal.confirm(options, this.confirmModalButtons()).then(
+            () => {
+              // get selected option
+              const option = document.querySelector(
+                "input[name='recurring-option']:checked"
+              ).value;
+              this.fetch(url, {
+                id: info.event.id,
+                start: info.event.startStr,
+                option: option,
+              }).then(() => {
+                this.refresh();
+              });
+            },
+            () => {
+              info.revert();
+            }
+          );
+        } else {
+          // move single event
+          this.fetch(url, {
+            id: info.event.id,
+            start: info.event.startStr,
+          });
+        }
       });
 
       // resize event
       calendar.on("eventResize", (info) => {
-        this.fetch(ProcessWire.config.urls.root + "rockcalendar/eventResize/", {
-          id: info.event.id,
-          start: info.event.startStr,
-          end: info.event.endStr,
-        });
+        const url = "/rockcalendar/eventResize/";
+        const isRecurring = info.event.extendedProps.isRecurring;
+        if (isRecurring) {
+          // show modal to choose option
+          UIkit.modal.confirm(options, this.confirmModalButtons()).then(
+            () => {
+              // get selected option
+              const option = document.querySelector(
+                "input[name='recurring-option']:checked"
+              ).value;
+              this.fetch(url, {
+                id: info.event.id,
+                start: info.event.startStr,
+                end: info.event.endStr,
+                option: option,
+              }).then(() => {
+                this.refresh();
+              });
+            },
+            () => {
+              info.revert();
+            }
+          );
+        } else {
+          this.fetch(url, {
+            id: info.event.id,
+            start: info.event.startStr,
+            end: info.event.endStr,
+          });
+        }
       });
 
       // click (edit) event
@@ -114,14 +174,45 @@ var RockCalendar;
         );
       });
 
-      // listen to modal close
+      // cleanup unmodified unpublished pages on modal close
       document.addEventListener("click", (event) => {
         let button = event.target.closest("button");
         if (!button) return;
         if (!button.matches(".ui-dialog-titlebar-close")) return;
-        calendar.refetchEvents();
-        this.refresh();
+
+        // delete page on modal close
+        const dialog = button.closest(".ui-dialog");
+        if (!dialog) return;
+
+        // get page id from #PageIDIndicator inside the iframe
+        const iframe = dialog.querySelector("iframe");
+        if (!iframe) return;
+
+        const el = iframe.contentWindow.document.querySelector(
+          "[rockcalendar-cleanup]"
+        );
+        if (!el) return;
+
+        const pageId = parseInt(el.getAttribute("rockcalendar-cleanup"));
+        if (!pageId) return;
+
+        preventRefresh = true;
+        this.fetch("/rockcalendar/cleanup/", { pageId }).then(() => {
+          this.refresh();
+          setTimeout(() => {
+            preventRefresh = false;
+          }, 1000);
+        });
       });
+    }
+
+    confirmModalButtons() {
+      return {
+        i18n: {
+          ok: this.x("ok"),
+          cancel: this.x("cancel"),
+        },
+      };
     }
 
     eventDidMount(info) {
@@ -164,12 +255,21 @@ var RockCalendar;
     }
 
     fetch(endpoint, data) {
-      fetch(endpoint, {
+      // remove leading slash
+      endpoint = endpoint.replace(/^\//, "");
+
+      // Convert data object to FormData
+      const formData = new FormData();
+      for (const [key, value] of Object.entries(data)) {
+        formData.append(key, value);
+      }
+
+      return fetch(ProcessWire.config.urls.root + endpoint, {
         method: "POST",
         headers: {
           "X-Requested-With": "XMLHttpRequest",
         },
-        body: JSON.stringify(data),
+        body: formData,
       })
         .then((response) => response.json())
         .then((json) => {
@@ -215,6 +315,10 @@ var RockCalendar;
       this.calendar.refetchEvents();
       this.redraw();
     }
+
+    x(key) {
+      return this.translations[key] || key;
+    }
   }
 
   class Calendars {
@@ -222,8 +326,8 @@ var RockCalendar;
       this.calendars = {};
     }
 
-    add(id, lang) {
-      let cal = new Calendar(id, lang);
+    add(id, lang, x) {
+      let cal = new Calendar(id, lang, x);
       this.calendars[id] = cal;
       if (loaded) cal.init();
     }

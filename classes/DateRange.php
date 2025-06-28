@@ -2,7 +2,9 @@
 
 namespace RockDaterangePicker;
 
+use DateInterval;
 use DateTime;
+use DateTimeImmutable;
 use IntlDateFormatter;
 use OpenPsa\Ranger\Ranger;
 use ProcessWire\NullPage;
@@ -24,9 +26,14 @@ class DateRange extends WireData
 
   public function __construct($arr = [])
   {
+    // get default start and end if not set
+    // these values are used when creating a new page without saving
+    $start = strtotime('today');
+    $end = strtotime('tomorrow') - 1;
+
     $data = (new WireData)->setArray($arr);
-    $this->start = $this->getTS($data->start) ?: time();
-    $this->end = $this->getTS($data->end) ?: time();
+    $this->start = $this->getTS($data->start) ?: $start;
+    $this->end = $this->getTS($data->end) ?: $end;
     $this->hasTime = $data->hasTime ?: false;
     $this->allDay = !$this->hasTime;
     $this->hasRange = $data->hasRange ?: false;
@@ -41,11 +48,12 @@ class DateRange extends WireData
   }
 
   /**
-   * Time difference in seconds
+   * Duration of the event as DateInterval
+   * @return DateInterval
    */
-  public function diff(): int
+  public function diff(): DateInterval
   {
-    return $this->end - $this->start;
+    return $this->startDate()->diff($this->endDate());
   }
 
   /**
@@ -58,6 +66,19 @@ class DateRange extends WireData
   {
     if (!$format) $format = 'Y-m-d H:i:s';
     return date($format, $this->end + $offset);
+  }
+
+  public function endDate($offset = 0): DateTimeImmutable
+  {
+    return (new DateTimeImmutable())
+      ->setTimestamp($this->end + $offset);
+  }
+
+  public function getInterval(): DateInterval
+  {
+    $startDate = $this->startDate();
+    $endDate = $this->endDate($this->allDay ? 1 : 0);
+    return $startDate->diff($endDate);
   }
 
   public function ___getRanger(): Ranger
@@ -77,6 +98,7 @@ class DateRange extends WireData
   {
     if (is_int($str)) return $str;
     if ($str instanceof DateTime) return $str->getTimestamp();
+    if ($str instanceof DateTimeImmutable) return $str->getTimestamp();
     return strtotime((string)$str);
   }
 
@@ -101,6 +123,35 @@ class DateRange extends WireData
     return $hash;
   }
 
+  /**
+   * Modify the current daterange based on the changes from $old to $new
+   */
+  public function modify(
+    DateRange $old,
+    DateRange $new,
+    bool $apply = false,
+  ): self {
+    // apply changes to this object or return a new object
+    if ($apply) $date = $this;
+    else $date = clone $this;
+
+    $diff = $old->startDate()->diff($new->startDate());
+    $start = $date->startDate()->add($diff);
+    $date->setStart($start, false);
+    $date->setEnd($start->add($new->diff()));
+    $date->setFlags($new);
+
+    return $date;
+  }
+
+  public function setFlags(DateRange $date): void
+  {
+    $this->allDay = $date->allDay;
+    $this->hasTime = $date->hasTime;
+    $this->hasRange = $date->hasRange;
+    $this->isRecurring = $date->isRecurring;
+  }
+
   public function ranger(): string
   {
     return $this->getRanger()->format($this->start, $this->end);
@@ -113,17 +164,24 @@ class DateRange extends WireData
     return $this;
   }
 
-  public function setStart(mixed $start): self
+  public function setStart(mixed $start, bool $updateEnd = true): self
   {
-    $diff = $this->diff();
     $this->start = $this->getTS($start);
-    $this->end = $this->start + $diff;
+    if ($updateEnd) {
+      $diff = $this->diff();
+      $this->end = $this->startDate()->add($diff)->getTimestamp();
+    }
     return $this;
   }
 
   public function setEnd(mixed $end): self
   {
     $this->end = $this->getTS($end);
+
+    // update range settings
+    $interval = $this->getInterval();
+    $this->hasRange = $interval->days > 1;
+
     return $this;
   }
 
@@ -133,12 +191,15 @@ class DateRange extends WireData
   public function start($format = null, $offset = 0): string
   {
     if (!$format) $format = 'Y-m-d H:i:s';
+    // $datetime = rockcalendar()->datetime()->setTimestamp($this->start);
+    // bd($datetime);
     return date($format, $this->start + $offset);
   }
 
-  public function startDate(): DateTime
+  public function startDate(): DateTimeImmutable
   {
-    return (new DateTime())->setTimestamp($this->start);
+    return (new DateTimeImmutable())
+      ->setTimestamp($this->start);
   }
 
   public function __toString()

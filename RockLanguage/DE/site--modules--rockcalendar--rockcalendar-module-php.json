@@ -253,6 +253,24 @@
         },
         "37dc5ec3101b01ac035b343be161e0ed": {
             "text": "Entweder eine Zahl oder eine Folge von Zahlen."
+        },
+        "397ea2ccc0eb308ebd435c15e402f303": {
+            "text": "Nur dieses Event"
+        },
+        "f3e15354e4d467f2342bfdcde60b9fe1": {
+            "text": "Nur dieses Event (aus der Serie entfernen)"
+        },
+        "8cf37787d82d9ce0fd9032c93f831d59": {
+            "text": "Dieses und alle folgenden Events"
+        },
+        "7541f79bcff4801dce2353f9cfde5aa4": {
+            "text": "Alle Events dieser Serie"
+        },
+        "e0aa021e21dddbd6d8cecec71e9cf564": {
+            "text": "Ok"
+        },
+        "cb62e35819d732212e26249e9aebe2b0": {
+            "text": "Datum \u00e4ndern"
         }
     }
 }

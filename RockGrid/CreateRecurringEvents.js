@@ -437,10 +437,24 @@ document.addEventListener("RockGrid:init", (e) => {
 
     onChangeHasTime() {
       let input = this.li.querySelector("input[name='customstartdate']");
+      const currentValue = input.value;
+
       if (this.hasTime) {
         input.type = "datetime-local";
+        // Ensure the value is in the correct format for datetime-local
+        // This is necessary for firefox issue "The invalid form control with name=‘customstartdate’ is not focusable."
+        if (currentValue && !currentValue.includes("T")) {
+          // Convert date-only to datetime-local format
+          input.value = currentValue + "T00:00";
+        }
       } else {
         input.type = "date";
+        // Ensure the value is in the correct format for date
+        // This is necessary for firefox issue "The invalid form control with name=‘customstartdate’ is not focusable."
+        if (currentValue && currentValue.includes("T")) {
+          // Convert datetime-local to date format
+          input.value = currentValue.split("T")[0];
+        }
       }
     }
 
