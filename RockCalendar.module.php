@@ -685,7 +685,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
 
     // prepare title
     $title = wire()->sanitizer->text($p->title, [
-      'maxLength' => 100,
+      'maxLength' => 50,
       'stripTags' => true,
       'convertEntities' => true,
     ]);
