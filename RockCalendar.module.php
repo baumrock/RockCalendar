@@ -683,9 +683,16 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $col = '#B2DFDB';
     if ($p->hasStatus(Page::statusUnpublished)) $col = '#E0E0E0';
 
+    // prepare title
+    $title = wire()->sanitizer->text($p->title, [
+      'maxLength' => 100,
+      'stripTags' => true,
+      'convertEntities' => true,
+    ]);
+
     return [
       'id' => $p->id,
-      'title' => $p->title,
+      'title' => $title,
       'start' => $date->start(),
       'end' => $date->end(offset: 1),
       'allDay' => $date->hasTime ? 0 : 1,
