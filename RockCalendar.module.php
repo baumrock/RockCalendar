@@ -12,7 +12,7 @@ use RockDaterangePicker\DateRange;
 
 /**
  * @author Bernhard Baumrock, 29.08.2024
- * @license COMMERCIAL DO NOT DISTRIBUTE
+ * @license MIT as of 2026-01-21
  * @link https://www.baumrock.com
  */
 function rockcalendar(): RockCalendar|null
