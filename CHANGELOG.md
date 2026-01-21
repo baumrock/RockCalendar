@@ -1,3 +1,14 @@
+## [2.0.0](https://github.com/baumrock/RockCalendar/compare/v1.9.0...v2.0.0) (2026-01-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* change license to MIT
+
+### Bug Fixes
+
+* change license to MIT ([bf4e506](https://github.com/baumrock/RockCalendar/commit/bf4e506935a7c54e2e4e0890aab9394c14655d7a))
+
 ## [1.9.0](https://github.com/baumrock/RockCalendar/compare/v1.8.0...v1.9.0) (2025-06-28)
 
 
@@ -38,11 +49,4 @@
 ### Features
 
 * add new "expert" mode :) ([b2c46db](https://github.com/baumrock/RockCalendar/commit/b2c46dbe288cb7fd935fc43c424eeed6df39689c))
-
-## [1.6.3](https://github.com/baumrock/RockCalendar/compare/v1.6.2...v1.6.3) (2025-04-01)
-
-
-### Bug Fixes
-
-* minor refactoring ([312df75](https://github.com/baumrock/RockCalendar/commit/312df7506c68405a58a30af9385f226fa914b0b8))
 
