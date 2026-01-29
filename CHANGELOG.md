@@ -1,3 +1,12 @@
+## [2.0.1](https://github.com/baumrock/RockCalendar/compare/v2.0.0...v2.0.1) (2026-01-29)
+
+
+### Bug Fixes
+
+* issue when creating events without recurring events available ([07f9edf](https://github.com/baumrock/RockCalendar/commit/07f9edf09cbc174fe5187043c64cd5915164bd1f))
+* trashing recurring events does not work properly ([3abeba6](https://github.com/baumrock/RockCalendar/commit/3abeba652df7f8b5a4a8f90484a05af26dff6343))
+* wrong end date set when creating recurring events ([f35c0a8](https://github.com/baumrock/RockCalendar/commit/f35c0a84fad8d96c5a466ab6cadbaee3be856e80))
+
 ## [2.0.0](https://github.com/baumrock/RockCalendar/compare/v1.9.0...v2.0.0) (2026-01-21)
 
 
@@ -42,11 +51,4 @@
 ### Bug Fixes
 
 * start with simple mode ([292319b](https://github.com/baumrock/RockCalendar/commit/292319bd29ee821d72b953669d9b800c89e0343d))
-
-## [1.7.0](https://github.com/baumrock/RockCalendar/compare/v1.6.3...v1.7.0) (2025-04-04)
-
-
-### Features
-
-* add new "expert" mode :) ([b2c46db](https://github.com/baumrock/RockCalendar/commit/b2c46dbe288cb7fd935fc43c424eeed6df39689c))
 
