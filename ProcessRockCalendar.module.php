@@ -55,7 +55,13 @@ class ProcessRockCalendar extends Process
 
     // get events to trash
     $type = wire()->input->get('type', ['following', 'all']);
-    $all = rockcalendar()->getEventsOfSeries($p, $type);
+    $all = rockcalendar()->getEventsOfSeries(
+      $p,
+      $type,
+      // we need to include the main event because it's already trashed
+      // at this point and if it's not included, the SSE will mess up.
+      true,
+    );
     $num = count($all);
 
     // show progress bar and delete all pages
