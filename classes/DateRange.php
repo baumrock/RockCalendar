@@ -166,10 +166,12 @@ class DateRange extends WireData
 
   public function setStart(mixed $start, bool $updateEnd = true): self
   {
+    if ($updateEnd) {
+      $duration = $this->diff();
+    }
     $this->start = $this->getTS($start);
     if ($updateEnd) {
-      $diff = $this->diff();
-      $this->end = $this->startDate()->add($diff)->getTimestamp();
+      $this->end = $this->startDate()->add($duration)->getTimestamp();
     }
     return $this;
   }
