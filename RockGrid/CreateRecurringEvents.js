@@ -119,9 +119,12 @@ document.addEventListener("RockGrid:init", (e) => {
       }
     }
 
-    createDone() {
+    createDone(createdPageIds) {
       this.createPause();
       this.createEventsButton.setAttribute("disabled", "disabled");
+      this.createEventsButton.dispatchEvent(new CustomEvent('recurringevents.created', {
+        detail: { pageIds: createdPageIds }
+      }));
     }
 
     createPause(e) {
@@ -144,6 +147,7 @@ document.addEventListener("RockGrid:init", (e) => {
       this.progressContainer.classList.add("running");
       this.createEventsButton.setAttribute("disabled", "disabled");
       this.progressPauseButton.removeAttribute("disabled");
+      const createdPageIds = [];
       const url = ProcessWire.config.urls.root;
       RockGrid.sse({
         url: url + "rockcalendar/create-recurring-events/",
@@ -163,10 +167,15 @@ document.addEventListener("RockGrid:init", (e) => {
         onMessage: (msg) => {
           let data = JSON.parse(msg);
           this.setProgress(data.current);
-          this.table.updateRow(data.id, { created: 1 });
+          this.table.updateRow(data.id, { created: 1 })
+            .catch(error => {
+              // This operations always throws the following error: 'Update Error - No matching row found'
+              // Catch and ignore
+            });
+          if (data.created) createdPageIds.push(data.created);
         },
         onDone: () => {
-          this.createDone();
+          this.createDone(createdPageIds);
         },
       });
     }
