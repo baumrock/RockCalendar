@@ -141,7 +141,13 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
         if (!$p->id) return;
         if (!$p->hasField(self::field_date)) return;
         if (!$p->editable()) return;
-        return $this->getEventsOfSeries($p, $rawInput->type);
+        $events = $this->getEventsOfSeries(
+          $p,
+          $rawInput->type,
+          true,
+        );
+        // bd($events, 'events');
+        return $events;
       },
 
       // item callback
@@ -151,6 +157,7 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
         if (!$p->id) return;
         if (!$p->hasField(self::field_date)) return;
         if (!$p->editable()) return;
+        // bd($p->id, 'trashing page');
         // sleep(1);
         $p->trash();
         return [
@@ -652,8 +659,11 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     ]);
   }
 
-  public function getEventsOfSeries(Page $p, ?string $type = null): array
-  {
+  public function getEventsOfSeries(
+    Page $p,
+    ?string $type = null,
+    ?bool $forceIncludeSelf = false,
+  ): array {
     // this is to support NULL types coming from sanitized input
     $type = $type ?? 'self';
 
@@ -670,7 +680,13 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       $selector['id!='] = $p->id;
       $selector[self::field_date . '.start>='] = $date->start();
     }
+
     $all = wire()->pages->findIDs($selector);
+
+    // force include the page itself?
+    if ($forceIncludeSelf) $all = [$p->id, ...$all];
+
+    // return events
     return $all;
   }
 

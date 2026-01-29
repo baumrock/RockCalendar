@@ -20,7 +20,7 @@ var RockDaterange;
           this.endDate = this.getDate(this.$end.value);
           this.hasTime = false;
           this.hasRange = false;
-          this.isRecurring = this.$isRecurring.checked;
+          this.isRecurring = this.$isRecurring?.checked ?? false;
           this.changed();
           this.initPicker();
           this.$hasTime.addEventListener("change", this.changed.bind(this));
