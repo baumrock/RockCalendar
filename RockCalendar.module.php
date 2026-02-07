@@ -538,8 +538,8 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
     $endTS = strtotime($end);
     $p = wire()->pages->get($pid);
     $field = wire()->fields->get('type=FieldtypeRockDaterangePicker');
-    if (!$p->editable()) $data = [
-      'msg' => "Page $p must be editable to get events.",
+    if (!$this->allowEventsAccess($p)) $data = [
+      'msg' => "Access denied for events of page $p.",
     ];
     else $data = $this->getEvents(
       $pid,
@@ -721,6 +721,28 @@ class RockCalendar extends WireData implements Module, ConfigurableModule
       // will be accessible from js via event.extendedProps
       'isRecurring' => $date->isRecurring,
     ];
+  }
+
+  /**
+   * Check if event data can be accessed for this parent page.
+   *
+   * Default behavior requires the page to be editable (admin context).
+   * Hook this to allow public/frontend access to calendar event data.
+   *
+   * Example: Allow guests to view events on public calendar pages:
+   *   $wire->addHookAfter('RockCalendar::allowEventsAccess', function($event) {
+   *       $parent = $event->arguments(0);
+   *       if ($parent->template->name === 'calendar-events' && $parent->viewable()) {
+   *           $event->return = true;
+   *       }
+   *   });
+   *
+   * @param Page $parent The calendar parent page (pid from the request)
+   * @return bool
+   */
+  public function ___allowEventsAccess(Page $parent): bool
+  {
+    return $parent->editable();
   }
 
   public function getLocales(): array
