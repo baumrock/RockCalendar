@@ -1,3 +1,10 @@
+## [2.1.0](https://github.com/baumrock/RockCalendar/compare/v2.0.1...v2.1.0) (2026-02-07)
+
+
+### Features
+
+* add hookable ___allowEventsAccess() for frontend calendar support ([dc8c78e](https://github.com/baumrock/RockCalendar/commit/dc8c78e384e5debacc24d6a6bd6e438f84d92d1d))
+
 ## [2.0.1](https://github.com/baumrock/RockCalendar/compare/v2.0.0...v2.0.1) (2026-01-29)
 
 
@@ -44,11 +51,4 @@
 ### Bug Fixes
 
 * daterange picker not working in repeater items ([74084b3](https://github.com/baumrock/RockCalendar/commit/74084b3a3138ed1bc22ae19635b7d2ee37fd2210))
-
-## [1.7.1](https://github.com/baumrock/RockCalendar/compare/v1.7.0...v1.7.1) (2025-04-06)
-
-
-### Bug Fixes
-
-* start with simple mode ([292319b](https://github.com/baumrock/RockCalendar/commit/292319bd29ee821d72b953669d9b800c89e0343d))
 
