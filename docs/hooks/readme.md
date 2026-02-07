@@ -43,3 +43,29 @@ wire()->addHookAfter('RockCalendar::getItemArray', function ($event) {
 <img src=https://i.imgur.com/ST55aSf.png class=blur height=200>
 
 <img src=https://i.imgur.com/QjBetDC.png class=blur height=191>
+
+## allowEventsAccess
+
+This hook controls who can access event data from the `/rockcalendar/events/` endpoint. By default, only users who can edit the parent page have access (admin context). Hook this to allow public/frontend read access:
+
+```php
+wire()->addHookAfter('RockCalendar::allowEventsAccess', function ($event) {
+  $parent = $event->arguments(0);
+  if ($parent->template->name === 'calendar-events' && $parent->viewable()) {
+    $event->return = true;
+  }
+});
+```
+
+This lets you reuse the built-in `/rockcalendar/events/?pid=1234` endpoint for frontend calendars instead of creating a custom one. Combine with the `getItemArray` hook to return frontend URLs instead of admin edit URLs:
+
+```php
+wire()->addHookAfter('RockCalendar::getItemArray', function ($event) {
+  if (wire()->page->template->name === 'admin') return;
+  $arr = $event->return;
+  if (!$arr) return;
+  $p = $event->arguments(0);
+  $arr['url'] = $p->url;
+  $event->return = $arr;
+});
+```
